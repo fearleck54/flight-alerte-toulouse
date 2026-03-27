@@ -241,14 +241,24 @@
         <span class="banner-icon">⏸</span>
         <span id="bannerText">Les recherches automatiques sont <strong>désactivées</strong>. Lance des recherches manuellement depuis le panneau ci-dessous.</span>
       </div>
-      <div class="schedule-pills">
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:14px">
+        <div class="field" style="flex:1">
+          <label>Fréquence des recherches</label>
+          <select id="scheduleSelect" onchange="onScheduleChange()">
+            <option value="hourly">Toutes les heures (24×/jour)</option>
+            <option value="every2h">Toutes les 2h (12×/jour)</option>
+            <option value="3xday" selected>3× par jour (8h, 14h, 21h)</option>
+          </select>
+        </div>
+        <button class="btn btn-save" id="scheduleBtn" onclick="applySchedule()" style="min-width:100px" disabled>Appliquer</button>
+      </div>
+      <div class="schedule-pills" id="schedulePills">
         <div class="sched-pill"><span class="dot off" id="dot1"></span>08h00</div>
         <div class="sched-pill"><span class="dot off" id="dot2"></span>14h00</div>
-        <div class="sched-pill"><span class="dot off" id="dot3"></span>20h00</div>
-        <div class="sched-pill"><span class="dot off" id="dot4"></span>00h00</div>
+        <div class="sched-pill"><span class="dot off" id="dot3"></span>21h00</div>
       </div>
       <p style="font-size:0.75rem;color:var(--muted);margin-top:10px;line-height:1.6">
-        En mode ON, l'agent tourne 4×/jour et t'envoie une notif Telegram si une offre passe sous ton seuil.
+        En mode ON, l'agent tourne selon la fréquence choisie et t'envoie une notif Telegram si une offre est trouvée.
       </p>
     </div>
   </div>
@@ -387,6 +397,10 @@
     // Lire l'état ON/OFF depuis localStorage en attendant la vérif API
     const localState = localStorage.getItem('agent_enabled') === 'true';
     applyToggleUI(localState);
+    // Restaurer la fréquence sauvegardée
+    const savedSched = localStorage.getItem('schedule_key') || '3xday';
+    document.getElementById('scheduleSelect').value = savedSched;
+    renderPills(savedSched);
   });
 
   const fmt = d => d.toISOString().split('T')[0];
@@ -416,6 +430,7 @@
         document.getElementById('statusDot').className = 'ok';
         document.getElementById('statusLabel').textContent = 'Prêt';
         fetchAgentState(token);
+        document.getElementById('scheduleBtn').disabled = false;
       } else {
         tokenValid = false;
         setTokenStatus('invalid','✗ Token invalide ou scope "workflow" manquant');
@@ -518,8 +533,7 @@
       ? 'Les recherches automatiques sont <strong>activées</strong>. Tu recevras une notif Telegram si une offre est trouvée.'
       : 'Les recherches automatiques sont <strong>désactivées</strong>. Lance des recherches manuellement depuis le panneau ci-dessous.';
 
-    ['dot1','dot2','dot3','dot4'].forEach(id => {
-      const dot = document.getElementById(id);
+    document.querySelectorAll('#schedulePills .dot').forEach(dot => {
       dot.className = 'dot' + (enabled ? '' : ' off');
     });
   }
@@ -708,6 +722,88 @@
     document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
     document.getElementById('btnText').textContent = on ? 'Recherche en cours…' : 'Lancer maintenant';
     document.getElementById('launchBtn').disabled = on;
+  }
+
+
+  // ── SCHEDULE ──────────────────────────────────────────────────────────
+  const SCHEDULES = {
+    'hourly':  { cron: '0 * * * *',        pills: ['00h','01h','02h','03h','...','23h'], label:'Toutes les heures' },
+    'every2h': { cron: '0 */2 * * *',      pills: ['00h','02h','04h','06h','08h','10h','12h','14h','16h','18h','20h','22h'], label:'Toutes les 2h' },
+    '3xday':   { cron: '0 7,13,20 * * *',  pills: ['08h00','14h00','21h00'], label:'3× par jour' },
+  };
+
+  function onScheduleChange() {
+    const val = document.getElementById('scheduleSelect').value;
+    renderPills(val);
+    const btn = document.getElementById('scheduleBtn');
+    btn.disabled = !tokenValid;
+    btn.textContent = 'Appliquer';
+  }
+
+  function renderPills(schedKey) {
+    const pills = document.getElementById('schedulePills');
+    const sched = SCHEDULES[schedKey];
+    if (!sched) return;
+    const enabled = document.getElementById('agentToggle').checked;
+    const dotClass = enabled ? 'dot' : 'dot off';
+    pills.innerHTML = sched.pills.map(h =>
+      `<div class="sched-pill"><span class="${dotClass}"></span>${h}</div>`
+    ).join('');
+  }
+
+  async function applySchedule() {
+    const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+    if (!token || !tokenValid) { showToast('Token GitHub requis','err'); return; }
+
+    const schedKey = document.getElementById('scheduleSelect').value;
+    const sched    = SCHEDULES[schedKey];
+    const btn      = document.getElementById('scheduleBtn');
+
+    btn.textContent = '…';
+    btn.disabled = true;
+
+    // Lire le fichier YAML actuel
+    try {
+      const getR = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/.github/workflows/${WORKFLOW_ID}`,
+        { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } }
+      );
+      if (!getR.ok) throw new Error('Impossible de lire le workflow');
+      const fileData = await getR.json();
+      const sha      = fileData.sha;
+      let yaml       = atob(fileData.content.replace(/\n/g,''));
+
+      // Remplacer la ligne cron
+      yaml = yaml.replace(/- cron: "[^"]*"/, `- cron: "${sched.cron}"`);
+
+      // Envoyer la mise à jour
+      const putR = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/.github/workflows/${WORKFLOW_ID}`,
+        {
+          method: 'PUT',
+          headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' },
+          body: JSON.stringify({
+            message: `chore: schedule → ${sched.label}`,
+            content: btoa(unescape(encodeURIComponent(yaml))),
+            sha,
+          })
+        }
+      );
+
+      if (putR.ok || putR.status === 200 || putR.status === 201) {
+        localStorage.setItem('schedule_key', schedKey);
+        showToast(`Fréquence mise à jour : ${sched.label} ✓`, 'ok');
+        addLog('ok', `✓ Cron mis à jour : ${sched.cron} (${sched.label})`);
+      } else {
+        const err = await putR.json().catch(()=>({}));
+        showToast(`Erreur ${putR.status} : ${err.message||''}`, 'err');
+      }
+    } catch(e) {
+      showToast(`Erreur : ${e.message}`, 'err');
+    }
+
+    btn.textContent = 'Appliquer';
+    btn.disabled = false;
   }
 
   function showToast(msg, type='') {
