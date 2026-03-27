@@ -500,7 +500,6 @@
     const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
     if (!token || !tokenValid) {
       showToast('Token GitHub requis pour changer cet état','err');
-      // Annuler le toggle visuellement
       const cb = document.getElementById('agentToggle');
       cb.checked = !cb.checked;
       return;
@@ -508,26 +507,66 @@
 
     const enabled = document.getElementById('agentToggle').checked;
     applyToggleUI(enabled);
+    localStorage.setItem('agent_enabled', enabled);
 
+    // Modifier le YAML pour ajouter/retirer le cron
     try {
-      // Tenter de mettre à jour la variable GitHub (PATCH si existe, POST sinon)
-      const body = JSON.stringify({ name: VAR_NAME, value: String(enabled) });
       const headers = { Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' };
-      const base = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables`;
+      const fileUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/.github/workflows/${WORKFLOW_ID}`;
 
-      let r = await fetch(`${base}/${VAR_NAME}`, { method:'PATCH', headers, body });
-      if (r.status === 404) {
-        r = await fetch(base, { method:'POST', headers, body });
+      const getR = await fetch(fileUrl, { headers });
+      if (!getR.ok) throw new Error('Impossible de lire le workflow');
+      const fileData = await getR.json();
+      const sha = fileData.sha;
+      let yaml = atob(fileData.content.replace(/\n/g,''));
+
+      if (enabled) {
+        // Ajouter le cron selon la fréquence choisie
+        const schedKey = document.getElementById('scheduleSelect').value;
+        const sched = SCHEDULES[schedKey] || SCHEDULES['4xday'];
+        // Remplacer ou ajouter le schedule
+        if (yaml.includes('schedule:')) {
+          yaml = yaml.replace(/schedule:\s*
+\s*- cron: "[^"]*"/, `schedule:
+    - cron: "${sched.cron}"`);
+        } else {
+          yaml = yaml.replace('on:
+  workflow_dispatch:', `on:
+  schedule:
+    - cron: "${sched.cron}"
+  workflow_dispatch:`);
+        }
+      } else {
+        // Retirer le schedule complètement
+        yaml = yaml.replace(/  schedule:\s*
+\s*- cron: "[^"]*"
+/, '');
       }
 
-      if (r.ok || r.status === 201 || r.status === 204) {
-        localStorage.setItem('agent_enabled', enabled);
-        showToast(enabled ? 'Agent activé ✓' : 'Agent désactivé', enabled ? 'ok' : 'warn');
+      const putR = await fetch(fileUrl, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({
+          message: enabled ? `chore: activer agent automatique` : `chore: désactiver agent automatique`,
+          content: btoa(unescape(encodeURIComponent(yaml))),
+          sha,
+        })
+      });
+
+      if (putR.ok || putR.status === 200 || putR.status === 201) {
+        showToast(enabled ? '✅ Agent activé — runs automatiques en cours' : '⏸ Agent désactivé', enabled ? 'ok' : 'warn');
+        addLog(enabled ? 'ok' : 'warn', enabled ? `✓ Agent activé — cron configuré` : `⏸ Agent désactivé — plus de runs automatiques`);
       } else {
-        showToast('Erreur lors de la mise à jour','err');
+        const err = await putR.json().catch(()=>({}));
+        showToast(`Erreur ${putR.status} : ${err.message||''}`, 'err');
+        // Annuler le toggle si erreur
+        document.getElementById('agentToggle').checked = !enabled;
+        applyToggleUI(!enabled);
       }
     } catch(e) {
-      showToast('Erreur réseau','err');
+      showToast(`Erreur : ${e.message}`, 'err');
+      document.getElementById('agentToggle').checked = !enabled;
+      applyToggleUI(!enabled);
     }
   }
 
