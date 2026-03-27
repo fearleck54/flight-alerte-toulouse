@@ -441,6 +441,27 @@ def main():
         print("Agent désactivé (AGENT_ENABLED=false). Arrêt.")
         return
 
+    # Vérification fréquence (runs automatiques seulement)
+    IS_MANUAL = os.environ.get("IS_MANUAL", "false") == "true"
+    if not IS_MANUAL:
+        CRON_MODE = os.environ.get("CRON_MODE", "4xday")
+        current_hour = datetime.utcnow().hour
+        fr_hour = (current_hour + 2) % 24
+
+        allowed_hours = {
+            "hourly":  list(range(24)),
+            "every2h": [0,2,4,6,8,10,12,14,16,18,20,22],
+            "every3h": [0,3,6,9,12,15,18,21],
+            "4xday":   [8,14,20,0],
+            "3xday":   [8,14,21],
+        }
+        hours = allowed_hours.get(CRON_MODE, allowed_hours["4xday"])
+        if fr_hour not in hours:
+            print(f"Heure actuelle ({fr_hour}h FR) pas dans le planning {CRON_MODE}. Arrêt.")
+            return
+        print(f"Fréquence: {CRON_MODE} — heure FR: {fr_hour}h ✓")
+
+
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         raise ValueError("TELEGRAM_TOKEN et TELEGRAM_CHAT_ID sont requis")
 
