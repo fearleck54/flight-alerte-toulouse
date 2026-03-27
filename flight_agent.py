@@ -1,79 +1,92 @@
 #!/usr/bin/env python3
 """
 Agent Alertes Vols Toulouse
-- Source 1 : Amadeus API (2000 req/mois gratuit) — prioritaire
-- Source 2 : SerpAPI / Google Flights (fallback si Amadeus échoue)
+- Source 1 : Ryanair API non-officielle (sans clé, direct)
+- Source 2 : Google Flights scraping (toutes compagnies)
+- Source 3 : Kayak scraping (fallback)
+- Source 4 : SerpAPI (si clé disponible, prioritaire sur GF+Kayak)
 - Notification : Telegram
 """
 
-import os
-import json
-import time
-import hashlib
-import logging
+import os, json, time, hashlib, logging, re, random
 import requests
 from datetime import datetime, timedelta
 
-# ── LOGGING ────────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-# ── CONFIG DEPUIS VARIABLES D'ENVIRONNEMENT ────────────────────────────────
-SERPAPI_KEY          = os.environ.get("SERPAPI_KEY", "")
-TELEGRAM_TOKEN       = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID     = os.environ.get("TELEGRAM_CHAT_ID", "")
-AMADEUS_CLIENT_ID    = os.environ.get("AMADEUS_CLIENT_ID", "")
-AMADEUS_CLIENT_SECRET= os.environ.get("AMADEUS_CLIENT_SECRET", "")
+# ── CONFIG ─────────────────────────────────────────────────────────────────
+TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
+TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+SERPAPI_KEY      = os.environ.get("SERPAPI_KEY", "")
 
-MAX_PRICE   = int(os.environ.get("MAX_PRICE",   "80"))
-DATE_FROM   = os.environ.get("DATE_FROM",  "")
-DATE_TO     = os.environ.get("DATE_TO",    "")
-MIN_NIGHTS  = int(os.environ.get("MIN_NIGHTS",  "2"))
-MAX_NIGHTS  = int(os.environ.get("MAX_NIGHTS",  "5"))
-MAX_STOPS   = int(os.environ.get("MAX_STOPS",   "1"))
-DAYS_RAW    = os.environ.get("DAYS", "friday")
-DESTINATIONS_RAW = os.environ.get("DESTINATIONS", "")
+MAX_PRICE  = int(os.environ.get("MAX_PRICE",  "80"))
+DATE_FROM  = os.environ.get("DATE_FROM", "")
+DATE_TO    = os.environ.get("DATE_TO",   "")
+MIN_NIGHTS = int(os.environ.get("MIN_NIGHTS", "2"))
+MAX_NIGHTS = int(os.environ.get("MAX_NIGHTS", "5"))
+MAX_STOPS  = int(os.environ.get("MAX_STOPS",  "1"))
+DAYS_RAW   = os.environ.get("DAYS", "friday")
+DEST_RAW   = os.environ.get("DESTINATIONS", "")
 
-ORIGIN = "TLS"
+ORIGIN    = "TLS"
 SEEN_FILE = "seen_deals.json"
 
-# ── JOURS DE DÉPART ────────────────────────────────────────────────────────
-DAY_MAP = {
-    "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
-    "friday": 4, "saturday": 5, "sunday": 6,
-    "lundi": 0, "mardi": 1, "mercredi": 2, "jeudi": 3,
-    "vendredi": 4, "samedi": 5, "dimanche": 6,
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "fr-FR,fr;q=0.9,en-US;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
 }
 
-def parse_days(raw: str) -> set:
+# ── JOURS ──────────────────────────────────────────────────────────────────
+DAY_MAP = {
+    "monday":0, "tuesday":1, "wednesday":2, "thursday":3,
+    "friday":4, "saturday":5, "sunday":6,
+    "lundi":0, "mardi":1, "mercredi":2, "jeudi":3,
+    "vendredi":4, "samedi":5, "dimanche":6,
+}
+
+def parse_days(raw):
     if not raw or raw.strip().lower() in ("any", "all", ""):
         return set(range(7))
     result = set()
-    for part in raw.replace(";", ",").split(","):
-        key = part.strip().lower()
-        if key in DAY_MAP:
-            result.add(DAY_MAP[key])
-    return result if result else set(range(7))
+    for p in raw.replace(";", ",").split(","):
+        k = p.strip().lower()
+        if k in DAY_MAP:
+            result.add(DAY_MAP[k])
+    return result or set(range(7))
 
 ALLOWED_DAYS = parse_days(DAYS_RAW)
 
 # ── DESTINATIONS ───────────────────────────────────────────────────────────
-DEFAULT_DESTINATIONS = [
-    "BCN","MAD","LIS","ORY","CDG","AMS","BRU","DUB","FCO","MXP",
-    "VCE","ATH","PRG","BUD","WAW","VIE","CPH","ARN","OSL","HEL",
-    "LHR","STN","EDI","MAN","RAK","CMN","TUN","ALG","PMI","IBZ",
-    "ALC","AGP","OPO","FAO","FUE","LPA","ACE","TFS",
+RYANAIR_FROM_TLS = {
+    "BCN","MAD","DUB","STN","BGY","BVA","CRL","BRE","HAM","SVQ",
+    "AGP","ALC","PMI","IBZ","LPA","TFS","FUE","ACE","RAK","CMN",
+    "OPO","FAO","VLC","ZAZ","MAN","EDI","BRS","CIA","NAP","PSA",
+    "EIN","KRK","WRO","GDN","CAT","TSF",
+}
+
+DEFAULT_DESTS = [
+    "BCN","MAD","LIS","OPO","FCO","MXP","VCE","NAP","ATH","PRG",
+    "BUD","WAW","VIE","AMS","BRU","DUB","EDI","MAN","STN","LTN",
+    "CDG","ORY","PMI","IBZ","MAH","LPA","TFS","FUE","ACE",
+    "RAK","CMN","TUN","CPH","ARN","OSL","HEL","SOF","OTP","IST",
+    "AGP","ALC","SVQ","VLC","FAO","BVA","CRL","BGY","KEF",
 ]
 
-def parse_destinations(raw: str) -> list:
+def parse_destinations(raw):
     if not raw or not raw.strip():
-        return DEFAULT_DESTINATIONS
+        return DEFAULT_DESTS
     return [d.strip().upper() for d in raw.replace(";", ",").split(",") if d.strip()]
 
-DESTINATIONS = parse_destinations(DESTINATIONS_RAW)
+DESTINATIONS = parse_destinations(DEST_RAW)
 
-# ── FENÊTRE DE DATES ───────────────────────────────────────────────────────
-def build_date_range() -> list:
+# ── DATES ──────────────────────────────────────────────────────────────────
+def build_date_range():
     today = datetime.utcnow().date()
     start = datetime.strptime(DATE_FROM, "%Y-%m-%d").date() if DATE_FROM else today + timedelta(days=7)
     end   = datetime.strptime(DATE_TO,   "%Y-%m-%d").date() if DATE_TO   else today + timedelta(days=90)
@@ -85,199 +98,226 @@ def build_date_range() -> list:
         cur += timedelta(days=1)
     return dates
 
-# ── CACHE DES OFFRES DÉJÀ VUES ────────────────────────────────────────────
-def load_seen() -> set:
+# ── CACHE ──────────────────────────────────────────────────────────────────
+def load_seen():
     try:
         with open(SEEN_FILE) as f:
             return set(json.load(f))
     except Exception:
         return set()
 
-def save_seen(seen: set):
+def save_seen(seen):
     with open(SEEN_FILE, "w") as f:
         json.dump(list(seen), f)
 
-def deal_id(origin, dest, dep_date, ret_date, price) -> str:
-    key = f"{origin}-{dest}-{dep_date}-{ret_date}-{price}"
-    return hashlib.md5(key.encode()).hexdigest()
+def deal_id(orig, dest, dep, ret, price):
+    return hashlib.md5(f"{orig}-{dest}-{dep}-{ret}-{price:.0f}".encode()).hexdigest()
 
 # ══════════════════════════════════════════════════════════════════════════
-#  SOURCE 1 — AMADEUS
+#  SOURCE 1 — RYANAIR (API non-officielle, sans clé)
 # ══════════════════════════════════════════════════════════════════════════
 
-_amadeus_token = None
-_amadeus_token_expiry = 0
-
-def amadeus_get_token() -> str | None:
-    global _amadeus_token, _amadeus_token_expiry
-    if not AMADEUS_CLIENT_ID or not AMADEUS_CLIENT_SECRET:
-        return None
-    if _amadeus_token and time.time() < _amadeus_token_expiry - 30:
-        return _amadeus_token
-    try:
-        r = requests.post(
-            "https://test.api.amadeus.com/v1/security/oauth2/token",
-            data={
-                "grant_type": "client_credentials",
-                "client_id": AMADEUS_CLIENT_ID,
-                "client_secret": AMADEUS_CLIENT_SECRET,
-            },
-            timeout=15,
-        )
-        r.raise_for_status()
-        data = r.json()
-        _amadeus_token = data["access_token"]
-        _amadeus_token_expiry = time.time() + data.get("expires_in", 1799)
-        log.info("Amadeus token OK")
-        return _amadeus_token
-    except Exception as e:
-        log.warning(f"Amadeus auth échouée : {e}")
-        return None
-
-
-def amadeus_search(origin: str, destination: str, dep_date: str, ret_date: str) -> list:
-    """
-    Retourne une liste de dicts {price, stops, duration, airline}
-    """
-    token = amadeus_get_token()
-    if not token:
+def ryanair_search(dest, dep_str, ret_str):
+    if dest not in RYANAIR_FROM_TLS:
         return []
-
+    url = "https://www.ryanair.com/api/farfnd/v4/roundTripFares"
     params = {
-        "originLocationCode":      origin,
-        "destinationLocationCode": destination,
-        "departureDate":           dep_date,
-        "returnDate":              ret_date,
-        "adults":                  1,
-        "nonStop":                 "false",
-        "max":                     5,
-        "currencyCode":            "EUR",
+        "departureAirportIataCode":  ORIGIN,
+        "arrivalAirportIataCode":    dest,
+        "outboundDepartureDateFrom": dep_str,
+        "outboundDepartureDateTo":   dep_str,
+        "inboundDepartureDateFrom":  ret_str,
+        "inboundDepartureDateTo":    ret_str,
+        "currency":     "EUR",
+        "priceValueTo": MAX_PRICE,
     }
-    if MAX_STOPS == 0:
-        params["nonStop"] = "true"
-
     try:
-        r = requests.get(
-            "https://test.api.amadeus.com/v2/shopping/flight-offers",
-            headers={"Authorization": f"Bearer {token}"},
-            params=params,
-            timeout=20,
-        )
-        if r.status_code == 429:
-            log.warning("Amadeus rate limit atteint")
-            return []
+        r = requests.get(url, params=params,
+                         headers={**HEADERS, "Accept": "application/json"},
+                         timeout=15)
         if not r.ok:
-            log.warning(f"Amadeus {r.status_code} pour {origin}→{destination} {dep_date}")
             return []
-
-        offers = r.json().get("data", [])
         results = []
-        for offer in offers:
+        for fare in r.json().get("fares", []):
             try:
-                price = float(offer["price"]["grandTotal"])
-                itins = offer["itineraries"]
-                # stops = nombre de segments - 1 sur le trajet aller
-                stops = len(itins[0]["segments"]) - 1
-                if stops > MAX_STOPS:
-                    continue
-                duration = itins[0].get("duration", "")
-                airline = offer["validatingAirlineCodes"][0] if offer.get("validatingAirlineCodes") else "?"
-                results.append({
-                    "price": price,
-                    "stops": stops,
-                    "duration": duration,
-                    "airline": airline,
-                    "source": "Amadeus",
-                })
-            except (KeyError, IndexError, ValueError):
+                total = fare["outbound"]["price"]["value"] + fare["inbound"]["price"]["value"]
+                results.append({"price": round(total, 2), "stops": 0,
+                                 "airline": "Ryanair", "source": "Ryanair"})
+            except (KeyError, TypeError):
                 continue
         return results
-
     except Exception as e:
-        log.warning(f"Amadeus search exception : {e}")
+        log.debug(f"Ryanair {dest}: {e}")
         return []
 
+# ══════════════════════════════════════════════════════════════════════════
+#  SOURCE 2 — GOOGLE FLIGHTS (scraping)
+# ══════════════════════════════════════════════════════════════════════════
+
+def gf_scrape(dest, dep_str, ret_str):
+    """
+    Appelle l'endpoint de recherche Google Flights et extrait les prix
+    depuis les données JSON embarquées dans le HTML.
+    """
+    url = "https://www.google.com/travel/flights"
+    params = {
+        "hl":   "fr",
+        "curr": "EUR",
+        "q":    f"Vols {ORIGIN} {dest} {dep_str} {ret_str}",
+    }
+    try:
+        r = requests.get(url, params=params, headers=HEADERS, timeout=20)
+        if not r.ok:
+            return []
+        html = r.text
+
+        # Google embarque les données dans des blocs JSON dans le HTML
+        # On cherche des patterns de prix EUR réalistes
+        candidates = []
+
+        # Pattern 1 : prix suivi de EUR ou €
+        for m in re.finditer(r'(\d{2,4})[,\.]?(\d{0,2})\s*(?:EUR|€)', html):
+            try:
+                price = float(m.group(1))
+                if 15 <= price <= MAX_PRICE:
+                    candidates.append(price)
+            except ValueError:
+                pass
+
+        # Pattern 2 : dans des structures JSON type "price":{"amount":"123"}
+        for m in re.finditer(r'"(?:amount|price|totalPrice)"\s*:\s*"?(\d{2,4})"?', html):
+            try:
+                price = float(m.group(1))
+                if 15 <= price <= MAX_PRICE:
+                    candidates.append(price)
+            except ValueError:
+                pass
+
+        if candidates:
+            price = min(candidates)
+            return [{"price": price, "stops": MAX_STOPS,
+                     "airline": "Diverses", "source": "Google Flights"}]
+        return []
+    except Exception as e:
+        log.debug(f"GF scrape {dest}: {e}")
+        return []
 
 # ══════════════════════════════════════════════════════════════════════════
-#  SOURCE 2 — SERPAPI (Google Flights)
+#  SOURCE 3 — KAYAK (scraping)
 # ══════════════════════════════════════════════════════════════════════════
 
-def serpapi_search(origin: str, destination: str, dep_date: str, ret_date: str) -> list:
+def kayak_scrape(dest, dep_str, ret_str):
+    url = f"https://www.kayak.fr/flights/{ORIGIN}-{dest}/{dep_str}/{ret_str}?sort=price_a&fs=stops=~{MAX_STOPS}"
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=20)
+        if not r.ok:
+            return []
+        html = r.text
+
+        candidates = []
+        # Kayak affiche les prix dans des spans avec classe "price-text" ou similaire
+        for m in re.finditer(r'(\d{2,4})\s*€', html[:100000]):
+            try:
+                price = float(m.group(1))
+                if 15 <= price <= MAX_PRICE:
+                    candidates.append(price)
+            except ValueError:
+                pass
+
+        if candidates:
+            price = min(candidates)
+            return [{"price": price, "stops": MAX_STOPS,
+                     "airline": "Diverses", "source": "Kayak"}]
+        return []
+    except Exception as e:
+        log.debug(f"Kayak {dest}: {e}")
+        return []
+
+# ══════════════════════════════════════════════════════════════════════════
+#  SOURCE 4 — SERPAPI (si clé dispo)
+# ══════════════════════════════════════════════════════════════════════════
+
+def serpapi_search(dest, dep_str, ret_str):
     if not SERPAPI_KEY:
         return []
     params = {
-        "engine":           "google_flights",
-        "departure_id":     origin,
-        "arrival_id":       destination,
-        "outbound_date":    dep_date,
-        "return_date":      ret_date,
-        "currency":         "EUR",
-        "hl":               "fr",
-        "type":             "1",  # 1 = aller-retour
-        "api_key":          SERPAPI_KEY,
+        "engine": "google_flights",
+        "departure_id": ORIGIN, "arrival_id": dest,
+        "outbound_date": dep_str, "return_date": ret_str,
+        "currency": "EUR", "hl": "fr", "type": "1",
+        "api_key": SERPAPI_KEY,
     }
     if MAX_STOPS == 0:
-        params["stops"] = "1"  # 1 = direct only in SerpAPI
-
+        params["stops"] = "1"
     try:
         r = requests.get("https://serpapi.com/search", params=params, timeout=25)
         if not r.ok:
-            log.warning(f"SerpAPI {r.status_code} pour {origin}→{destination}")
             return []
         data = r.json()
         results = []
         for flight in data.get("best_flights", []) + data.get("other_flights", []):
             try:
-                price = float(flight.get("price", 999999))
+                price = float(flight.get("price", 9999))
                 legs  = flight.get("flights", [])
                 stops = len(legs) - 1
                 if stops > MAX_STOPS:
                     continue
-                airline  = legs[0].get("airline", "?") if legs else "?"
-                duration = flight.get("total_duration", 0)
-                dur_str  = f"PT{duration//60}H{duration%60}M" if duration else ""
                 results.append({
-                    "price":    price,
-                    "stops":    stops,
-                    "duration": dur_str,
-                    "airline":  airline,
-                    "source":   "SerpAPI",
+                    "price":   price,
+                    "stops":   stops,
+                    "airline": legs[0].get("airline", "?") if legs else "?",
+                    "source":  "SerpAPI",
                 })
             except (KeyError, ValueError):
                 continue
         return results
-
     except Exception as e:
-        log.warning(f"SerpAPI exception : {e}")
+        log.debug(f"SerpAPI {dest}: {e}")
         return []
 
-
 # ══════════════════════════════════════════════════════════════════════════
-#  RECHERCHE COMBINÉE
+#  MOTEUR COMBINÉ
 # ══════════════════════════════════════════════════════════════════════════
 
-def search_flights(origin: str, destination: str, dep_date: str, ret_date: str) -> list:
-    """
-    Essaie Amadeus en premier. Si aucun résultat, bascule sur SerpAPI.
-    """
-    results = amadeus_search(origin, destination, dep_date, ret_date)
-    source_used = "Amadeus"
+def search_all(dest, dep_str, ret_str):
+    results = []
+    log_parts = []
 
-    if not results and SERPAPI_KEY:
-        log.info(f"  Amadeus vide → fallback SerpAPI pour {origin}→{destination}")
-        results = serpapi_search(origin, destination, dep_date, ret_date)
-        source_used = "SerpAPI"
+    # Ryanair toujours en premier (fiable, sans quota)
+    r = ryanair_search(dest, dep_str, ret_str)
+    if r:
+        results += r
+        log_parts.append(f"Ryanair:{len(r)}")
+
+    # SerpAPI si clé dispo (prioritaire sur scraping)
+    if SERPAPI_KEY:
+        s = serpapi_search(dest, dep_str, ret_str)
+        if s:
+            results += s
+            log_parts.append(f"SerpAPI:{len(s)}")
+    else:
+        # Google Flights scraping
+        g = gf_scrape(dest, dep_str, ret_str)
+        if g:
+            results += g
+            log_parts.append(f"GF:{len(g)}")
+
+        # Kayak si toujours rien
+        if not g:
+            k = kayak_scrape(dest, dep_str, ret_str)
+            if k:
+                results += k
+                log_parts.append(f"Kayak:{len(k)}")
 
     if results:
-        log.info(f"  {origin}→{destination} {dep_date} : {len(results)} offre(s) via {source_used}")
+        log.info(f"  {ORIGIN}→{dest} {dep_str}: {len(results)} offre(s) [{', '.join(log_parts)}]")
     return results
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  TELEGRAM
 # ══════════════════════════════════════════════════════════════════════════
 
-def send_telegram(message: str):
+def send_telegram(message):
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         log.warning("Telegram non configuré")
         return
@@ -290,57 +330,35 @@ def send_telegram(message: str):
         r.raise_for_status()
         log.info("Telegram ✓")
     except Exception as e:
-        log.error(f"Telegram erreur : {e}")
+        log.error(f"Telegram: {e}")
 
-
-def format_duration(iso: str) -> str:
-    """PT2H35M → 2h35"""
-    if not iso:
-        return ""
-    iso = iso.replace("PT", "")
-    h = m = 0
-    if "H" in iso:
-        h, iso = iso.split("H")
-        h = int(h)
-    if "M" in iso:
-        m = int(iso.replace("M", ""))
-    return f"{h}h{m:02d}" if h else f"{m}min"
-
-
-def format_deal(dest, dep_date, ret_date, offer: dict) -> str:
-    stops_label = "Direct" if offer["stops"] == 0 else f"{offer['stops']} escale(s)"
-    dur = format_duration(offer.get("duration", ""))
-    dur_str = f" · {dur}" if dur else ""
-    src = offer.get("source", "")
+def fmt_deal(dest, dep, ret, o):
+    stops = "Direct ✅" if o["stops"] == 0 else f"{o['stops']} escale(s)"
     return (
         f"✈️ <b>TLS → {dest}</b>\n"
-        f"📅 {dep_date} → {ret_date}\n"
-        f"💶 <b>{offer['price']:.0f}€</b> A/R · {stops_label}{dur_str}\n"
-        f"🏢 {offer['airline']} · via {src}"
+        f"📅 {dep} → {ret}\n"
+        f"💶 <b>{o['price']:.0f}€</b> A/R · {stops}\n"
+        f"🏢 {o['airline']} · via {o['source']}"
     )
-
 
 # ══════════════════════════════════════════════════════════════════════════
 #  MAIN
 # ══════════════════════════════════════════════════════════════════════════
 
 def main():
-    print("=" * 52)
-    print(f"Agent vols Toulouse — {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC")
-    print(f"Seuil : {MAX_PRICE}€ | Séjour : {MIN_NIGHTS}–{MAX_NIGHTS} nuits")
-    print(f"Escales max : {MAX_STOPS} | Sources : Amadeus + SerpAPI fallback")
-    print("=" * 52)
+    print("=" * 54)
+    print(f"Agent vols TLS — {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC")
+    print(f"Seuil: {MAX_PRICE}€ | Séjour: {MIN_NIGHTS}–{MAX_NIGHTS}j | Escales max: {MAX_STOPS}")
+    print(f"Sources: Ryanair + {'SerpAPI' if SERPAPI_KEY else 'Google Flights + Kayak'}")
+    print("=" * 54)
 
-    # Validation minimale
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         raise ValueError("TELEGRAM_TOKEN et TELEGRAM_CHAT_ID sont requis")
-    if not AMADEUS_CLIENT_ID and not SERPAPI_KEY:
-        raise ValueError("Au moins AMADEUS_CLIENT_ID+SECRET ou SERPAPI_KEY sont requis")
 
-    seen      = load_seen()
-    deals     = []
-    dates     = build_date_range()
-    new_seen  = set()
+    seen     = load_seen()
+    new_seen = set()
+    deals    = []
+    dates    = build_date_range()
 
     log.info(f"{len(dates)} dates candidates · {len(DESTINATIONS)} destinations")
 
@@ -351,7 +369,7 @@ def main():
                 dep_str  = dep_date.strftime("%Y-%m-%d")
                 ret_str  = ret_date.strftime("%Y-%m-%d")
 
-                offers = search_flights(ORIGIN, dest, dep_str, ret_str)
+                offers = search_all(dest, dep_str, ret_str)
 
                 for offer in offers:
                     if offer["price"] > MAX_PRICE:
@@ -361,25 +379,20 @@ def main():
                     if did not in seen:
                         deals.append((dest, dep_str, ret_str, offer))
 
-                # Petite pause pour ne pas surcharger les APIs
-                time.sleep(0.3)
+                time.sleep(random.uniform(0.5, 1.2))
 
     log.info(f"{len(deals)} nouvelle(s) offre(s) sous {MAX_PRICE}€")
 
     if deals:
-        header = f"🔔 <b>{len(deals)} bon(s) plan(s) depuis Toulouse !</b>\n"
-        chunks = [header]
-        for dest, dep, ret, offer in deals[:15]:  # max 15 par notif
-            chunks.append(format_deal(dest, dep, ret, offer))
-        send_telegram("\n\n".join(chunks))
+        blocs = [f"🔔 <b>{len(deals)} bon(s) plan(s) depuis Toulouse !</b>"]
+        blocs += [fmt_deal(d, dp, rt, o) for d, dp, rt, o in deals[:15]]
+        send_telegram("\n\n".join(blocs))
     else:
-        log.info("Aucune offre sous le seuil — pas de notif Telegram")
+        log.info("Aucune offre — pas de notif Telegram")
 
-    # Fusionner anciens + nouveaux IDs vus
     save_seen(seen | new_seen)
-    print("=" * 52)
+    print("=" * 54)
     print("Terminé.")
-
 
 if __name__ == "__main__":
     main()
