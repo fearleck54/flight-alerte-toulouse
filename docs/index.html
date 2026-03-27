@@ -247,7 +247,8 @@
           <select id="scheduleSelect" onchange="onScheduleChange()">
             <option value="hourly">Toutes les heures (24×/jour)</option>
             <option value="every2h">Toutes les 2h (12×/jour)</option>
-            <option value="3xday" selected>3× par jour (8h, 14h, 21h)</option>
+            <option value="4xday" selected>4× par jour (8h, 14h, 20h, 00h)</option>
+            <option value="3xday">3× par jour (8h, 14h, 21h)</option>
           </select>
         </div>
         <button class="btn btn-save" id="scheduleBtn" onclick="applySchedule()" style="min-width:100px" disabled>Appliquer</button>
@@ -322,8 +323,18 @@
         </div>
       </div>
 
+      <div class="field" style="margin-bottom:16px">
+        <label>Zone géographique</label>
+        <div class="chip-group">
+          <span class="chip active" data-group="zone" data-val="all" onclick="toggleZone(this)">🌍 Toutes</span>
+          <span class="chip" data-group="zone" data-val="france" onclick="toggleZone(this)">🇫🇷 France</span>
+          <span class="chip" data-group="zone" data-val="europe" onclick="toggleZone(this)">🇪🇺 Europe</span>
+          <span class="chip" data-group="zone" data-val="afrique_nord" onclick="toggleZone(this)">🌅 Afrique du Nord</span>
+        </div>
+      </div>
+
       <div class="field">
-        <label>Destinations (vide = toutes)</label>
+        <label>Destinations spécifiques (remplace la zone si renseigné)</label>
         <input type="text" id="destinations" placeholder="BCN, MAD, LIS, CDG, AMS…">
       </div>
 
@@ -398,7 +409,7 @@
     const localState = localStorage.getItem('agent_enabled') === 'true';
     applyToggleUI(localState);
     // Restaurer la fréquence sauvegardée
-    const savedSched = localStorage.getItem('schedule_key') || '3xday';
+    const savedSched = localStorage.getItem('schedule_key') || '4xday';
     document.getElementById('scheduleSelect').value = savedSched;
     renderPills(savedSched);
   });
@@ -538,6 +549,31 @@
     });
   }
 
+  // ── ZONES ────────────────────────────────────────────────────────────
+  const ZONES = {
+    france:      'CDG,ORY,LYS,NCE,MRS,BOD,NTE,BES,LIL,SXB',
+    europe:      'BCN,MAD,LIS,OPO,FCO,MXP,VCE,NAP,ATH,PRG,BUD,WAW,VIE,AMS,BRU,DUB,EDI,MAN,STN,LTN,LGW,LHR,BRS,CDG,ORY,LYS,NCE,GVA,PMI,IBZ,LPA,TFS,FUE,ACE,AGP,ALC,SVQ,VLC,FAO,BGY,BVA,CRL,CIA,PSA,EIN,KRK,WRO,GDN,DBV,SPU,CFU,HER,RHO,SKG,VCE,OLB,AJA,BIA,IST,ZTH,TUN,ALG',
+    afrique_nord:'RAK,CMN,TUN,DJE,MIR,NBE,ORN,ALG,TLM',
+    all:         '',
+  };
+
+  function toggleZone(el) {
+    document.querySelectorAll('[data-group="zone"]').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    // Si une zone est sélectionnée, vider le champ destinations custom
+    const zone = el.dataset.val;
+    if (zone !== 'all') {
+      document.getElementById('destinations').placeholder = `Zone ${el.textContent.trim()} sélectionnée — laisse vide pour l'utiliser`;
+    } else {
+      document.getElementById('destinations').placeholder = 'BCN, MAD, LIS, CDG, AMS…';
+    }
+  }
+
+  function getActiveZone() {
+    const chip = document.querySelector('[data-group="zone"].active');
+    return chip ? chip.dataset.val : 'all';
+  }
+
   // ── CHIPS ─────────────────────────────────────────────────────────────
   function toggleChip(el) {
     const single = ['type','stops'];
@@ -564,6 +600,10 @@
   }
 
   function getCurrentCriteria() {
+    const customDests = document.getElementById('destinations').value.trim();
+    const zone = getActiveZone();
+    // Custom destinations overrides zone
+    const destinations = customDests || (zone !== 'all' ? ZONES[zone] : '');
     return {
       max_price:    document.getElementById('maxPrice').value,
       date_from:    document.getElementById('dateFrom').value,
@@ -572,7 +612,7 @@
       max_nights:   document.getElementById('stayMax').value,
       max_stops:    getChips('stops')[0] || '1',
       days:         getChips('days').join(',') || 'any',
-      destinations: document.getElementById('destinations').value.trim(),
+      destinations: destinations,
     };
   }
 
@@ -611,6 +651,12 @@
     const stopChip = document.querySelector(`[data-group="stops"][data-val="${c.max_stops}"]`);
     if (stopChip) stopChip.classList.add('active');
 
+    // Restore zone if saved
+    if (c.zone) {
+      document.querySelectorAll('[data-group="zone"]').forEach(ch => ch.classList.remove('active'));
+      const zchip = document.querySelector(`[data-group="zone"][data-val="${c.zone}"]`);
+      if (zchip) zchip.classList.add('active');
+    }
     showToast(`Profil "${p.name}" chargé ✓`,'ok');
   }
 
@@ -729,6 +775,7 @@
   const SCHEDULES = {
     'hourly':  { cron: '0 * * * *',        pills: ['00h','01h','02h','03h','...','23h'], label:'Toutes les heures' },
     'every2h': { cron: '0 */2 * * *',      pills: ['00h','02h','04h','06h','08h','10h','12h','14h','16h','18h','20h','22h'], label:'Toutes les 2h' },
+    '4xday':   { cron: '0 6,12,18,22 * * *', pills: ['08h00','14h00','20h00','00h00'], label:'4× par jour' },
     '3xday':   { cron: '0 7,13,20 * * *',  pills: ['08h00','14h00','21h00'], label:'3× par jour' },
   };
 
