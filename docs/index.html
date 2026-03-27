@@ -526,8 +526,10 @@
         const sched = SCHEDULES[schedKey] || SCHEDULES['4xday'];
         // Remplacer ou ajouter le schedule
         if (yaml.includes('schedule:')) {
-          yaml = yaml.replace(/schedule:\s*
-\s*- cron: "[^"]*"/, `schedule:
+          yaml = yaml.replace(/schedule:[^
+]*
+[^
+]*- cron: "[^"]*"/, `schedule:
     - cron: "${sched.cron}"`);
         } else {
           yaml = yaml.replace('on:
@@ -538,8 +540,10 @@
         }
       } else {
         // Retirer le schedule complètement
-        yaml = yaml.replace(/  schedule:\s*
-\s*- cron: "[^"]*"
+        yaml = yaml.replace(/  schedule:[^
+]*
+[^
+]*- cron: "[^"]*"
 /, '');
       }
 
