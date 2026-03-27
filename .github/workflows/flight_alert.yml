@@ -1,26 +1,28 @@
 name: Agent Alertes Vols Toulouse
 
 on:
+  schedule:
+    - cron: "0 6,12,18,22 * * *"
   workflow_dispatch:
     inputs:
       max_price:
-        description: "Prix max aller-retour (Ã¢ÂÂ¬)"
+        description: "Prix max aller-retour (ÃÂ¢ÃÂÃÂ¬)"
         required: false
         default: "80"
       date_from:
-        description: "DÃÂ©part ÃÂ  partir du (YYYY-MM-DD)"
+        description: "DÃÂÃÂ©part ÃÂÃÂ  partir du (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "DÃÂ©part avant le (YYYY-MM-DD)"
+        description: "DÃÂÃÂ©part avant le (YYYY-MM-DD)"
         required: false
         default: ""
       min_nights:
-        description: "DurÃÂ©e min du sÃÂ©jour (nuits)"
+        description: "DurÃÂÃÂ©e min du sÃÂÃÂ©jour (nuits)"
         required: false
         default: "2"
       max_nights:
-        description: "DurÃÂ©e max du sÃÂ©jour (nuits)"
+        description: "DurÃÂÃÂ©e max du sÃÂÃÂ©jour (nuits)"
         required: false
         default: "5"
       max_stops:
@@ -28,11 +30,11 @@ on:
         required: false
         default: "1"
       days:
-        description: "Jours de dÃÂ©part (friday,saturday,sunday,any)"
+        description: "Jours de dÃÂÃÂ©part (friday,saturday,sunday,any)"
         required: false
         default: "friday"
       destinations:
-        description: "Codes IATA sÃÂ©parÃÂ©s par virgule (vide=toute Europe)"
+        description: "Codes IATA sÃÂÃÂ©parÃÂÃÂ©s par virgule (vide=toute Europe)"
         required: false
         default: ""
 
@@ -51,10 +53,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Installation des dÃÂ©pendances
+      - name: Installation des dÃÂÃÂ©pendances
         run: pip install requests
 
-      - name: Restauration du cache (offres dÃÂ©jÃÂ  vues)
+      - name: Restauration du cache (offres dÃÂÃÂ©jÃÂÃÂ  vues)
         uses: actions/cache@v4
         with:
           path: |
@@ -65,16 +67,16 @@ jobs:
 
       - name: Lancement de l'agent
         env:
-          # Ã¢ÂÂÃ¢ÂÂ Amadeus (prioritaire) Ã¢ÂÂÃ¢ÂÂ
+          # ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Amadeus (prioritaire) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
           AMADEUS_CLIENT_ID:     ${{ secrets.AMADEUS_CLIENT_ID }}
           AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
-          # Ã¢ÂÂÃ¢ÂÂ SerpAPI (fallback) Ã¢ÂÂÃ¢ÂÂ
+          # ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ SerpAPI (fallback) ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
           RAPIDAPI_KEY:          ${{ secrets.RAPIDAPI_KEY }}
           SERPAPI_KEY:           ${{ secrets.SERPAPI_KEY }}
-          # Ã¢ÂÂÃ¢ÂÂ Telegram Ã¢ÂÂÃ¢ÂÂ
+          # ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ Telegram ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
           TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          # Ã¢ÂÂÃ¢ÂÂ ParamÃÂ¨tres de recherche Ã¢ÂÂÃ¢ÂÂ
+          # ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ ParamÃÂÃÂ¨tres de recherche ÃÂ¢ÃÂÃÂÃÂ¢ÃÂÃÂ
           MAX_PRICE:    ${{ github.event.inputs.max_price  || '80' }}
           DATE_FROM:    ${{ github.event.inputs.date_from  || '' }}
           DATE_TO:      ${{ github.event.inputs.date_to    || '' }}
