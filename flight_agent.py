@@ -29,8 +29,9 @@ MAX_STOPS  = int(os.environ.get("MAX_STOPS",  "1"))
 DAYS_RAW   = os.environ.get("DAYS", "friday")
 DEST_RAW   = os.environ.get("DESTINATIONS", "")
 
-ORIGIN    = "TLS"
-SEEN_FILE = "seen_deals.json"
+ORIGIN        = "TLS"
+SEEN_FILE     = "seen_deals.json"
+AGENT_ENABLED = os.environ.get("AGENT_ENABLED", "true").lower()
 
 HEADERS = {
     "User-Agent": (
@@ -351,6 +352,11 @@ def main():
     print(f"Seuil: {MAX_PRICE}€ | Séjour: {MIN_NIGHTS}–{MAX_NIGHTS}j | Escales max: {MAX_STOPS}")
     print(f"Sources: Ryanair + {'SerpAPI' if SERPAPI_KEY else 'Google Flights + Kayak'}")
     print("=" * 54)
+
+    # Vérification ON/OFF
+    if AGENT_ENABLED == "false":
+        print("Agent désactivé (AGENT_ENABLED=false). Arrêt.")
+        return
 
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT_ID:
         raise ValueError("TELEGRAM_TOKEN et TELEGRAM_CHAT_ID sont requis")
