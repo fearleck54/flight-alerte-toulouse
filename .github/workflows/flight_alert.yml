@@ -4,23 +4,23 @@ on:
   workflow_dispatch:
     inputs:
       max_price:
-        description: "Prix max aller-retour (€)"
+        description: "Prix max aller-retour (â¬)"
         required: false
         default: "80"
       date_from:
-        description: "Départ à partir du (YYYY-MM-DD)"
+        description: "DÃ©part Ã  partir du (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "Départ avant le (YYYY-MM-DD)"
+        description: "DÃ©part avant le (YYYY-MM-DD)"
         required: false
         default: ""
       min_nights:
-        description: "Durée min du séjour (nuits)"
+        description: "DurÃ©e min du sÃ©jour (nuits)"
         required: false
         default: "2"
       max_nights:
-        description: "Durée max du séjour (nuits)"
+        description: "DurÃ©e max du sÃ©jour (nuits)"
         required: false
         default: "5"
       max_stops:
@@ -28,11 +28,11 @@ on:
         required: false
         default: "1"
       days:
-        description: "Jours de départ (friday,saturday,sunday,any)"
+        description: "Jours de dÃ©part (friday,saturday,sunday,any)"
         required: false
         default: "friday"
       destinations:
-        description: "Codes IATA séparés par virgule (vide=toute Europe)"
+        description: "Codes IATA sÃ©parÃ©s par virgule (vide=toute Europe)"
         required: false
         default: ""
 
@@ -51,10 +51,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Installation des dépendances
+      - name: Installation des dÃ©pendances
         run: pip install requests
 
-      - name: Restauration du cache (offres déjà vues)
+      - name: Restauration du cache (offres dÃ©jÃ  vues)
         uses: actions/cache@v4
         with:
           path: |
@@ -65,16 +65,16 @@ jobs:
 
       - name: Lancement de l'agent
         env:
-          # ── Amadeus (prioritaire) ──
+          # ââ Amadeus (prioritaire) ââ
           AMADEUS_CLIENT_ID:     ${{ secrets.AMADEUS_CLIENT_ID }}
           AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
-          # ── SerpAPI (fallback) ──
+          # ââ SerpAPI (fallback) ââ
           RAPIDAPI_KEY:          ${{ secrets.RAPIDAPI_KEY }}
           SERPAPI_KEY:           ${{ secrets.SERPAPI_KEY }}
-          # ── Telegram ──
+          # ââ Telegram ââ
           TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          # ── Paramètres de recherche ──
+          # ââ ParamÃ¨tres de recherche ââ
           MAX_PRICE:    ${{ github.event.inputs.max_price  || '80' }}
           DATE_FROM:    ${{ github.event.inputs.date_from  || '' }}
           DATE_TO:      ${{ github.event.inputs.date_to    || '' }}
