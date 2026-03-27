@@ -41,7 +41,9 @@ on:
 jobs:
   search-flights:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    timeout-minutes: 60
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
