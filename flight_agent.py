@@ -19,6 +19,7 @@ log = logging.getLogger(__name__)
 TELEGRAM_TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 SERPAPI_KEY      = os.environ.get("SERPAPI_KEY", "")
+RAPIDAPI_KEY     = os.environ.get("RAPIDAPI_KEY", "")
 
 MAX_PRICE  = int(os.environ.get("MAX_PRICE",  "80"))
 DATE_FROM  = os.environ.get("DATE_FROM", "")
@@ -72,11 +73,16 @@ RYANAIR_FROM_TLS = {
 }
 
 DEFAULT_DESTS = [
-    "BCN","MAD","LIS","OPO","FCO","MXP","VCE","NAP","ATH","PRG",
-    "BUD","WAW","VIE","AMS","BRU","DUB","EDI","MAN","STN","LTN",
-    "CDG","ORY","PMI","IBZ","MAH","LPA","TFS","FUE","ACE",
-    "RAK","CMN","TUN","CPH","ARN","OSL","HEL","SOF","OTP","IST",
-    "AGP","ALC","SVQ","VLC","FAO","BVA","CRL","BGY","KEF",
+    # Ryanair direct TLS
+    "BCN","MAD","DUB","STN","BGY","BVA","CRL","SVQ","AGP","ALC",
+    "PMI","IBZ","LPA","TFS","FUE","ACE","RAK","CMN","OPO","FAO",
+    "VLC","MAN","EDI","CIA","NAP","PSA","EIN","KRK","WRO","GDN",
+    # Transavia direct TLS
+    "AMS","LIS","TUN","DJE","MIR","NBE","ORN","ALG","TLM",
+    # Volotea direct TLS
+    "ATH","VCE","OLB","AJA","BIA","CFU","HER","KGS","RHO","SKG","DBV","SPU",
+    # EasyJet / Air France / autres
+    "LGW","LTN","BRS","NCE","GVA","FCO","MXP","CDG","ORY","LYS","LHR","IST",
 ]
 
 def parse_destinations(raw):
@@ -276,6 +282,76 @@ def serpapi_search(dest, dep_str, ret_str):
         log.debug(f"SerpAPI {dest}: {e}")
         return []
 
+
+# ══════════════════════════════════════════════════════════════════════════
+#  SOURCE — FLYSCRAPER via RapidAPI (toutes compagnies)
+# ══════════════════════════════════════════════════════════════════════════
+
+def flyscraper_search(dest, dep_str, ret_str):
+    if not RAPIDAPI_KEY:
+        return []
+    url = "https://flyScraper.p.rapidapi.com/flights/search"
+    headers = {
+        "x-rapidapi-host": "flyScraper.p.rapidapi.com",
+        "x-rapidapi-key":  RAPIDAPI_KEY,
+    }
+    params = {
+        "origin":        ORIGIN,
+        "destination":   dest,
+        "departureDate": dep_str,
+        "returnDate":    ret_str,
+        "adults":        "1",
+        "currency":      "EUR",
+        "cabinClass":    "economy",
+    }
+    try:
+        r = requests.get(url, headers=headers, params=params, timeout=20)
+        if not r.ok:
+            log.debug(f"FlyScraper {r.status_code} pour {dest}")
+            return []
+        data = r.json()
+        results = []
+        flights = data.get("data", data.get("flights", data.get("results", [])))
+        if isinstance(flights, dict):
+            flights = flights.get("itineraries", flights.get("offers", []))
+        for flight in flights[:10]:
+            try:
+                # Essaie différentes structures JSON selon la version de l'API
+                price = (
+                    flight.get("price", {}).get("total")
+                    or flight.get("price", {}).get("amount")
+                    or flight.get("totalPrice")
+                    or flight.get("fare", {}).get("total")
+                )
+                if price is None:
+                    continue
+                price = float(str(price).replace(",","."))
+                legs  = flight.get("legs", flight.get("segments", flight.get("slices", [])))
+                stops = len(legs) - 1 if legs else 0
+                if stops > MAX_STOPS:
+                    continue
+                airline = "Diverses"
+                if legs:
+                    seg = legs[0]
+                    airline = (
+                        seg.get("airline", {}).get("name")
+                        or seg.get("operatingCarrier", {}).get("name")
+                        or seg.get("carrierCode")
+                        or "Diverses"
+                    )
+                results.append({
+                    "price":   round(price, 2),
+                    "stops":   stops,
+                    "airline": airline,
+                    "source":  "FlyScraper",
+                })
+            except (KeyError, ValueError, TypeError):
+                continue
+        return results
+    except Exception as e:
+        log.debug(f"FlyScraper exception {dest}: {e}")
+        return []
+
 # ══════════════════════════════════════════════════════════════════════════
 #  MOTEUR COMBINÉ
 # ══════════════════════════════════════════════════════════════════════════
@@ -284,31 +360,29 @@ def search_all(dest, dep_str, ret_str):
     results = []
     log_parts = []
 
-    # Ryanair toujours en premier (fiable, sans quota)
+    # 1. FlyScraper (prioritaire — toutes compagnies, rapide)
+    if RAPIDAPI_KEY:
+        f = flyscraper_search(dest, dep_str, ret_str)
+        if f:
+            results += f
+            log_parts.append(f"FlyScraper:{len(f)}")
+
+    # 2. Ryanair — API directe en complément
     r = ryanair_search(dest, dep_str, ret_str)
     if r:
-        results += r
-        log_parts.append(f"Ryanair:{len(r)}")
+        # Éviter les doublons Ryanair si déjà dans FlyScraper
+        existing_prices = {round(x["price"]) for x in results}
+        for offer in r:
+            if round(offer["price"]) not in existing_prices:
+                results.append(offer)
+                log_parts.append("Ryanair:1")
 
-    # SerpAPI si clé dispo (prioritaire sur scraping)
-    if SERPAPI_KEY:
+    # 3. SerpAPI si clé dispo et pas de FlyScraper
+    if SERPAPI_KEY and not RAPIDAPI_KEY:
         s = serpapi_search(dest, dep_str, ret_str)
         if s:
             results += s
             log_parts.append(f"SerpAPI:{len(s)}")
-    else:
-        # Google Flights scraping
-        g = gf_scrape(dest, dep_str, ret_str)
-        if g:
-            results += g
-            log_parts.append(f"GF:{len(g)}")
-
-        # Kayak si toujours rien
-        if not g:
-            k = kayak_scrape(dest, dep_str, ret_str)
-            if k:
-                results += k
-                log_parts.append(f"Kayak:{len(k)}")
 
     if results:
         log.info(f"  {ORIGIN}→{dest} {dep_str}: {len(results)} offre(s) [{', '.join(log_parts)}]")
@@ -350,7 +424,7 @@ def main():
     print("=" * 54)
     print(f"Agent vols TLS — {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC")
     print(f"Seuil: {MAX_PRICE}€ | Séjour: {MIN_NIGHTS}–{MAX_NIGHTS}j | Escales max: {MAX_STOPS}")
-    print(f"Sources: Ryanair + {'SerpAPI' if SERPAPI_KEY else 'Google Flights + Kayak'}")
+    print(f"Sources: {'FlyScraper' if RAPIDAPI_KEY else ''} + Ryanair + {'SerpAPI' if SERPAPI_KEY else 'scraping'}")
     print("=" * 54)
 
     # Vérification ON/OFF
@@ -385,7 +459,7 @@ def main():
                     if did not in seen:
                         deals.append((dest, dep_str, ret_str, offer))
 
-                time.sleep(random.uniform(0.4, 0.9))
+                time.sleep(random.uniform(0.2, 0.5))
 
     log.info(f"{len(deals)} nouvelle(s) offre(s) sous {MAX_PRICE}€")
 
