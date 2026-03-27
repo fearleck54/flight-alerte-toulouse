@@ -1,95 +1,84 @@
 name: Agent Alertes Vols Toulouse
 
 on:
+  schedule:
+    - cron: "0 * * * *"
   workflow_dispatch:
     inputs:
       max_price:
-        description: "Prix max aller-retour (â¬)"
+        description: "Prix max (€)"
         required: false
-        default: "80"
+        default: ""
       date_from:
-        description: "DÃ©part Ã  partir du (YYYY-MM-DD)"
+        description: "Date départ min (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "DÃ©part avant le (YYYY-MM-DD)"
+        description: "Date départ max (YYYY-MM-DD)"
         required: false
         default: ""
       min_nights:
-        description: "DurÃ©e min du sÃ©jour (nuits)"
+        description: "Nuits min"
         required: false
-        default: "2"
+        default: ""
       max_nights:
-        description: "DurÃ©e max du sÃ©jour (nuits)"
+        description: "Nuits max"
         required: false
-        default: "5"
+        default: ""
       max_stops:
-        description: "Escales max (0=direct, 1=1 escale, 2=peu importe)"
+        description: "Escales max"
         required: false
-        default: "1"
+        default: ""
       days:
-        description: "Jours de dÃ©part (friday,saturday,sunday,any)"
+        description: "Jours de départ"
         required: false
-        default: "friday"
+        default: ""
       destinations:
-        description: "Codes IATA sÃ©parÃ©s par virgule (vide=toute Europe)"
+        description: "Destinations IATA"
         required: false
         default: ""
 
 jobs:
   search-flights:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    timeout-minutes: 60
     steps:
-      - name: Checkout du code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Installation de Python
+      - name: Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Installation des dÃ©pendances
+      - name: Dépendances
         run: pip install requests
-
-      - name: Restauration du cache (offres dÃ©jÃ  vues)
+      - name: Cache
         uses: actions/cache@v4
         with:
-          path: |
-            seen_deals.json
-            dest_offset.json
+          path: seen_deals.json
           key: seen-deals-cache
           restore-keys: seen-deals-cache
-
-      - name: Lancement de l'agent
+      - name: Lancement
         env:
-          # ââ Amadeus (prioritaire) ââ
-          AMADEUS_CLIENT_ID:     ${{ secrets.AMADEUS_CLIENT_ID }}
-          AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
-          # ââ SerpAPI (fallback) ââ
-          RAPIDAPI_KEY:          ${{ secrets.RAPIDAPI_KEY }}
-          SERPAPI_KEY:           ${{ secrets.SERPAPI_KEY }}
-          # ââ Telegram ââ
-          TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          # ââ ParamÃ¨tres de recherche ââ
-          MAX_PRICE:    ${{ github.event.inputs.max_price  || '80' }}
-          DATE_FROM:    ${{ github.event.inputs.date_from  || '' }}
-          DATE_TO:      ${{ github.event.inputs.date_to    || '' }}
-          MIN_NIGHTS:   ${{ github.event.inputs.min_nights || '2' }}
-          MAX_NIGHTS:   ${{ github.event.inputs.max_nights || '5' }}
-          MAX_STOPS:    ${{ github.event.inputs.max_stops  || '1' }}
-          DAYS:         ${{ github.event.inputs.days       || 'friday' }}
-          DESTINATIONS: ${{ github.event.inputs.destinations || '' }}
-          AGENT_ENABLED: ${{ vars.AGENT_ENABLED || 'true' }}
+          RAPIDAPI_KEY:     ${{ secrets.RAPIDAPI_KEY }}
+          SERPAPI_KEY:      ${{ secrets.SERPAPI_KEY }}
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          AGENT_ENABLED:    ${{ vars.AGENT_ENABLED || 'true' }}
+          CRON_MODE:        ${{ vars.CRON_MODE || '4xday' }}
+          MAX_PRICE:        ${{ github.event.inputs.max_price  || vars.MAX_PRICE  || '80' }}
+          DATE_FROM:        ${{ github.event.inputs.date_from  || vars.DATE_FROM  || '' }}
+          DATE_TO:          ${{ github.event.inputs.date_to    || vars.DATE_TO    || '' }}
+          MIN_NIGHTS:       ${{ github.event.inputs.min_nights || vars.MIN_NIGHTS || '2' }}
+          MAX_NIGHTS:       ${{ github.event.inputs.max_nights || vars.MAX_NIGHTS || '5' }}
+          MAX_STOPS:        ${{ github.event.inputs.max_stops  || vars.MAX_STOPS  || '1' }}
+          DAYS:             ${{ github.event.inputs.days       || vars.DAYS       || 'any' }}
+          DESTINATIONS:     ${{ github.event.inputs.destinations || vars.DESTINATIONS || '' }}
+          IS_MANUAL:        ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python flight_agent.py
-
-      - name: Sauvegarde du cache
+      - name: Sauvegarde cache
         uses: actions/cache@v4
         with:
-          path: |
-            seen_deals.json
-            dest_offset.json
+          path: seen_deals.json
           key: seen-deals-cache
