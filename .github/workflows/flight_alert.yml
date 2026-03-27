@@ -1,0 +1,50 @@
+name: Agent Alertes Vols Toulouse
+
+on:
+  # Lance l'agent automatiquement toutes les 6 heures
+  schedule:
+    - cron: "0 6,12,18,22 * * *"
+
+  # Permet de lancer manuellement depuis l'interface GitHub
+  workflow_dispatch:
+    inputs:
+      max_price:
+        description: "Prix max aller-retour (€)"
+        required: false
+        default: "80"
+      weekend_only:
+        description: "Week-ends uniquement ? (true/false)"
+        required: false
+        default: "true"
+
+jobs:
+  search-flights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installation des dépendances
+        run: pip install requests
+
+      - name: Lancement de l'agent
+        env:
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python flight_agent.py
+
+      - name: Sauvegarde des offres vues (cache)
+        uses: actions/cache@v4
+        with:
+          path: seen_deals.json
+          key: seen-deals-${{ github.run_id }}
+          restore-keys: |
+            seen-deals-
