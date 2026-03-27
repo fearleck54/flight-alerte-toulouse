@@ -366,16 +366,44 @@ def main():
     deals    = []
     dates    = build_date_range()
 
-    log.info(f"{len(dates)} dates candidates · {len(DESTINATIONS)} destinations")
+    # Limiter pour tenir dans le timeout GitHub Actions (30 min)
+    # Stratégie : on prend les N prochaines dates uniquement
+    # et on tourne les destinations en rotation via le cache
+    MAX_DATES = 4        # dates max par run
+    MAX_DESTS = 20       # destinations max par run
+    MAX_COMBOS = 60      # combinaisons max totales (dates × dests × nuits)
 
+    dates = dates[:MAX_DATES]
+
+    # Rotation des destinations : on mémorise où on s'est arrêté
+    dest_offset = 0
+    try:
+        with open("dest_offset.json") as f:
+            dest_offset = json.load(f).get("offset", 0)
+    except Exception:
+        dest_offset = 0
+
+    dests_rotated = (DESTINATIONS * 2)[dest_offset:dest_offset + MAX_DESTS]
+    next_offset   = (dest_offset + MAX_DESTS) % len(DESTINATIONS)
+    with open("dest_offset.json", "w") as f:
+        json.dump({"offset": next_offset}, f)
+
+    log.info(f"{len(dates)} dates · {len(dests_rotated)} destinations (offset {dest_offset}) · max {MAX_COMBOS} combos")
+
+    combo_count = 0
     for dep_date in dates:
-        for dest in DESTINATIONS:
+        for dest in dests_rotated:
             for nights in range(MIN_NIGHTS, MAX_NIGHTS + 1):
+                if combo_count >= MAX_COMBOS:
+                    log.info("Limite de combos atteinte, arrêt propre.")
+                    break
+
                 ret_date = dep_date + timedelta(days=nights)
                 dep_str  = dep_date.strftime("%Y-%m-%d")
                 ret_str  = ret_date.strftime("%Y-%m-%d")
 
                 offers = search_all(dest, dep_str, ret_str)
+                combo_count += 1
 
                 for offer in offers:
                     if offer["price"] > MAX_PRICE:
@@ -385,7 +413,13 @@ def main():
                     if did not in seen:
                         deals.append((dest, dep_str, ret_str, offer))
 
-                time.sleep(random.uniform(0.5, 1.2))
+                time.sleep(random.uniform(0.4, 0.9))
+            else:
+                continue
+            break
+        else:
+            continue
+        break
 
     log.info(f"{len(deals)} nouvelle(s) offre(s) sous {MAX_PRICE}€")
 
