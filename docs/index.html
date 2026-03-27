@@ -3,707 +3,614 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Vols · Toulouse</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<title>Flight Alerts · Toulouse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #18181f;
-    --border: #ffffff12;
-    --border-hover: #ffffff28;
-    --accent: #e8f05a;
-    --accent-dim: #e8f05a22;
-    --text: #f0f0f0;
-    --text-muted: #666680;
-    --text-dim: #333345;
-    --red: #ff4d6d;
-    --green: #4dffb4;
-    --mono: 'DM Mono', monospace;
-    --display: 'Syne', sans-serif;
+    --blue:       #0770e3;
+    --blue-light: #e8f2ff;
+    --blue-mid:   #b2d0f5;
+    --teal:       #00a698;
+    --bg:         #f5f6f8;
+    --white:      #ffffff;
+    --text:       #111236;
+    --muted:      #68697f;
+    --border:     #dde1e7;
+    --success:    #00a698;
+    --danger:     #d1435b;
+    --shadow:     0 2px 12px rgba(17,18,54,0.08);
+    --radius:     12px;
   }
 
   body {
     background: var(--bg);
     color: var(--text);
-    font-family: var(--mono);
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
-    overflow-x: hidden;
   }
 
-  /* Grid background */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Glow */
-  body::after {
-    content: '';
-    position: fixed;
-    top: -200px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 600px;
-    height: 400px;
-    background: radial-gradient(ellipse, #e8f05a18 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .container {
-    position: relative;
-    z-index: 1;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 48px 24px 80px;
-  }
-
-  /* Header */
-  header {
-    margin-bottom: 52px;
-    animation: fadeUp .6s ease both;
-  }
-
-  .badge {
-    display: inline-flex;
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    border: 1px solid var(--accent);
-    padding: 4px 10px;
-    border-radius: 2px;
-    margin-bottom: 20px;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
-
-  .badge::before {
-    content: '';
-    width: 5px; height: 5px;
-    background: var(--accent);
-    border-radius: 50%;
-    animation: pulse 2s ease infinite;
-  }
-
-  h1 {
-    font-family: var(--display);
-    font-size: clamp(36px, 6vw, 56px);
-    font-weight: 800;
-    line-height: 1.05;
-    letter-spacing: -.02em;
-  }
-
-  h1 span { color: var(--accent); }
-
-  .subtitle {
-    margin-top: 12px;
-    color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  /* Config token */
-  .token-bar {
+  .nav-brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 24px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 12px;
-    color: var(--text-muted);
-    animation: fadeUp .6s .1s ease both;
-  }
-
-  .token-bar input {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 12px;
-  }
-
-  .token-bar input::placeholder { color: var(--text-dim); }
-
-  .token-label {
-    font-size: 10px;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--accent);
-    white-space: nowrap;
-  }
-
-  /* Cards */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 28px;
-    margin-bottom: 16px;
-    transition: border-color .2s;
-    animation: fadeUp .6s ease both;
-  }
-
-  .card:hover { border-color: var(--border-hover); }
-
-  .card-title {
-    font-family: var(--display);
-    font-size: 11px;
     font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card-title::before {
-    content: '';
-    display: block;
-    width: 16px; height: 1px;
-    background: var(--accent);
-  }
-
-  /* Form grid */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-
-  .field { display: flex; flex-direction: column; gap: 6px; }
-
-  label {
-    font-size: 10px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-
-  input[type="date"],
-  input[type="number"],
-  input[type="text"],
-  select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
+    font-size: 1.05rem;
     color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 10px 12px;
-    outline: none;
-    transition: border-color .15s;
-    width: 100%;
-    -webkit-appearance: none;
-    appearance: none;
+    text-decoration: none;
   }
-
-  input:focus, select:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-dim);
-  }
-
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    filter: invert(1) opacity(.3);
-    cursor: pointer;
-  }
-
-  select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666680' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 32px;
-    cursor: pointer;
-  }
-
-  /* Range slider */
-  .range-wrap { position: relative; }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 2px;
-    background: var(--border);
-    border-radius: 0;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    margin-top: 8px;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 16px; height: 16px;
-    background: var(--accent);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: transform .15s;
-  }
-
-  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-
-  .range-val {
-    position: absolute;
-    right: 0; top: -2px;
-    font-size: 18px;
-    font-family: var(--display);
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  /* Toggle chips */
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-
-  .chip input { display: none; }
-
-  .chip label {
-    display: block;
-    padding: 7px 14px;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    font-size: 12px;
-    letter-spacing: .04em;
-    text-transform: none;
-    color: var(--text-muted);
-    cursor: pointer;
-    transition: all .15s;
-    user-select: none;
-  }
-
-  .chip input:checked + label {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-
-  .chip label:hover { border-color: var(--border-hover); color: var(--text); }
-
-  /* Destination tags */
-  .dest-input-wrap {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 10px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    min-height: 44px;
-    cursor: text;
-    transition: border-color .15s;
-  }
-
-  .dest-input-wrap:focus-within {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--accent-dim);
-  }
-
-  .dest-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--accent-dim);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    font-size: 11px;
+  .nav-brand svg { width: 28px; height: 28px; }
+  .nav-badge {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-size: 0.7rem;
+    font-weight: 600;
     padding: 2px 8px;
-    border-radius: 2px;
-    letter-spacing: .06em;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
   }
-
-  .dest-tag button {
-    background: none;
-    border: none;
-    color: var(--accent);
-    cursor: pointer;
-    font-size: 14px;
-    line-height: 1;
-    padding: 0;
-    opacity: .6;
-    transition: opacity .1s;
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  #statusDot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.3s;
   }
+  #statusDot.ok  { background: var(--success); box-shadow: 0 0 0 3px rgba(0,166,152,0.2); }
+  #statusDot.err { background: var(--danger); }
+  #statusLabel { font-size: 0.78rem; color: var(--muted); font-weight: 500; }
 
-  .dest-tag button:hover { opacity: 1; }
-
-  #dest-input {
-    flex: 1;
-    min-width: 60px;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 0;
-    text-transform: uppercase;
-  }
-
-  .dest-hint {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 5px;
-  }
-
-  /* Launch button */
-  .launch-wrap {
-    margin-top: 28px;
-    animation: fadeUp .6s .4s ease both;
-  }
-
-  .btn-launch {
-    width: 100%;
-    padding: 18px;
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    border-radius: 6px;
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 800;
-    letter-spacing: .04em;
-    cursor: pointer;
-    transition: all .2s;
+  .hero {
+    background: linear-gradient(135deg, #0057b8 0%, #0770e3 55%, #00a698 100%);
+    padding: 40px 24px 56px;
+    text-align: center;
+    color: #fff;
     position: relative;
     overflow: hidden;
   }
-
-  .btn-launch::before {
+  .hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: white;
-    opacity: 0;
-    transition: opacity .15s;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero-plane { font-size: 2.4rem; margin-bottom: 12px; display: block; animation: planeFly 3s ease-in-out infinite alternate; }
+  @keyframes planeFly { from { transform: translateX(-6px) rotate(-3deg); } to { transform: translateX(6px) rotate(3deg); } }
+  .hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.85; }
+
+  main {
+    max-width: 720px;
+    margin: -28px auto 0;
+    padding: 0 20px 60px;
+    position: relative;
+    z-index: 1;
   }
 
-  .btn-launch:hover::before { opacity: .1; }
-  .btn-launch:active { transform: scale(.99); }
-  .btn-launch:disabled {
-    opacity: .4;
-    cursor: not-allowed;
-    transform: none;
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
   }
+  .card-header {
+    padding: 18px 24px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-header h2 { font-size: 0.95rem; font-weight: 600; flex: 1; }
+  .card-header .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--blue-light);
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+  }
+  .card-body { padding: 20px 24px; }
 
-  .btn-launch .spinner {
-    display: none;
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media(max-width:520px){ .form-grid { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .field input, .field select {
+    height: 44px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0 12px;
+    font-size: 0.92rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(7,112,227,0.12);
+  }
+  .field input[type="range"] {
+    height: auto; border: none; padding: 8px 0;
+    accent-color: var(--blue); box-shadow: none;
+  }
+  .range-row { display: flex; align-items: center; gap: 8px; }
+  .range-row input[type="range"] { flex: 1; }
+  .range-val { font-size: 0.9rem; font-weight: 700; color: var(--blue); min-width: 52px; text-align: right; }
+
+  .token-row { display: flex; gap: 10px; align-items: flex-end; }
+  .token-row .field { flex: 1; }
+  .token-input-wrap { position: relative; display: flex; }
+  .token-input-wrap input { width: 100%; padding-right: 40px; }
+  .eye-btn {
+    position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    font-size: 1rem; padding: 4px;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  .token-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.75rem; font-weight: 500;
+    padding: 3px 10px; border-radius: 20px; margin-top: 6px;
+    transition: all 0.2s;
+  }
+  .token-status.idle     { background: #f0f1f3; color: var(--muted); }
+  .token-status.checking { background: #fff8e0; color: #b07d00; }
+  .token-status.valid    { background: #e6f9f5; color: var(--success); }
+  .token-status.invalid  { background: #fef0f2; color: var(--danger); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 44px; padding: 0 22px; border-radius: 8px;
+    font-size: 0.88rem; font-weight: 600; font-family: 'Inter', sans-serif;
+    cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-primary { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(7,112,227,0.3); }
+  .btn-primary:hover:not(:disabled) { background: #0561c8; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(7,112,227,0.35); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-ghost  { background: var(--bg); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); }
+  .btn-save   { background: var(--blue-light); color: var(--blue); border: 1.5px solid var(--blue-mid); min-width: 90px; }
+  .btn-save:hover { background: var(--blue-mid); }
+
+  .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+  .spinner {
     width: 16px; height: 16px;
-    border: 2px solid #0a0a0f44;
-    border-top-color: #0a0a0f;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    margin: 0 auto;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  .btn-launch.loading .btn-text { display: none; }
-  .btn-launch.loading .spinner { display: block; }
-
-  /* Status */
-  #status {
-    margin-top: 16px;
-    padding: 14px 18px;
-    border-radius: 6px;
-    font-size: 13px;
-    display: none;
-    animation: fadeUp .3s ease both;
+  .log-wrap {
+    background: #0f1117; border-radius: 8px;
+    padding: 14px 16px; min-height: 120px; max-height: 260px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem; line-height: 1.7; color: #8b9ab8;
   }
+  .log-wrap::-webkit-scrollbar { width: 4px; }
+  .log-wrap::-webkit-scrollbar-thumb { background: #2a2f3e; border-radius: 2px; }
+  .log-line { display: block; }
+  .log-line.ok   { color: #7ec8a0; }
+  .log-line.err  { color: #f28b82; }
+  .log-line.info { color: #93c5fd; }
+  .log-empty     { color: #3a4155; font-style: italic; }
 
-  #status.success {
-    display: block;
-    background: #4dffb422;
-    border: 1px solid #4dffb444;
-    color: var(--green);
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip {
+    border: 1.5px solid var(--border); border-radius: 20px;
+    padding: 5px 14px; font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; transition: all 0.15s;
+    color: var(--muted); background: var(--white); user-select: none;
   }
+  .chip:hover  { border-color: var(--blue); color: var(--blue); }
+  .chip.active { background: var(--blue-light); border-color: var(--blue); color: var(--blue); font-weight: 600; }
 
-  #status.error {
-    display: block;
-    background: #ff4d6d22;
-    border: 1px solid #ff4d6d44;
-    color: var(--red);
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .schedule-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .sched-pill {
+    background: var(--bg); border: 1.5px solid var(--border);
+    border-radius: 8px; padding: 6px 14px;
+    font-size: 0.8rem; font-weight: 500; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
   }
+  .sched-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
 
-  /* Footer */
-  footer {
-    margin-top: 60px;
-    text-align: center;
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: .06em;
-    animation: fadeUp .6s .5s ease both;
+  #toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text); color: #fff;
+    padding: 12px 22px; border-radius: 30px;
+    font-size: 0.85rem; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    transition: transform 0.35s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999; white-space: nowrap;
   }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.ok   { background: var(--success); }
+  #toast.err  { background: var(--danger); }
 
-  /* Animations */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .3; }
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .card:nth-child(1) { animation-delay: .1s; }
-  .card:nth-child(2) { animation-delay: .2s; }
-  .card:nth-child(3) { animation-delay: .3s; }
-
-  @media (max-width: 500px) {
-    .grid-2, .grid-3 { grid-template-columns: 1fr; }
-  }
+  footer { text-align: center; padding: 20px; font-size: 0.75rem; color: var(--muted); }
+  footer a { color: var(--blue); text-decoration: none; }
 </style>
 </head>
 <body>
-<div class="container">
 
-  <header>
-    <div class="badge">Agent actif</div>
-    <h1>Vols depuis<br><span>Toulouse</span></h1>
-    <p class="subtitle">Configure ta recherche et lance l'agent manuellement.<br>Les alertes arrivent directement sur Telegram.</p>
-  </header>
-
-  <!-- Config GitHub -->
-  <div class="token-bar" style="animation-delay:.05s">
-    <span class="token-label">GitHub Token</span>
-    <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
-    <button onclick="saveToken()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:var(--mono);font-size:11px;white-space:nowrap">Sauvegarder</button>
+<nav>
+  <a class="nav-brand" href="#">
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#0770e3"/>
+      <path d="M6 18l4-8 3 5 3-3 6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="9" r="2" fill="#00a698"/>
+    </svg>
+    Flight Alerts
+    <span class="nav-badge">TLS</span>
+  </a>
+  <div class="nav-right">
+    <div id="statusDot"></div>
+    <span id="statusLabel">Non configuré</span>
   </div>
-  <p style="font-size:11px;color:var(--text-dim);margin:-4px 0 24px 0;padding-left:4px;animation:fadeUp .6s .1s ease both">
-    Stocké localement dans ton navigateur · jamais envoyé ailleurs
-  </p>
+</nav>
 
-  <!-- Dates -->
-  <div class="card">
-    <div class="card-title">Fenêtre de dates</div>
-    <div class="grid-2">
-      <div class="field">
-        <label>Départ à partir du</label>
-        <input type="date" id="date-from">
-      </div>
-      <div class="field">
-        <label>Départ avant le</label>
-        <input type="date" id="date-to">
-      </div>
-      <div class="field">
-        <label>Durée min (nuits)</label>
-        <input type="number" id="min-nights" value="2" min="1" max="14">
-      </div>
-      <div class="field">
-        <label>Durée max (nuits)</label>
-        <input type="number" id="max-nights" value="5" min="1" max="14">
-      </div>
-    </div>
-  </div>
-
-  <!-- Prix & filtres -->
-  <div class="card">
-    <div class="card-title">Filtres</div>
-
-    <div class="field" style="margin-bottom:28px">
-      <label>Prix max aller-retour</label>
-      <div class="range-wrap">
-        <span class="range-val" id="price-val">80€</span>
-        <input type="range" id="price" min="20" max="300" value="80" step="5" oninput="document.getElementById('price-val').textContent=this.value+'€'">
-      </div>
-    </div>
-
-    <div class="field" style="margin-bottom:20px">
-      <label>Jours de départ</label>
-      <div class="chips">
-        <div class="chip"><input type="checkbox" id="d1" value="friday" checked><label for="d1">Vendredi</label></div>
-        <div class="chip"><input type="checkbox" id="d2" value="saturday"><label for="d2">Samedi</label></div>
-        <div class="chip"><input type="checkbox" id="d3" value="sunday"><label for="d3">Dimanche</label></div>
-        <div class="chip"><input type="checkbox" id="d4" value="any"><label for="d4">N'importe quel jour</label></div>
-      </div>
-    </div>
-
-    <div class="field">
-      <label>Escales max</label>
-      <div class="chips">
-        <div class="chip"><input type="radio" name="stops" id="s0" value="0"><label for="s0">Direct uniquement</label></div>
-        <div class="chip"><input type="radio" name="stops" id="s1" value="1" checked><label for="s1">1 escale max</label></div>
-        <div class="chip"><input type="radio" name="stops" id="s2" value="2"><label for="s2">Peu importe</label></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Destinations -->
-  <div class="card">
-    <div class="card-title">Destinations</div>
-    <div class="field">
-      <label>Destinations ciblées (laisser vide = toute l'Europe)</label>
-      <div class="dest-input-wrap" id="dest-wrap" onclick="document.getElementById('dest-input').focus()">
-        <input type="text" id="dest-input" placeholder="BCN, LIS, AMS..." maxlength="3">
-      </div>
-      <p class="dest-hint">Tape un code IATA (3 lettres) et appuie sur Entrée · ex: BCN = Barcelone, LIS = Lisbonne</p>
-    </div>
-  </div>
-
-  <!-- Launch -->
-  <div class="launch-wrap">
-    <button class="btn-launch" id="btn-launch" onclick="launch()">
-      <span class="btn-text">✈ Lancer la recherche</span>
-      <div class="spinner"></div>
-    </button>
-    <div id="status"></div>
-  </div>
-
-  <footer>
-    TLS · Agent vols personnel · Les résultats arrivent sur Telegram
-  </footer>
-
+<div class="hero">
+  <span class="hero-plane">✈️</span>
+  <h1>Alertes vols depuis Toulouse</h1>
+  <p>Configure tes critères · Lance une recherche · Reçois les bons plans sur Telegram</p>
 </div>
 
+<main>
+
+  <!-- TOKEN -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🔑</div>
+      <h2>Token GitHub</h2>
+    </div>
+    <div class="card-body">
+      <div class="token-row">
+        <div class="field">
+          <label>Personal Access Token</label>
+          <div class="token-input-wrap">
+            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" oninput="onTokenInput()">
+            <button class="eye-btn" onclick="toggleEye()">👁</button>
+          </div>
+        </div>
+        <button class="btn btn-save" onclick="saveToken()">Sauver</button>
+      </div>
+      <span class="token-status idle" id="tokenStatus">● Token non renseigné</span>
+      <p style="font-size:0.75rem;color:var(--muted);margin-top:10px;line-height:1.6">
+        GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic) → cocher <code style="background:var(--bg);padding:1px 5px;border-radius:4px">workflow</code>
+      </p>
+    </div>
+  </div>
+
+  <!-- CRITÈRES -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🎯</div>
+      <h2>Critères de recherche</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="field" style="margin-bottom:18px">
+        <label>Prix maximum</label>
+        <div class="range-row">
+          <input type="range" id="maxPrice" min="30" max="300" value="80" step="5" oninput="document.getElementById('priceVal').textContent=this.value+'€'">
+          <span class="range-val" id="priceVal">80€</span>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:18px">
+        <div class="field">
+          <label>Date départ (min)</label>
+          <input type="date" id="dateFrom">
+        </div>
+        <div class="field">
+          <label>Date départ (max)</label>
+          <input type="date" id="dateTo">
+        </div>
+        <div class="field">
+          <label>Durée séjour min (jours)</label>
+          <input type="number" id="stayMin" value="2" min="1" max="30">
+        </div>
+        <div class="field">
+          <label>Durée séjour max (jours)</label>
+          <input type="number" id="stayMax" value="4" min="1" max="30">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Type de vol</label>
+        <div class="chip-group">
+          <span class="chip active" data-group="type" data-val="roundtrip" onclick="toggleChip(this)">Aller-retour</span>
+          <span class="chip" data-group="type" data-val="oneway" onclick="toggleChip(this)">Aller simple</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Jours de départ</label>
+        <div class="chip-group">
+          <span class="chip" data-group="days" data-val="lun" onclick="toggleChip(this)">Lun</span>
+          <span class="chip" data-group="days" data-val="mar" onclick="toggleChip(this)">Mar</span>
+          <span class="chip" data-group="days" data-val="mer" onclick="toggleChip(this)">Mer</span>
+          <span class="chip" data-group="days" data-val="jeu" onclick="toggleChip(this)">Jeu</span>
+          <span class="chip active" data-group="days" data-val="ven" onclick="toggleChip(this)">Ven</span>
+          <span class="chip active" data-group="days" data-val="sam" onclick="toggleChip(this)">Sam</span>
+          <span class="chip active" data-group="days" data-val="dim" onclick="toggleChip(this)">Dim</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Destinations (vide = toutes)</label>
+        <input type="text" id="destinations" placeholder="BCN, MAD, LIS, CDG, AMS…">
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🚀</div>
+      <h2>Lancer une recherche</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="actions-row">
+        <button class="btn btn-primary" id="launchBtn" onclick="launchSearch()" disabled>
+          <span id="btnSpinner" class="spinner"></span>
+          <span id="btnText">Lancer maintenant</span>
+        </button>
+        <button class="btn btn-ghost" onclick="clearLog()">Effacer les logs</button>
+      </div>
+
+      <div class="field" style="margin-bottom:10px">
+        <label>Recherches automatiques (heures françaises)</label>
+      </div>
+      <div class="schedule-pills" style="margin-bottom:16px">
+        <div class="sched-pill"><span class="dot"></span>08h00</div>
+        <div class="sched-pill"><span class="dot"></span>14h00</div>
+        <div class="sched-pill"><span class="dot"></span>20h00</div>
+        <div class="sched-pill"><span class="dot"></span>00h00</div>
+      </div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:16px;line-height:1.6">Notif Telegram uniquement si une offre passe sous ton seuil de prix.</p>
+
+      <div class="divider"></div>
+
+      <div class="field" style="margin-bottom:8px"><label>Logs</label></div>
+      <div class="log-wrap" id="logBox">
+        <span class="log-empty">Aucun log. Lance une recherche pour voir les résultats ici.</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Flight Alerts TLS · <a href="https://github.com/fearleck54/flight-alerte-toulouse" target="_blank">fearleck54/flight-alerte-toulouse</a></footer>
+
+<div id="toast"></div>
+
 <script>
-// ── Config ──────────────────────────────────────────────────────────────────
-const GITHUB_OWNER = 'fearleck54';   // ← remplace par ton username GitHub
-const GITHUB_REPO  = 'flight-alerte-toulouse';      // ← remplace par le nom de ton dépôt
-const WORKFLOW_ID  = 'flight_alert.yml';
+  const GITHUB_OWNER = 'fearleck54';
+  const GITHUB_REPO  = 'flight-alerte-toulouse';
+  const WORKFLOW_ID  = 'flight_alert.yml';
 
-// ── Token storage ────────────────────────────────────────────────────────────
-function saveToken() {
-  const t = document.getElementById('gh-token').value.trim();
-  if (!t) return;
-  localStorage.setItem('gh_token', t);
-  showStatus('success', 'Token sauvegardé localement !');
-  setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
-}
-
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('gh_token');
-  if (saved) document.getElementById('gh-token').value = saved;
-
-  // Default dates : aujourd'hui + 7j → aujourd'hui + 90j
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-  const from = new Date(now); from.setDate(now.getDate() + 7);
-  const to   = new Date(now); to.setDate(now.getDate() + 90);
-  document.getElementById('date-from').value = fmt(from);
-  document.getElementById('date-to').value   = fmt(to);
-});
-
-// ── Destinations tags ────────────────────────────────────────────────────────
-const destinations = new Set();
-
-document.getElementById('dest-input').addEventListener('keydown', e => {
-  const val = e.target.value.trim().toUpperCase();
-  if ((e.key === 'Enter' || e.key === ',') && val.length === 3) {
-    e.preventDefault();
-    addDest(val);
-    e.target.value = '';
-  }
-  if (e.key === 'Backspace' && val === '' && destinations.size > 0) {
-    const last = [...destinations].pop();
-    removeDest(last);
-  }
-});
-
-function addDest(code) {
-  if (destinations.has(code)) return;
-  destinations.add(code);
-  const wrap = document.getElementById('dest-wrap');
-  const input = document.getElementById('dest-input');
-  const tag = document.createElement('span');
-  tag.className = 'dest-tag';
-  tag.dataset.code = code;
-  tag.innerHTML = `${code}<button onclick="removeDest('${code}')" type="button">×</button>`;
-  wrap.insertBefore(tag, input);
-}
-
-function removeDest(code) {
-  destinations.delete(code);
-  const tag = document.querySelector(`.dest-tag[data-code="${code}"]`);
-  if (tag) tag.remove();
-}
-
-// ── Launch ───────────────────────────────────────────────────────────────────
-async function launch() {
-  const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh_token');
-  if (!token) {
-    showStatus('error', 'Entre ton GitHub Token personnel en haut de la page.');
-    return;
-  }
-
-  const dateFrom  = document.getElementById('date-from').value;
-  const dateTo    = document.getElementById('date-to').value;
-  const minNights = document.getElementById('min-nights').value;
-  const maxNights = document.getElementById('max-nights').value;
-  const price     = document.getElementById('price').value;
-  const stops     = document.querySelector('input[name="stops"]:checked')?.value ?? '1';
-  const dests     = [...destinations].join(',') || '';
-
-  const days = [...document.querySelectorAll('.chips input[type=checkbox]:checked')]
-    .map(c => c.value).join(',') || 'any';
-
-  const btn = document.getElementById('btn-launch');
-  btn.classList.add('loading');
-  btn.disabled = true;
-  document.getElementById('status').style.display = 'none';
-
-  try {
-    const resp = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ref: 'main',
-          inputs: {
-            max_price:  price,
-            date_from:  dateFrom,
-            date_to:    dateTo,
-            min_nights: minNights,
-            max_nights: maxNights,
-            max_stops:  stops,
-            days:       days,
-            destinations: dests,
-          }
-        })
-      }
-    );
-
-    if (resp.status === 204) {
-      showStatus('success', '✓ Agent lancé ! Résultats dans quelques minutes sur Telegram.');
-    } else {
-      const err = await resp.json().catch(() => ({}));
-      showStatus('error', `Erreur ${resp.status} : ${err.message || 'Vérifie ton token GitHub.'}`);
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('gh_token');
+    if (saved) {
+      document.getElementById('ghToken').value = saved;
+      validateToken(saved);
     }
-  } catch(e) {
-    showStatus('error', 'Impossible de contacter GitHub. Vérifie ta connexion.');
-  } finally {
-    btn.classList.remove('loading');
-    btn.disabled = false;
-  }
-}
+    const today = new Date();
+    const plus7  = new Date(today); plus7.setDate(today.getDate() + 7);
+    const plus90 = new Date(today); plus90.setDate(today.getDate() + 90);
+    document.getElementById('dateFrom').value = fmt(plus7);
+    document.getElementById('dateTo').value   = fmt(plus90);
+  });
 
-function showStatus(type, msg) {
-  const s = document.getElementById('status');
-  s.className = type;
-  s.textContent = msg;
-  s.style.display = 'block';
-}
+  const fmt = d => d.toISOString().split('T')[0];
+
+  let tokenValid = false, tokenTimer = null;
+
+  function onTokenInput() {
+    clearTimeout(tokenTimer);
+    setTokenStatus('idle', '● Saisie en cours…');
+    tokenValid = false; updateBtn();
+    const val = document.getElementById('ghToken').value.trim();
+    if (val.length > 10) {
+      setTokenStatus('checking', '⏳ Vérification…');
+      tokenTimer = setTimeout(() => validateToken(val), 900);
+    }
+  }
+
+  async function validateToken(token) {
+    try {
+      const r = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+      });
+      if (r.ok) {
+        tokenValid = true;
+        setTokenStatus('valid', '✓ Token valide · Dépôt accessible');
+        document.getElementById('statusDot').className = 'ok';
+        document.getElementById('statusLabel').textContent = 'Prêt';
+      } else {
+        tokenValid = false;
+        setTokenStatus('invalid', '✗ Token invalide ou accès refusé (scope "workflow" manquant ?)');
+        document.getElementById('statusDot').className = 'err';
+        document.getElementById('statusLabel').textContent = 'Token invalide';
+      }
+    } catch {
+      setTokenStatus('invalid', '✗ Erreur réseau');
+    }
+    updateBtn();
+  }
+
+  function saveToken() {
+    const val = document.getElementById('ghToken').value.trim();
+    if (!val) { showToast('Entre un token avant de sauvegarder', 'err'); return; }
+    localStorage.setItem('gh_token', val);
+    validateToken(val);
+    showToast('Token sauvegardé localement ✓', 'ok');
+  }
+
+  function toggleEye() {
+    const i = document.getElementById('ghToken');
+    i.type = i.type === 'password' ? 'text' : 'password';
+  }
+
+  function setTokenStatus(cls, txt) {
+    const el = document.getElementById('tokenStatus');
+    el.className = `token-status ${cls}`;
+    el.textContent = txt;
+  }
+
+  function updateBtn() {
+    document.getElementById('launchBtn').disabled = !tokenValid;
+  }
+
+  function toggleChip(el) {
+    if (el.dataset.group === 'type') {
+      document.querySelectorAll('[data-group="type"]').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    } else {
+      el.classList.toggle('active');
+    }
+  }
+
+  function getChips(group) {
+    return [...document.querySelectorAll(`[data-group="${group}"].active`)].map(c => c.dataset.val);
+  }
+
+  async function launchSearch() {
+    const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+    if (!token) { showToast('Token manquant', 'err'); return; }
+
+    const inputs = {
+      max_price:    document.getElementById('maxPrice').value,
+      date_from:    document.getElementById('dateFrom').value,
+      date_to:      document.getElementById('dateTo').value,
+      stay_min:     document.getElementById('stayMin').value,
+      stay_max:     document.getElementById('stayMax').value,
+      flight_type:  getChips('type')[0] || 'roundtrip',
+      travel_days:  getChips('days').join(','),
+      destinations: document.getElementById('destinations').value.trim(),
+    };
+
+    setLoading(true);
+    addLog('info', `▶ Lancement · ${new Date().toLocaleTimeString('fr-FR')}`);
+    addLog('info', `  Prix max: ${inputs.max_price}€ · ${inputs.date_from} → ${inputs.date_to}`);
+    addLog('info', `  Séjour: ${inputs.stay_min}–${inputs.stay_max}j · Jours: ${inputs.travel_days || 'tous'}`);
+    if (inputs.destinations) addLog('info', `  Destinations: ${inputs.destinations}`);
+
+    try {
+      const r = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ref: 'main', inputs }),
+        }
+      );
+
+      if (r.status === 204) {
+        addLog('ok', '✓ Workflow déclenché avec succès !');
+        addLog('ok', '  Notif Telegram si une offre est trouvée sous ton seuil.');
+        showToast('Recherche lancée ✓', 'ok');
+        setTimeout(() => pollWorkflow(token), 5000);
+      } else {
+        const err = await r.json().catch(() => ({}));
+        addLog('err', `✗ Erreur ${r.status} : ${err.message || 'Inconnue'}`);
+        if (r.status === 422) addLog('err', '  → Le workflow doit accepter des inputs. Vérifie flight_alert.yml.');
+        if (r.status === 403) addLog('err', '  → Permission refusée. Le token a-t-il le scope "workflow" ?');
+        showToast(`Erreur ${r.status}`, 'err');
+      }
+    } catch (e) {
+      addLog('err', `✗ Erreur réseau : ${e.message}`);
+      showToast('Erreur réseau', 'err');
+    }
+    setLoading(false);
+  }
+
+  async function pollWorkflow(token) {
+    try {
+      const r = await fetch(
+        `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runs?per_page=1`,
+        { headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' } }
+      );
+      if (!r.ok) return;
+      const data = await r.json();
+      const run  = data.workflow_runs?.[0];
+      if (run) {
+        addLog('info', `  Run #${run.run_number} · ${run.status} · ${run.conclusion || 'en cours…'}`);
+        addLog('info', `  🔗 ${run.html_url}`);
+      }
+    } catch { /* silence */ }
+  }
+
+  function addLog(type, msg) {
+    const box = document.getElementById('logBox');
+    const empty = box.querySelector('.log-empty');
+    if (empty) empty.remove();
+    const line = document.createElement('span');
+    line.className = `log-line ${type}`;
+    line.textContent = msg;
+    box.appendChild(line);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('logBox').innerHTML = '<span class="log-empty">Logs effacés.</span>';
+  }
+
+  function setLoading(on) {
+    document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
+    document.getElementById('btnText').textContent = on ? 'Recherche en cours…' : 'Lancer maintenant';
+    document.getElementById('launchBtn').disabled = on;
+  }
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = type; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
 </script>
 </body>
 </html>
