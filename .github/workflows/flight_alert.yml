@@ -1,21 +1,43 @@
 name: Agent Alertes Vols Toulouse
 
 on:
-  # Lance l'agent automatiquement toutes les 6 heures
   schedule:
     - cron: "0 6,12,18,22 * * *"
 
-  # Permet de lancer manuellement depuis l'interface GitHub
   workflow_dispatch:
     inputs:
       max_price:
         description: "Prix max aller-retour (€)"
         required: false
         default: "80"
-      weekend_only:
-        description: "Week-ends uniquement ? (true/false)"
+      date_from:
+        description: "Départ à partir du (YYYY-MM-DD)"
         required: false
-        default: "true"
+        default: ""
+      date_to:
+        description: "Départ avant le (YYYY-MM-DD)"
+        required: false
+        default: ""
+      min_nights:
+        description: "Durée min du séjour (nuits)"
+        required: false
+        default: "2"
+      max_nights:
+        description: "Durée max du séjour (nuits)"
+        required: false
+        default: "5"
+      max_stops:
+        description: "Escales max (0=direct, 1=1 escale, 2=peu importe)"
+        required: false
+        default: "1"
+      days:
+        description: "Jours de départ (friday,saturday,sunday,any)"
+        required: false
+        default: "friday"
+      destinations:
+        description: "Codes IATA séparés par virgule (vide=toute Europe)"
+        required: false
+        default: ""
 
 jobs:
   search-flights:
@@ -34,17 +56,30 @@ jobs:
       - name: Installation des dépendances
         run: pip install requests
 
+      - name: Restauration du cache (offres déjà vues)
+        uses: actions/cache@v4
+        with:
+          path: seen_deals.json
+          key: seen-deals-cache
+          restore-keys: seen-deals-cache
+
       - name: Lancement de l'agent
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          MAX_PRICE: ${{ github.event.inputs.max_price || '80' }}
+          DATE_FROM: ${{ github.event.inputs.date_from || '' }}
+          DATE_TO: ${{ github.event.inputs.date_to || '' }}
+          MIN_NIGHTS: ${{ github.event.inputs.min_nights || '2' }}
+          MAX_NIGHTS: ${{ github.event.inputs.max_nights || '5' }}
+          MAX_STOPS: ${{ github.event.inputs.max_stops || '1' }}
+          DAYS: ${{ github.event.inputs.days || 'friday' }}
+          DESTINATIONS: ${{ github.event.inputs.destinations || '' }}
         run: python flight_agent.py
 
-      - name: Sauvegarde des offres vues (cache)
+      - name: Sauvegarde du cache
         uses: actions/cache@v4
         with:
           path: seen_deals.json
-          key: seen-deals-${{ github.run_id }}
-          restore-keys: |
-            seen-deals-
+          key: seen-deals-cache
