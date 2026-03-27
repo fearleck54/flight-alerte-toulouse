@@ -1,1 +1,709 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Vols · Toulouse</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #ffffff12;
+    --border-hover: #ffffff28;
+    --accent: #e8f05a;
+    --accent-dim: #e8f05a22;
+    --text: #f0f0f0;
+    --text-muted: #666680;
+    --text-dim: #333345;
+    --red: #ff4d6d;
+    --green: #4dffb4;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, #e8f05a18 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* Header */
+  header {
+    margin-bottom: 52px;
+    animation: fadeUp .6s ease both;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  .badge::before {
+    content: '';
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease infinite;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* Config token */
+  .token-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    animation: fadeUp .6s .1s ease both;
+  }
+
+  .token-bar input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .token-bar input::placeholder { color: var(--text-dim); }
+
+  .token-label {
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 16px;
+    transition: border-color .2s;
+    animation: fadeUp .6s ease both;
+  }
+
+  .card:hover { border-color: var(--border-hover); }
+
+  .card-title {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::before {
+    content: '';
+    display: block;
+    width: 16px; height: 1px;
+    background: var(--accent);
+  }
+
+  /* Form grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  input[type="date"],
+  input[type="number"],
+  input[type="text"],
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color .15s;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(.3);
+    cursor: pointer;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666680' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  /* Range slider */
+  .range-wrap { position: relative; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    border-radius: 0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  .range-val {
+    position: absolute;
+    right: 0; top: -2px;
+    font-size: 18px;
+    font-family: var(--display);
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* Toggle chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .chip input { display: none; }
+
+  .chip label {
+    display: block;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    font-size: 12px;
+    letter-spacing: .04em;
+    text-transform: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .15s;
+    user-select: none;
+  }
+
+  .chip input:checked + label {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .chip label:hover { border-color: var(--border-hover); color: var(--text); }
+
+  /* Destination tags */
+  .dest-input-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-height: 44px;
+    cursor: text;
+    transition: border-color .15s;
+  }
+
+  .dest-input-wrap:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-dim);
+  }
+
+  .dest-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: .06em;
+  }
+
+  .dest-tag button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    opacity: .6;
+    transition: opacity .1s;
+  }
+
+  .dest-tag button:hover { opacity: 1; }
+
+  #dest-input {
+    flex: 1;
+    min-width: 60px;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 0;
+    text-transform: uppercase;
+  }
+
+  .dest-hint {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 5px;
+  }
+
+  /* Launch button */
+  .launch-wrap {
+    margin-top: 28px;
+    animation: fadeUp .6s .4s ease both;
+  }
+
+  .btn-launch {
+    width: 100%;
+    padding: 18px;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-launch::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+
+  .btn-launch:hover::before { opacity: .1; }
+  .btn-launch:active { transform: scale(.99); }
+  .btn-launch:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-launch .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid #0a0a0f44;
+    border-top-color: #0a0a0f;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .btn-launch.loading .btn-text { display: none; }
+  .btn-launch.loading .spinner { display: block; }
+
+  /* Status */
+  #status {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+    animation: fadeUp .3s ease both;
+  }
+
+  #status.success {
+    display: block;
+    background: #4dffb422;
+    border: 1px solid #4dffb444;
+    color: var(--green);
+  }
+
+  #status.error {
+    display: block;
+    background: #ff4d6d22;
+    border: 1px solid #ff4d6d44;
+    color: var(--red);
+  }
+
+  /* Footer */
+  footer {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: .06em;
+    animation: fadeUp .6s .5s ease both;
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .3; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .card:nth-child(1) { animation-delay: .1s; }
+  .card:nth-child(2) { animation-delay: .2s; }
+  .card:nth-child(3) { animation-delay: .3s; }
+
+  @media (max-width: 500px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="badge">Agent actif</div>
+    <h1>Vols depuis<br><span>Toulouse</span></h1>
+    <p class="subtitle">Configure ta recherche et lance l'agent manuellement.<br>Les alertes arrivent directement sur Telegram.</p>
+  </header>
+
+  <!-- Config GitHub -->
+  <div class="token-bar" style="animation-delay:.05s">
+    <span class="token-label">GitHub Token</span>
+    <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+    <button onclick="saveToken()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:var(--mono);font-size:11px;white-space:nowrap">Sauvegarder</button>
+  </div>
+  <p style="font-size:11px;color:var(--text-dim);margin:-4px 0 24px 0;padding-left:4px;animation:fadeUp .6s .1s ease both">
+    Stocké localement dans ton navigateur · jamais envoyé ailleurs
+  </p>
+
+  <!-- Dates -->
+  <div class="card">
+    <div class="card-title">Fenêtre de dates</div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Départ à partir du</label>
+        <input type="date" id="date-from">
+      </div>
+      <div class="field">
+        <label>Départ avant le</label>
+        <input type="date" id="date-to">
+      </div>
+      <div class="field">
+        <label>Durée min (nuits)</label>
+        <input type="number" id="min-nights" value="2" min="1" max="14">
+      </div>
+      <div class="field">
+        <label>Durée max (nuits)</label>
+        <input type="number" id="max-nights" value="5" min="1" max="14">
+      </div>
+    </div>
+  </div>
+
+  <!-- Prix & filtres -->
+  <div class="card">
+    <div class="card-title">Filtres</div>
+
+    <div class="field" style="margin-bottom:28px">
+      <label>Prix max aller-retour</label>
+      <div class="range-wrap">
+        <span class="range-val" id="price-val">80€</span>
+        <input type="range" id="price" min="20" max="300" value="80" step="5" oninput="document.getElementById('price-val').textContent=this.value+'€'">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:20px">
+      <label>Jours de départ</label>
+      <div class="chips">
+        <div class="chip"><input type="checkbox" id="d1" value="friday" checked><label for="d1">Vendredi</label></div>
+        <div class="chip"><input type="checkbox" id="d2" value="saturday"><label for="d2">Samedi</label></div>
+        <div class="chip"><input type="checkbox" id="d3" value="sunday"><label for="d3">Dimanche</label></div>
+        <div class="chip"><input type="checkbox" id="d4" value="any"><label for="d4">N'importe quel jour</label></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Escales max</label>
+      <div class="chips">
+        <div class="chip"><input type="radio" name="stops" id="s0" value="0"><label for="s0">Direct uniquement</label></div>
+        <div class="chip"><input type="radio" name="stops" id="s1" value="1" checked><label for="s1">1 escale max</label></div>
+        <div class="chip"><input type="radio" name="stops" id="s2" value="2"><label for="s2">Peu importe</label></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Destinations -->
+  <div class="card">
+    <div class="card-title">Destinations</div>
+    <div class="field">
+      <label>Destinations ciblées (laisser vide = toute l'Europe)</label>
+      <div class="dest-input-wrap" id="dest-wrap" onclick="document.getElementById('dest-input').focus()">
+        <input type="text" id="dest-input" placeholder="BCN, LIS, AMS..." maxlength="3">
+      </div>
+      <p class="dest-hint">Tape un code IATA (3 lettres) et appuie sur Entrée · ex: BCN = Barcelone, LIS = Lisbonne</p>
+    </div>
+  </div>
+
+  <!-- Launch -->
+  <div class="launch-wrap">
+    <button class="btn-launch" id="btn-launch" onclick="launch()">
+      <span class="btn-text">✈ Lancer la recherche</span>
+      <div class="spinner"></div>
+    </button>
+    <div id="status"></div>
+  </div>
+
+  <footer>
+    TLS · Agent vols personnel · Les résultats arrivent sur Telegram
+  </footer>
+
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+const GITHUB_OWNER = 'TON_USERNAME';   // ← remplace par ton username GitHub
+const GITHUB_REPO  = 'TON_REPO';      // ← remplace par le nom de ton dépôt
+const WORKFLOW_ID  = 'flight_alert.yml';
+
+// ── Token storage ────────────────────────────────────────────────────────────
+function saveToken() {
+  const t = document.getElementById('gh-token').value.trim();
+  if (!t) return;
+  localStorage.setItem('gh_token', t);
+  showStatus('success', 'Token sauvegardé localement !');
+  setTimeout(() => document.getElementById('status').style.display = 'none', 2000);
+}
+
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem('gh_token');
+  if (saved) document.getElementById('gh-token').value = saved;
+
+  // Default dates : aujourd'hui + 7j → aujourd'hui + 90j
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const from = new Date(now); from.setDate(now.getDate() + 7);
+  const to   = new Date(now); to.setDate(now.getDate() + 90);
+  document.getElementById('date-from').value = fmt(from);
+  document.getElementById('date-to').value   = fmt(to);
+});
+
+// ── Destinations tags ────────────────────────────────────────────────────────
+const destinations = new Set();
+
+document.getElementById('dest-input').addEventListener('keydown', e => {
+  const val = e.target.value.trim().toUpperCase();
+  if ((e.key === 'Enter' || e.key === ',') && val.length === 3) {
+    e.preventDefault();
+    addDest(val);
+    e.target.value = '';
+  }
+  if (e.key === 'Backspace' && val === '' && destinations.size > 0) {
+    const last = [...destinations].pop();
+    removeDest(last);
+  }
+});
+
+function addDest(code) {
+  if (destinations.has(code)) return;
+  destinations.add(code);
+  const wrap = document.getElementById('dest-wrap');
+  const input = document.getElementById('dest-input');
+  const tag = document.createElement('span');
+  tag.className = 'dest-tag';
+  tag.dataset.code = code;
+  tag.innerHTML = `${code}<button onclick="removeDest('${code}')" type="button">×</button>`;
+  wrap.insertBefore(tag, input);
+}
+
+function removeDest(code) {
+  destinations.delete(code);
+  const tag = document.querySelector(`.dest-tag[data-code="${code}"]`);
+  if (tag) tag.remove();
+}
+
+// ── Launch ───────────────────────────────────────────────────────────────────
+async function launch() {
+  const token = document.getElementById('gh-token').value.trim() || localStorage.getItem('gh_token');
+  if (!token) {
+    showStatus('error', 'Entre ton GitHub Token personnel en haut de la page.');
+    return;
+  }
+
+  const dateFrom  = document.getElementById('date-from').value;
+  const dateTo    = document.getElementById('date-to').value;
+  const minNights = document.getElementById('min-nights').value;
+  const maxNights = document.getElementById('max-nights').value;
+  const price     = document.getElementById('price').value;
+  const stops     = document.querySelector('input[name="stops"]:checked')?.value ?? '1';
+  const dests     = [...destinations].join(',') || '';
+
+  const days = [...document.querySelectorAll('.chips input[type=checkbox]:checked')]
+    .map(c => c.value).join(',') || 'any';
+
+  const btn = document.getElementById('btn-launch');
+  btn.classList.add('loading');
+  btn.disabled = true;
+  document.getElementById('status').style.display = 'none';
+
+  try {
+    const resp = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ref: 'main',
+          inputs: {
+            max_price:  price,
+            date_from:  dateFrom,
+            date_to:    dateTo,
+            min_nights: minNights,
+            max_nights: maxNights,
+            max_stops:  stops,
+            days:       days,
+            destinations: dests,
+          }
+        })
+      }
+    );
+
+    if (resp.status === 204) {
+      showStatus('success', '✓ Agent lancé ! Résultats dans quelques minutes sur Telegram.');
+    } else {
+      const err = await resp.json().catch(() => ({}));
+      showStatus('error', `Erreur ${resp.status} : ${err.message || 'Vérifie ton token GitHub.'}`);
+    }
+  } catch(e) {
+    showStatus('error', 'Impossible de contacter GitHub. Vérifie ta connexion.');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function showStatus(type, msg) {
+  const s = document.getElementById('status');
+  s.className = type;
+  s.textContent = msg;
+  s.style.display = 'block';
+}
+</script>
+</body>
+</html>
