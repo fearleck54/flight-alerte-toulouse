@@ -32,6 +32,33 @@ DEST_RAW   = os.environ.get("DESTINATIONS", "")
 
 ORIGIN        = "TLS"
 SEEN_FILE     = "seen_deals.json"
+AIRPORT_NAMES = {
+    "TLS":"Toulouse","BCN":"Barcelone","MAD":"Madrid","LIS":"Lisbonne",
+    "OPO":"Porto","FCO":"Rome","MXP":"Milan Malpensa","VCE":"Venise",
+    "NAP":"Naples","ATH":"Athènes","PRG":"Prague","BUD":"Budapest",
+    "WAW":"Varsovie","VIE":"Vienne","AMS":"Amsterdam","BRU":"Bruxelles",
+    "DUB":"Dublin","EDI":"Édimbourg","MAN":"Manchester","STN":"Londres Stansted",
+    "LTN":"Londres Luton","LGW":"Londres Gatwick","LHR":"Londres Heathrow",
+    "BRS":"Bristol","CDG":"Paris CDG","ORY":"Paris Orly","LYS":"Lyon",
+    "NCE":"Nice","GVA":"Genève","PMI":"Majorque","IBZ":"Ibiza","MAH":"Minorque",
+    "LPA":"Gran Canaria","TFS":"Tenerife Sud","FUE":"Fuerteventura",
+    "ACE":"Lanzarote","AGP":"Malaga","ALC":"Alicante","SVQ":"Séville",
+    "VLC":"Valence","FAO":"Faro","RAK":"Marrakech","CMN":"Casablanca",
+    "TUN":"Tunis","DJE":"Djerba","MIR":"Monastir","NBE":"Enfidha",
+    "ORN":"Oran","ALG":"Alger","TLM":"Tlemcen","CPH":"Copenhague",
+    "ARN":"Stockholm","OSL":"Oslo","HEL":"Helsinki","IST":"Istanbul",
+    "DBV":"Dubrovnik","SPU":"Split","CFU":"Corfou","HER":"Héraklion",
+    "RHO":"Rhodes","SKG":"Thessalonique","OLB":"Olbia","AJA":"Ajaccio",
+    "BIA":"Bastia","BGY":"Milan Bergame","BVA":"Paris Beauvais",
+    "CRL":"Bruxelles Charleroi","CIA":"Rome Ciampino","PSA":"Pise",
+    "EIN":"Eindhoven","KRK":"Cracovie","WRO":"Wroclaw","GDN":"Gdansk",
+    "ZTH":"Zakynthos","JMK":"Mykonos","KGS":"Kos","PVK":"Preveza",
+}
+
+def airport_label(iata):
+    name = AIRPORT_NAMES.get(iata, "")
+    return f"{name} ({iata})" if name else iata
+
 AGENT_ENABLED = os.environ.get("AGENT_ENABLED", "true").lower()
 
 HEADERS = {
