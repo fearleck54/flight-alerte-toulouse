@@ -417,8 +417,9 @@ def send_telegram(message):
 
 def fmt_deal(dest, dep, ret, o):
     stops = "Direct ✅" if o["stops"] == 0 else f"{o['stops']} escale(s)"
+    dest_label = airport_label(dest)
     return (
-        f"✈️ <b>TLS → {dest}</b>\n"
+        f"✈️ <b>Toulouse → {dest_label}</b>\n"
         f"📅 {dep} → {ret}\n"
         f"💶 <b>{o['price']:.0f}€</b> A/R · {stops}\n"
         f"🏢 {o['airline']} · via {o['source']}"
