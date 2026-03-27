@@ -1,28 +1,26 @@
 name: Agent Alertes Vols Toulouse
 
 on:
-  schedule:
-    - cron: "0 7,13,20 * * *"
   workflow_dispatch:
     inputs:
       max_price:
-        description: "Prix max aller-retour (â¬)"
+        description: "Prix max aller-retour (Ã¢ÂÂ¬)"
         required: false
         default: "80"
       date_from:
-        description: "DÃ©part Ã  partir du (YYYY-MM-DD)"
+        description: "DÃÂ©part ÃÂ  partir du (YYYY-MM-DD)"
         required: false
         default: ""
       date_to:
-        description: "DÃ©part avant le (YYYY-MM-DD)"
+        description: "DÃÂ©part avant le (YYYY-MM-DD)"
         required: false
         default: ""
       min_nights:
-        description: "DurÃ©e min du sÃ©jour (nuits)"
+        description: "DurÃÂ©e min du sÃÂ©jour (nuits)"
         required: false
         default: "2"
       max_nights:
-        description: "DurÃ©e max du sÃ©jour (nuits)"
+        description: "DurÃÂ©e max du sÃÂ©jour (nuits)"
         required: false
         default: "5"
       max_stops:
@@ -30,11 +28,11 @@ on:
         required: false
         default: "1"
       days:
-        description: "Jours de dÃ©part (friday,saturday,sunday,any)"
+        description: "Jours de dÃÂ©part (friday,saturday,sunday,any)"
         required: false
         default: "friday"
       destinations:
-        description: "Codes IATA sÃ©parÃ©s par virgule (vide=toute Europe)"
+        description: "Codes IATA sÃÂ©parÃÂ©s par virgule (vide=toute Europe)"
         required: false
         default: ""
 
@@ -53,10 +51,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Installation des dÃ©pendances
+      - name: Installation des dÃÂ©pendances
         run: pip install requests
 
-      - name: Restauration du cache (offres dÃ©jÃ  vues)
+      - name: Restauration du cache (offres dÃÂ©jÃÂ  vues)
         uses: actions/cache@v4
         with:
           path: |
@@ -67,16 +65,16 @@ jobs:
 
       - name: Lancement de l'agent
         env:
-          # ââ Amadeus (prioritaire) ââ
+          # Ã¢ÂÂÃ¢ÂÂ Amadeus (prioritaire) Ã¢ÂÂÃ¢ÂÂ
           AMADEUS_CLIENT_ID:     ${{ secrets.AMADEUS_CLIENT_ID }}
           AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
-          # ââ SerpAPI (fallback) ââ
+          # Ã¢ÂÂÃ¢ÂÂ SerpAPI (fallback) Ã¢ÂÂÃ¢ÂÂ
           RAPIDAPI_KEY:          ${{ secrets.RAPIDAPI_KEY }}
           SERPAPI_KEY:           ${{ secrets.SERPAPI_KEY }}
-          # ââ Telegram ââ
+          # Ã¢ÂÂÃ¢ÂÂ Telegram Ã¢ÂÂÃ¢ÂÂ
           TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID:      ${{ secrets.TELEGRAM_CHAT_ID }}
-          # ââ ParamÃ¨tres de recherche ââ
+          # Ã¢ÂÂÃ¢ÂÂ ParamÃÂ¨tres de recherche Ã¢ÂÂÃ¢ÂÂ
           MAX_PRICE:    ${{ github.event.inputs.max_price  || '80' }}
           DATE_FROM:    ${{ github.event.inputs.date_from  || '' }}
           DATE_TO:      ${{ github.event.inputs.date_to    || '' }}
