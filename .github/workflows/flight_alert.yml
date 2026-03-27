@@ -71,6 +71,7 @@ jobs:
           AMADEUS_CLIENT_ID:     ${{ secrets.AMADEUS_CLIENT_ID }}
           AMADEUS_CLIENT_SECRET: ${{ secrets.AMADEUS_CLIENT_SECRET }}
           # ── SerpAPI (fallback) ──
+          RAPIDAPI_KEY:          ${{ secrets.RAPIDAPI_KEY }}
           SERPAPI_KEY:           ${{ secrets.SERPAPI_KEY }}
           # ── Telegram ──
           TELEGRAM_TOKEN:        ${{ secrets.TELEGRAM_TOKEN }}
