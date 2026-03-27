@@ -310,42 +310,50 @@ def flyscraper_search(dest, dep_str, ret_str):
             log.debug(f"FlyScraper {r.status_code} pour {dest}")
             return []
         data = r.json()
+
+        # Structure réelle : data.data.itineraries[]
+        itineraries = (
+            data.get("data", {}).get("itineraries")
+            or data.get("itineraries")
+            or []
+        )
+
         results = []
-        flights = data.get("data", data.get("flights", data.get("results", [])))
-        if isinstance(flights, dict):
-            flights = flights.get("itineraries", flights.get("offers", []))
-        for flight in flights[:10]:
+        for itin in itineraries[:10]:
             try:
-                # Essaie différentes structures JSON selon la version de l'API
-                price = (
-                    flight.get("price", {}).get("total")
-                    or flight.get("price", {}).get("amount")
-                    or flight.get("totalPrice")
-                    or flight.get("fare", {}).get("total")
-                )
-                if price is None:
+                # Prix en PRICE_UNIT_MILLI → diviser par 1000
+                price_obj = itin.get("price", {})
+                raw_amount = price_obj.get("raw") or price_obj.get("amount", "0")
+                unit = price_obj.get("unit", "")
+
+                price = float(str(raw_amount).replace(",", "."))
+                if "MILLI" in unit:
+                    price = price / 1000
+
+                # Stops : dans legs[0].stopCount
+                legs = itin.get("legs", [])
+                if not legs:
                     continue
-                price = float(str(price).replace(",","."))
-                legs  = flight.get("legs", flight.get("segments", flight.get("slices", [])))
-                stops = len(legs) - 1 if legs else 0
+                stops = legs[0].get("stopCount", len(legs[0].get("segments", [])) - 1)
+
                 if stops > MAX_STOPS:
                     continue
+
+                # Compagnie : dans legs[0].carriers.marketing[0].name
                 airline = "Diverses"
-                if legs:
-                    seg = legs[0]
-                    airline = (
-                        seg.get("airline", {}).get("name")
-                        or seg.get("operatingCarrier", {}).get("name")
-                        or seg.get("carrierCode")
-                        or "Diverses"
-                    )
+                carriers = legs[0].get("carriers", {})
+                marketing = carriers.get("marketing", [])
+                if marketing:
+                    airline = marketing[0].get("name", "Diverses")
+
                 results.append({
                     "price":   round(price, 2),
                     "stops":   stops,
                     "airline": airline,
                     "source":  "FlyScraper",
                 })
-            except (KeyError, ValueError, TypeError):
+            except (KeyError, ValueError, TypeError) as e:
+                log.debug(f"FlyScraper parse error: {e}")
                 continue
         return results
     except Exception as e:
