@@ -354,23 +354,24 @@
       <div class="divider"></div>
 
       <div class="field" style="margin-bottom:16px">
-        <label>Type de vol</label>
+        <label>Jours de départ</label>
         <div class="chip-group">
-          <span class="chip active" data-group="type" data-val="roundtrip" onclick="toggleChip(this)">Aller-retour</span>
-          <span class="chip" data-group="type" data-val="oneway" onclick="toggleChip(this)">Aller simple</span>
+          <span class="chip" data-group="days" data-val="monday" onclick="toggleChip(this)">Lun</span>
+          <span class="chip" data-group="days" data-val="tuesday" onclick="toggleChip(this)">Mar</span>
+          <span class="chip" data-group="days" data-val="wednesday" onclick="toggleChip(this)">Mer</span>
+          <span class="chip" data-group="days" data-val="thursday" onclick="toggleChip(this)">Jeu</span>
+          <span class="chip active" data-group="days" data-val="friday" onclick="toggleChip(this)">Ven</span>
+          <span class="chip active" data-group="days" data-val="saturday" onclick="toggleChip(this)">Sam</span>
+          <span class="chip active" data-group="days" data-val="sunday" onclick="toggleChip(this)">Dim</span>
         </div>
       </div>
 
       <div class="field" style="margin-bottom:16px">
-        <label>Jours de départ</label>
-        <div class="chip-group">
-          <span class="chip" data-group="days" data-val="lun" onclick="toggleChip(this)">Lun</span>
-          <span class="chip" data-group="days" data-val="mar" onclick="toggleChip(this)">Mar</span>
-          <span class="chip" data-group="days" data-val="mer" onclick="toggleChip(this)">Mer</span>
-          <span class="chip" data-group="days" data-val="jeu" onclick="toggleChip(this)">Jeu</span>
-          <span class="chip active" data-group="days" data-val="ven" onclick="toggleChip(this)">Ven</span>
-          <span class="chip active" data-group="days" data-val="sam" onclick="toggleChip(this)">Sam</span>
-          <span class="chip active" data-group="days" data-val="dim" onclick="toggleChip(this)">Dim</span>
+        <label>Escales maximum</label>
+        <div class="chip-group" id="stopsChips">
+          <span class="chip active" data-group="stops" data-val="0" onclick="toggleChip(this)">Direct uniquement</span>
+          <span class="chip" data-group="stops" data-val="1" onclick="toggleChip(this)">1 escale max</span>
+          <span class="chip" data-group="stops" data-val="2" onclick="toggleChip(this)">Peu importe</span>
         </div>
       </div>
 
@@ -503,8 +504,9 @@
   }
 
   function toggleChip(el) {
-    if (el.dataset.group === 'type') {
-      document.querySelectorAll('[data-group="type"]').forEach(c => c.classList.remove('active'));
+    const single = ['type', 'stops'];
+    if (single.includes(el.dataset.group)) {
+      document.querySelectorAll(`[data-group="${el.dataset.group}"]`).forEach(c => c.classList.remove('active'));
       el.classList.add('active');
     } else {
       el.classList.toggle('active');
@@ -523,10 +525,10 @@
       max_price:    document.getElementById('maxPrice').value,
       date_from:    document.getElementById('dateFrom').value,
       date_to:      document.getElementById('dateTo').value,
-      stay_min:     document.getElementById('stayMin').value,
-      stay_max:     document.getElementById('stayMax').value,
-      flight_type:  getChips('type')[0] || 'roundtrip',
-      travel_days:  getChips('days').join(','),
+      min_nights:   document.getElementById('stayMin').value,
+      max_nights:   document.getElementById('stayMax').value,
+      max_stops:    getChips('stops')[0] || '1',
+      days:         getChips('days').join(',') || 'any',
       destinations: document.getElementById('destinations').value.trim(),
     };
 
