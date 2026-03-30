@@ -37,6 +37,10 @@ on:
         description: "Destinations IATA"
         required: false
         default: ""
+      origin:
+        description: "Aéroports de départ (TLS,BOD,MRS,CDG,ORY)"
+        required: false
+        default: "TLS"
 
 jobs:
   search-flights:
@@ -75,6 +79,7 @@ jobs:
           MAX_STOPS:        ${{ github.event.inputs.max_stops  || vars.MAX_STOPS  || '1' }}
           DAYS:             ${{ github.event.inputs.days       || vars.DAYS       || 'any' }}
           DESTINATIONS:     ${{ github.event.inputs.destinations || vars.DESTINATIONS || '' }}
+          ORIGIN:           ${{ github.event.inputs.origin || vars.ORIGIN || 'TLS' }}
           IS_MANUAL:        ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python flight_agent.py
       - name: Sauvegarde cache
