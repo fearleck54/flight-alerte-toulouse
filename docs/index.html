@@ -578,7 +578,7 @@ async function saveParams() {
     MAX_NIGHTS:   document.getElementById('stayMax').value,
     MAX_STOPS:    stops,
     DAYS:         days,
-    DESTINATIONS: document.getElementById('destinations').value.trim(),
+    DESTINATIONS: document.getElementById('destinations').value.trim() || ' ',
     CRON_MODE:    schedKey,
   };
 
