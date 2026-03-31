@@ -2,7 +2,7 @@ name: Agent Alertes Vols Toulouse
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    - cron: "0 * * * *"  # toutes les heures, le script décide s'il tourne
   workflow_dispatch:
     inputs:
       max_price:
@@ -51,37 +51,42 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Dépendances
         run: pip install requests
+
       - name: Cache
         uses: actions/cache@v4
         with:
           path: seen_deals.json
           key: seen-deals-cache
           restore-keys: seen-deals-cache
+
       - name: Lancement
         env:
-          RAPIDAPI_KEY:     ${{ secrets.RAPIDAPI_KEY }}
-          SERPAPI_KEY:      ${{ secrets.SERPAPI_KEY }}
-          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          RAPIDAPI_KEY:    ${{ secrets.RAPIDAPI_KEY }}
+          SERPAPI_KEY:     ${{ secrets.SERPAPI_KEY }}
+          TELEGRAM_TOKEN:  ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          AGENT_ENABLED:    ${{ vars.AGENT_ENABLED || 'true' }}
-          CRON_MODE:        ${{ vars.CRON_MODE || '4xday' }}
-          MAX_PRICE:        ${{ github.event.inputs.max_price  || vars.MAX_PRICE  || '80' }}
-          DATE_FROM:        ${{ github.event.inputs.date_from  || vars.DATE_FROM  || '' }}
-          DATE_TO:          ${{ github.event.inputs.date_to    || vars.DATE_TO    || '' }}
-          MIN_NIGHTS:       ${{ github.event.inputs.min_nights || vars.MIN_NIGHTS || '2' }}
-          MAX_NIGHTS:       ${{ github.event.inputs.max_nights || vars.MAX_NIGHTS || '5' }}
-          MAX_STOPS:        ${{ github.event.inputs.max_stops  || vars.MAX_STOPS  || '1' }}
-          DAYS:             ${{ github.event.inputs.days       || vars.DAYS       || 'any' }}
-          DESTINATIONS:     ${{ github.event.inputs.destinations || vars.DESTINATIONS || '' }}
-          ORIGIN:           ${{ github.event.inputs.origin || vars.ORIGIN || 'TLS' }}
-          IS_MANUAL:        ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+          # Paramètres : inputs manuels en priorité, sinon variables GitHub
+          AGENT_ENABLED:   ${{ vars.AGENT_ENABLED || 'true' }}
+          CRON_MODE:       ${{ vars.CRON_MODE || '4xday' }}
+          MAX_PRICE:       ${{ github.event.inputs.max_price  || vars.MAX_PRICE  || '80' }}
+          DATE_FROM:       ${{ github.event.inputs.date_from  || vars.DATE_FROM  || '' }}
+          DATE_TO:         ${{ github.event.inputs.date_to    || vars.DATE_TO    || '' }}
+          MIN_NIGHTS:      ${{ github.event.inputs.min_nights || vars.MIN_NIGHTS || '2' }}
+          MAX_NIGHTS:      ${{ github.event.inputs.max_nights || vars.MAX_NIGHTS || '5' }}
+          MAX_STOPS:       ${{ github.event.inputs.max_stops  || vars.MAX_STOPS  || '1' }}
+          DAYS:            ${{ github.event.inputs.days       || vars.DAYS       || 'any' }}
+          DESTINATIONS:    ${{ github.event.inputs.destinations || vars.DESTINATIONS || '' }}
+          IS_MANUAL:       ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python flight_agent.py
+
       - name: Sauvegarde cache
         uses: actions/cache@v4
         with:
