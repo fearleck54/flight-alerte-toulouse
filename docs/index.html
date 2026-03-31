@@ -15,6 +15,7 @@
   --shadow:0 2px 12px rgba(17,18,54,0.08);--radius:12px;
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+
 nav{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
 .nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;color:var(--text);text-decoration:none}
 .nav-brand svg{width:28px;height:28px}
@@ -24,18 +25,22 @@ nav{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:
 #statusDot.ok{background:var(--success);box-shadow:0 0 0 3px rgba(0,166,152,.2)}
 #statusDot.err{background:var(--danger)}
 #statusLabel{font-size:0.75rem;color:var(--muted);font-weight:500}
+
 .hero{background:linear-gradient(135deg,#0057b8,#0770e3 55%,#00a698);padding:36px 20px 52px;text-align:center;color:#fff;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
 .hero-plane{font-size:2.2rem;margin-bottom:10px;display:block;animation:fly 3s ease-in-out infinite alternate}
 @keyframes fly{from{transform:translateX(-6px) rotate(-3deg)}to{transform:translateX(6px) rotate(3deg)}}
 .hero h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
 .hero p{font-size:0.88rem;opacity:.85}
+
 main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z-index:1}
+
 .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
 .card-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .card-header h2{font-size:0.9rem;font-weight:600;flex:1}
 .icon{width:30px;height:30px;border-radius:8px;background:var(--blue-light);display:grid;place-items:center;font-size:.95rem;flex-shrink:0}
 .card-body{padding:18px 20px}
+
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:480px){.form-grid{grid-template-columns:1fr}}
 .field{display:flex;flex-direction:column;gap:4px}
@@ -46,6 +51,7 @@ main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z
 .range-row{display:flex;align-items:center;gap:8px}
 .range-row input{flex:1}
 .range-val{font-size:.88rem;font-weight:700;color:var(--blue);min-width:48px;text-align:right}
+
 .token-row{display:flex;gap:8px;align-items:flex-end}
 .token-row .field{flex:1}
 .token-input-wrap{position:relative;display:flex}
@@ -56,6 +62,8 @@ main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z
 .token-status.checking{background:#fff8e0;color:#b07d00}
 .token-status.valid{background:#e6f9f5;color:var(--success)}
 .token-status.invalid{background:#fef0f2;color:var(--danger)}
+
+/* TOGGLE */
 .toggle-wrap{display:flex;align-items:center;gap:8px}
 .toggle-label{font-size:.78rem;font-weight:600}
 .toggle{position:relative;width:40px;height:22px}
@@ -64,14 +72,19 @@ main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z
 .toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
 .toggle input:checked + .toggle-slider{background:var(--success)}
 .toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
+
 .status-banner{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:14px;font-size:.82rem;font-weight:500;transition:all .3s}
 .status-banner.on{background:#e6f9f5;border:1.5px solid #a7f0e0;color:#007a6e}
 .status-banner.off{background:#fef0f2;border:1.5px solid #f8c4cc;color:#a02030}
 .banner-icon{font-size:1.1rem}
+
+/* CHIPS */
 .chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
 .chip{border:1.5px solid var(--border);border-radius:20px;padding:4px 13px;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;color:var(--muted);background:#fff;user-select:none}
 .chip:hover{border-color:var(--blue);color:var(--blue)}
 .chip.active{background:var(--blue-light);border-color:var(--blue);color:var(--blue);font-weight:600}
+
+/* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 20px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
 .btn-primary{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(7,112,227,.3)}
 .btn-primary:hover:not(:disabled){background:#0561c8;transform:translateY(-1px)}
@@ -86,9 +99,14 @@ main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z
 .btn-danger:hover{background:#fdd}
 .btn-sm{height:34px;padding:0 13px;font-size:.78rem}
 .actions-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+
 .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* SAVE PARAMS */
 .save-params-row{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* PROFILS */
 .profiles-list{display:flex;flex-direction:column;gap:7px}
 .profile-item{display:flex;align-items:center;gap:9px;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;background:#fff;transition:border-color .2s}
 .profile-item:hover{border-color:var(--blue-mid)}
@@ -100,42 +118,72 @@ main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z
 .save-profile-row{display:flex;gap:8px;margin-top:12px}
 .save-profile-row input{flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 11px;font-size:.85rem;font-family:'Inter',sans-serif;color:var(--text);outline:none}
 .save-profile-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(7,112,227,.12)}
+
+/* SCHEDULE */
 .schedule-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
 .sched-pill{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 13px;font-size:.78rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px}
 .sched-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--success);transition:background .3s}
 .sched-pill .dot.off{background:var(--danger)}
+
+/* LOG */
 .log-wrap{background:#0f1117;border-radius:8px;padding:12px 14px;min-height:100px;max-height:220px;overflow-y:auto;font-family:'Courier New',monospace;font-size:.75rem;line-height:1.7;color:#8b9ab8}
 .log-wrap::-webkit-scrollbar{width:4px}
 .log-wrap::-webkit-scrollbar-thumb{background:#2a2f3e;border-radius:2px}
-.log-line{display:block}.log-line.ok{color:#7ec8a0}.log-line.err{color:#f28b82}.log-line.info{color:#93c5fd}.log-line.warn{color:#fcd34d}
+.log-line{display:block}
+.log-line.ok{color:#7ec8a0}
+.log-line.err{color:#f28b82}
+.log-line.info{color:#93c5fd}
+.log-line.warn{color:#fcd34d}
 .log-empty{color:#3a4155;font-style:italic}
+
 .divider{height:1px;background:var(--border);margin:16px 0}
+
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:11px 20px;border-radius:30px;font-size:.82rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
 #toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ok{background:var(--success)}#toast.err{background:var(--danger)}#toast.warn{background:var(--warn);color:#000}
+#toast.ok{background:var(--success)}
+#toast.err{background:var(--danger)}
+#toast.warn{background:var(--warn);color:#000}
+
 footer{text-align:center;padding:18px;font-size:.72rem;color:var(--muted)}
 footer a{color:var(--blue);text-decoration:none}
 </style>
 </head>
 <body>
+
 <nav>
   <a class="nav-brand" href="#">
-    <svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="7" fill="#0770e3"/><path d="M6 18l4-8 3 5 3-3 6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="9" r="2" fill="#00a698"/></svg>
-    Flight Alerts <span class="nav-badge">Multi-villes</span>
+    <svg viewBox="0 0 28 28" fill="none">
+      <rect width="28" height="28" rx="7" fill="#0770e3"/>
+      <path d="M6 18l4-8 3 5 3-3 6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="20" cy="9" r="2" fill="#00a698"/>
+    </svg>
+    Flight Alerts
+    <span class="nav-badge">TLS</span>
   </a>
-  <div class="nav-right"><div id="statusDot"></div><span id="statusLabel">Non configuré</span></div>
+  <div class="nav-right">
+    <div id="statusDot"></div>
+    <span id="statusLabel">Non configuré</span>
+  </div>
 </nav>
+
 <div class="hero">
   <span class="hero-plane">✈️</span>
-  <h1>Alertes vols — Multi-départs</h1>
+  <h1>Alertes vols depuis Toulouse</h1>
   <p>Configure · Active · Reçois les bons plans sur Telegram</p>
 </div>
+
 <main>
+
+  <!-- TOKEN -->
   <div class="card">
-    <div class="card-header"><div class="icon">🔑</div><h2>Token GitHub</h2></div>
+    <div class="card-header">
+      <div class="icon">🔑</div>
+      <h2>Token GitHub</h2>
+    </div>
     <div class="card-body">
       <div class="token-row">
-        <div class="field"><label>Personal Access Token</label>
+        <div class="field">
+          <label>Personal Access Token</label>
           <div class="token-input-wrap">
             <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" oninput="onTokenInput()">
             <button class="eye-btn" onclick="toggleEye()">👁</button>
@@ -146,25 +194,18 @@ footer a{color:var(--blue);text-decoration:none}
       <span class="token-status idle" id="tokenStatus">● Token non renseigné</span>
     </div>
   </div>
-  <div class="card">
-    <div class="card-header"><div class="icon">🛫</div><h2>Aéroport de départ</h2></div>
-    <div class="card-body">
-      <div class="chip-group">
-        <span class="chip active" data-group="origin" data-val="TLS" onclick="toggleOrigin(this)">✈ Toulouse</span>
-        <span class="chip" data-group="origin" data-val="BOD" onclick="toggleOrigin(this)">✈ Bordeaux</span>
-        <span class="chip" data-group="origin" data-val="MRS" onclick="toggleOrigin(this)">✈ Marseille</span>
-        <span class="chip" data-group="origin" data-val="CDG" onclick="toggleOrigin(this)">✈ Paris CDG</span>
-        <span class="chip" data-group="origin" data-val="ORY" onclick="toggleOrigin(this)">✈ Paris Orly</span>
-      </div>
-      <p style="font-size:.7rem;color:var(--muted);margin-top:8px;line-height:1.5" id="originInfo">1 aéroport sélectionné — fenêtre de dates complète</p>
-    </div>
-  </div>
+
+  <!-- AGENT ON/OFF -->
   <div class="card">
     <div class="card-header">
-      <div class="icon">⚡</div><h2>Agent automatique</h2>
+      <div class="icon">⚡</div>
+      <h2>Agent automatique</h2>
       <div class="toggle-wrap">
         <span class="toggle-label" id="toggleLabel" style="color:var(--muted)">OFF</span>
-        <label class="toggle"><input type="checkbox" id="agentToggle" onchange="toggleAgent()"><span class="toggle-slider"></span></label>
+        <label class="toggle">
+          <input type="checkbox" id="agentToggle" onchange="toggleAgent()">
+          <span class="toggle-slider"></span>
+        </label>
       </div>
     </div>
     <div class="card-body">
@@ -172,8 +213,10 @@ footer a{color:var(--blue);text-decoration:none}
         <span class="banner-icon">⏸</span>
         <span id="bannerText">Agent <strong>désactivé</strong>. Lance des recherches manuellement.</span>
       </div>
+
       <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:14px">
-        <div class="field" style="flex:1"><label>Fréquence</label>
+        <div class="field" style="flex:1">
+          <label>Fréquence</label>
           <select id="scheduleSelect" onchange="renderPills()">
             <option value="hourly">Toutes les heures</option>
             <option value="every2h">Toutes les 2h</option>
@@ -183,27 +226,51 @@ footer a{color:var(--blue);text-decoration:none}
           </select>
         </div>
       </div>
+
       <div class="schedule-pills" id="schedulePills"></div>
       <p style="font-size:.72rem;color:var(--muted);line-height:1.6">En mode ON, l'agent tourne selon la fréquence et envoie une notif Telegram si une offre passe sous ton seuil.</p>
     </div>
   </div>
+
+  <!-- CRITÈRES -->
   <div class="card">
-    <div class="card-header"><div class="icon">🎯</div><h2>Critères de recherche</h2></div>
+    <div class="card-header">
+      <div class="icon">🎯</div>
+      <h2>Critères de recherche</h2>
+    </div>
     <div class="card-body">
-      <div class="field" style="margin-bottom:16px"><label>Prix maximum</label>
+
+      <div class="field" style="margin-bottom:16px">
+        <label>Prix maximum</label>
         <div class="range-row">
           <input type="range" id="maxPrice" min="30" max="300" value="80" step="5" oninput="document.getElementById('priceVal').textContent=this.value+'€'">
           <span class="range-val" id="priceVal">80€</span>
         </div>
       </div>
+
       <div class="form-grid" style="margin-bottom:16px">
-        <div class="field"><label>Date départ min</label><input type="date" id="dateFrom"></div>
-        <div class="field"><label>Date départ max</label><input type="date" id="dateTo"></div>
-        <div class="field"><label>Nuits min</label><input type="number" id="stayMin" value="2" min="1" max="30"></div>
-        <div class="field"><label>Nuits max</label><input type="number" id="stayMax" value="5" min="1" max="30"></div>
+        <div class="field">
+          <label>Date départ min</label>
+          <input type="date" id="dateFrom">
+        </div>
+        <div class="field">
+          <label>Date départ max</label>
+          <input type="date" id="dateTo">
+        </div>
+        <div class="field">
+          <label>Nuits min</label>
+          <input type="number" id="stayMin" value="2" min="1" max="30">
+        </div>
+        <div class="field">
+          <label>Nuits max</label>
+          <input type="number" id="stayMax" value="5" min="1" max="30">
+        </div>
       </div>
+
       <div class="divider"></div>
-      <div class="field" style="margin-bottom:14px"><label>Jours de départ</label>
+
+      <div class="field" style="margin-bottom:14px">
+        <label>Jours de départ</label>
         <div class="chip-group">
           <span class="chip active" data-group="days" data-val="any" onclick="toggleChip(this)">Tous</span>
           <span class="chip" data-group="days" data-val="monday" onclick="toggleChip(this)">Lun</span>
@@ -215,18 +282,29 @@ footer a{color:var(--blue);text-decoration:none}
           <span class="chip" data-group="days" data-val="sunday" onclick="toggleChip(this)">Dim</span>
         </div>
       </div>
-      <div class="field" style="margin-bottom:14px"><label>Escales maximum</label>
+
+      <div class="field" style="margin-bottom:14px">
+        <label>Escales maximum</label>
         <div class="chip-group">
           <span class="chip active" data-group="stops" data-val="0" onclick="toggleChip(this)">Direct</span>
           <span class="chip" data-group="stops" data-val="1" onclick="toggleChip(this)">1 escale max</span>
           <span class="chip" data-group="stops" data-val="2" onclick="toggleChip(this)">Peu importe</span>
         </div>
       </div>
-      <div class="field"><label>Destinations (vide = toutes)</label><input type="text" id="destinations" placeholder="BCN, MAD, LIS, CDG…"></div>
+
+      <div class="field" style="margin-bottom:0">
+        <label>Destinations (vide = toutes)</label>
+        <input type="text" id="destinations" placeholder="BCN, MAD, LIS, CDG…">
+      </div>
+
+      <!-- SAUVEGARDER PARAMÈTRES AUTO -->
       <div class="save-params-row">
-        <button class="btn btn-success" style="flex:1" id="saveParamsBtn" onclick="saveParams()" disabled>💾 Sauvegarder comme paramètres automatiques</button>
+        <button class="btn btn-success" style="flex:1" id="saveParamsBtn" onclick="saveParams()" disabled>
+          💾 Sauvegarder comme paramètres automatiques
+        </button>
       </div>
       <p style="font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.5">Ces paramètres seront utilisés par les runs automatiques.</p>
+
       <div class="divider"></div>
       <p style="font-size:.8rem;font-weight:600;margin-bottom:8px">📋 Profils de recherche</p>
       <div class="profiles-list" id="profilesList"></div>
@@ -236,199 +314,517 @@ footer a{color:var(--blue);text-decoration:none}
       </div>
     </div>
   </div>
+
+  <!-- LANCEMENT MANUEL -->
   <div class="card">
-    <div class="card-header"><div class="icon">🚀</div><h2>Lancer une recherche</h2></div>
+    <div class="card-header">
+      <div class="icon">🚀</div>
+      <h2>Lancer une recherche</h2>
+    </div>
     <div class="card-body">
       <div class="actions-row">
         <button class="btn btn-primary" id="launchBtn" onclick="launchSearch()" disabled>
-          <span id="btnSpinner" class="spinner"></span><span id="btnText">Lancer maintenant</span>
+          <span id="btnSpinner" class="spinner"></span>
+          <span id="btnText">Lancer maintenant</span>
         </button>
         <button class="btn btn-ghost" onclick="clearLog()">Effacer</button>
       </div>
       <div class="field" style="margin-bottom:8px"><label>Logs</label></div>
-      <div class="log-wrap" id="logBox"><span class="log-empty">Lance une recherche pour voir les résultats ici.</span></div>
+      <div class="log-wrap" id="logBox">
+        <span class="log-empty">Lance une recherche pour voir les résultats ici.</span>
+      </div>
     </div>
   </div>
-</main>
-<footer>Flight Alerts · <a href="https://github.com/fearleck54/flight-alerte-toulouse" target="_blank">fearleck54/flight-alerte-toulouse</a></footer>
-<div id="toast"></div>
-<script>
-const GITHUB_OWNER='fearleck54',GITHUB_REPO='flight-alerte-toulouse',WORKFLOW_ID='flight_alert.yml';
-const SCHEDULES={hourly:{pills:['0h','4h','8h','12h','16h','20h'],label:'Toutes les heures'},every2h:{pills:['0h','2h','4h','6h','8h','10h','12h','14h','16h','18h','20h','22h'],label:'Toutes les 2h'},every3h:{pills:['0h','3h','6h','9h','12h','15h','18h','21h'],label:'Toutes les 3h'},'4xday':{pills:['08h00','14h00','20h00','00h00'],label:'4× par jour'},'3xday':{pills:['08h00','14h00','21h00'],label:'3× par jour'}};
 
-window.addEventListener('DOMContentLoaded',()=>{
-  const saved=localStorage.getItem('gh_token');
-  if(saved){document.getElementById('ghToken').value=saved;validateToken(saved);}
-  const today=new Date();
-  const p7=new Date(today);p7.setDate(today.getDate()+7);
-  const p90=new Date(today);p90.setDate(today.getDate()+90);
-  document.getElementById('dateFrom').value=fmt(p7);
-  document.getElementById('dateTo').value=fmt(p90);
-  const savedSched=localStorage.getItem('schedule_key')||'4xday';
-  document.getElementById('scheduleSelect').value=savedSched;
-  renderPills();renderProfiles();
-  applyToggleUI(localStorage.getItem('agent_enabled')==='true');
-  updateOriginInfo();
+</main>
+
+<footer>Flight Alerts TLS · <a href="https://github.com/fearleck54/flight-alerte-toulouse" target="_blank">fearleck54/flight-alerte-toulouse</a></footer>
+<div id="toast"></div>
+
+<script>
+const GITHUB_OWNER = 'fearleck54';
+const GITHUB_REPO  = 'flight-alerte-toulouse';
+const WORKFLOW_ID  = 'flight_alert.yml';
+
+const SCHEDULES = {
+  hourly:  { pills: Array.from({length:24},(_,i)=>i+'h').filter((_,i)=>i%4===0), label:'Toutes les heures' },
+  every2h: { pills: ['0h','2h','4h','6h','8h','10h','12h','14h','16h','18h','20h','22h'], label:'Toutes les 2h' },
+  every3h: { pills: ['0h','3h','6h','9h','12h','15h','18h','21h'], label:'Toutes les 3h' },
+  '4xday': { pills: ['08h00','14h00','20h00','00h00'], label:'4× par jour' },
+  '3xday': { pills: ['08h00','14h00','21h00'], label:'3× par jour' },
+};
+
+// ── INIT
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('gh_token');
+  if (saved) { document.getElementById('ghToken').value = saved; validateToken(saved); }
+
+  const today = new Date();
+  const p7  = new Date(today); p7.setDate(today.getDate()+7);
+  const p90 = new Date(today); p90.setDate(today.getDate()+90);
+  document.getElementById('dateFrom').value = fmt(p7);
+  document.getElementById('dateTo').value   = fmt(p90);
+
+  const savedSched = localStorage.getItem('schedule_key') || '4xday';
+  document.getElementById('scheduleSelect').value = savedSched;
+  renderPills();
+  renderProfiles();
+
+  const localEnabled = localStorage.getItem('agent_enabled') === 'true';
+  applyToggleUI(localEnabled);
 });
 
-const fmt=d=>d.toISOString().split('T')[0];
-let tokenValid=false,tokenTimer=null;
+const fmt = d => d.toISOString().split('T')[0];
 
-function onTokenInput(){clearTimeout(tokenTimer);setTokenStatus('idle','● Saisie en cours…');tokenValid=false;updateBtns();const val=document.getElementById('ghToken').value.trim();if(val.length>10){setTokenStatus('checking','⏳ Vérification…');tokenTimer=setTimeout(()=>validateToken(val),900);}}
+// ── TOKEN
+let tokenValid = false, tokenTimer = null;
 
-async function validateToken(token){
-  try{
-    const r=await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}});
-    if(r.ok){tokenValid=true;setTokenStatus('valid','✓ Token valide');document.getElementById('statusDot').className='ok';document.getElementById('statusLabel').textContent='Prêt';fetchAgentState(token);}
-    else{tokenValid=false;setTokenStatus('invalid','✗ Token invalide');document.getElementById('statusDot').className='err';document.getElementById('statusLabel').textContent='Erreur';}
-  }catch{setTokenStatus('invalid','✗ Erreur réseau');}
+function onTokenInput() {
+  clearTimeout(tokenTimer);
+  setTokenStatus('idle','● Saisie en cours…');
+  tokenValid = false; updateBtns();
+  const val = document.getElementById('ghToken').value.trim();
+  if (val.length > 10) {
+    setTokenStatus('checking','⏳ Vérification…');
+    tokenTimer = setTimeout(() => validateToken(val), 900);
+  }
+}
+
+async function validateToken(token) {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+      headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' }
+    });
+    if (r.ok) {
+      tokenValid = true;
+      setTokenStatus('valid','✓ Token valide');
+      document.getElementById('statusDot').className = 'ok';
+      document.getElementById('statusLabel').textContent = 'Prêt';
+      fetchAgentState(token);
+    } else {
+      tokenValid = false;
+      setTokenStatus('invalid','✗ Token invalide');
+      document.getElementById('statusDot').className = 'err';
+      document.getElementById('statusLabel').textContent = 'Erreur';
+    }
+  } catch { setTokenStatus('invalid','✗ Erreur réseau'); }
   updateBtns();
 }
 
-function saveToken(){const val=document.getElementById('ghToken').value.trim();if(!val){showToast('Entre un token','err');return;}localStorage.setItem('gh_token',val);validateToken(val);showToast('Token sauvegardé ✓','ok');}
-function toggleEye(){const i=document.getElementById('ghToken');i.type=i.type==='password'?'text':'password';}
-function setTokenStatus(cls,txt){const el=document.getElementById('tokenStatus');el.className=`token-status ${cls}`;el.textContent=txt;}
-function updateBtns(){document.getElementById('launchBtn').disabled=!tokenValid;document.getElementById('saveParamsBtn').disabled=!tokenValid;}
-
-async function getVar(token,name){try{const r=await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables/${name}`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}});if(r.ok)return(await r.json()).value;}catch{}return null;}
-
-async function setVar(token,name,value){
-  const headers={Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json'};
-  const base=`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables`;
-  const body=JSON.stringify({name,value:String(value)});
-  let r=await fetch(`${base}/${name}`,{method:'PATCH',headers,body});
-  if(r.status===404)r=await fetch(base,{method:'POST',headers,body});
-  return r.ok||r.status===201||r.status===204;
+function saveToken() {
+  const val = document.getElementById('ghToken').value.trim();
+  if (!val) { showToast('Entre un token','err'); return; }
+  localStorage.setItem('gh_token', val);
+  validateToken(val);
+  showToast('Token sauvegardé ✓','ok');
 }
 
-async function fetchAgentState(token){
-  const enabled=await getVar(token,'AGENT_ENABLED');
-  const isOn=enabled!=='false';applyToggleUI(isOn);localStorage.setItem('agent_enabled',isOn);
-  const sched=await getVar(token,'CRON_MODE');
-  if(sched&&SCHEDULES[sched]){document.getElementById('scheduleSelect').value=sched;localStorage.setItem('schedule_key',sched);renderPills();}
-  const originVar=await getVar(token,'ORIGIN');
-  if(originVar){
-    document.querySelectorAll('[data-group="origin"]').forEach(c=>c.classList.remove('active'));
-    originVar.split(',').forEach(v=>{const chip=document.querySelector(`[data-group="origin"][data-val="${v.trim()}"]`);if(chip)chip.classList.add('active');});
+function toggleEye() {
+  const i = document.getElementById('ghToken');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+function setTokenStatus(cls, txt) {
+  const el = document.getElementById('tokenStatus');
+  el.className = `token-status ${cls}`; el.textContent = txt;
+}
+
+function updateBtns() {
+  document.getElementById('launchBtn').disabled = !tokenValid;
+  document.getElementById('saveParamsBtn').disabled = !tokenValid;
+}
+
+// ── VARIABLES GITHUB
+async function getVar(token, name) {
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables/${name}`,
+      { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } }
+    );
+    if (r.ok) return (await r.json()).value;
+  } catch {}
+  return null;
+}
+
+async function setVar(token, name, value) {
+  const headers = { Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' };
+  const base = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables`;
+  const body = JSON.stringify({ name, value: String(value) });
+  let r = await fetch(`${base}/${name}`, { method:'PATCH', headers, body });
+  if (r.status === 404) r = await fetch(base, { method:'POST', headers, body });
+  return r.ok || r.status === 201 || r.status === 204;
+}
+
+// ── AGENT STATE
+async function fetchAgentState(token) {
+  const enabled = await getVar(token, 'AGENT_ENABLED');
+  const isOn = enabled !== 'false';
+  applyToggleUI(isOn);
+  localStorage.setItem('agent_enabled', isOn);
+
+  const sched = await getVar(token, 'CRON_MODE');
+  if (sched && SCHEDULES[sched]) {
+    document.getElementById('scheduleSelect').value = sched;
+    localStorage.setItem('schedule_key', sched);
+    renderPills();
+  }
+
+  // Charger les paramètres sauvegardés
+  const params = {
+    MAX_PRICE: 'maxPrice', DATE_FROM: 'dateFrom', DATE_TO: 'dateTo',
+    MIN_NIGHTS: 'stayMin', MAX_NIGHTS: 'stayMax',
+    DESTINATIONS: 'destinations',
+  };
+  for (const [varName, fieldId] of Object.entries(params)) {
+    const val = await getVar(token, varName);
+    if (val !== null) {
+      document.getElementById(fieldId).value = val;
+      if (fieldId === 'maxPrice') document.getElementById('priceVal').textContent = val + '€';
+    }
+  }
+
+  // Chips stops
+  const stops = await getVar(token, 'MAX_STOPS');
+  if (stops !== null) {
+    document.querySelectorAll('[data-group="stops"]').forEach(c => c.classList.remove('active'));
+    const chip = document.querySelector(`[data-group="stops"][data-val="${stops}"]`);
+    if (chip) chip.classList.add('active');
+  }
+
+  // Chips origin
+  const originVar = await getVar(token, 'ORIGIN');
+  if (originVar) {
+    document.querySelectorAll('[data-group="origin"]').forEach(c => c.classList.remove('active'));
+    originVar.split(',').forEach(v => {
+      const chip = document.querySelector(`[data-group="origin"][data-val="${v.trim()}"]`);
+      if (chip) chip.classList.add('active');
+    });
     updateOriginInfo();
   }
-  const fields={MAX_PRICE:'maxPrice',DATE_FROM:'dateFrom',DATE_TO:'dateTo',MIN_NIGHTS:'stayMin',MAX_NIGHTS:'stayMax',DESTINATIONS:'destinations'};
-  for(const[varName,fieldId]of Object.entries(fields)){const val=await getVar(token,varName);if(val!==null){document.getElementById(fieldId).value=val;if(fieldId==='maxPrice')document.getElementById('priceVal').textContent=val+'€';}}
-  const stops=await getVar(token,'MAX_STOPS');
-  if(stops!==null){document.querySelectorAll('[data-group="stops"]').forEach(c=>c.classList.remove('active'));const chip=document.querySelector(`[data-group="stops"][data-val="${stops}"]`);if(chip)chip.classList.add('active');}
-  const days=await getVar(token,'DAYS');
-  if(days!==null){document.querySelectorAll('[data-group="days"]').forEach(c=>c.classList.remove('active'));if(days==='any'||days===''){document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');}else{days.split(',').forEach(v=>{const chip=document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);if(chip)chip.classList.add('active');});}}
+
+  // Chips days
+  const days = await getVar(token, 'DAYS');
+  if (days !== null) {
+    document.querySelectorAll('[data-group="days"]').forEach(c => c.classList.remove('active'));
+    if (days === 'any' || days === '') {
+      document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
+    } else {
+      days.split(',').forEach(v => {
+        const chip = document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);
+        if (chip) chip.classList.add('active');
+      });
+    }
+  }
 }
 
-async function toggleAgent(){
-  const token=localStorage.getItem('gh_token')||document.getElementById('ghToken').value.trim();
-  if(!token||!tokenValid){showToast('Token requis','err');document.getElementById('agentToggle').checked=!document.getElementById('agentToggle').checked;return;}
-  const enabled=document.getElementById('agentToggle').checked;
+async function toggleAgent() {
+  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+  if (!token || !tokenValid) {
+    showToast('Token requis','err');
+    document.getElementById('agentToggle').checked = !document.getElementById('agentToggle').checked;
+    return;
+  }
+  const enabled = document.getElementById('agentToggle').checked;
   applyToggleUI(enabled);
-  const schedKey=document.getElementById('scheduleSelect').value;
-  const ok1=await setVar(token,'AGENT_ENABLED',String(enabled));
-  const ok2=await setVar(token,'CRON_MODE',schedKey);
-  if(ok1&&ok2){localStorage.setItem('agent_enabled',enabled);localStorage.setItem('schedule_key',schedKey);showToast(enabled?'✅ Agent activé':'⏸ Agent désactivé',enabled?'ok':'warn');}
-  else{showToast('Erreur de mise à jour','err');document.getElementById('agentToggle').checked=!enabled;applyToggleUI(!enabled);}
+
+  const schedKey = document.getElementById('scheduleSelect').value;
+  const ok1 = await setVar(token, 'AGENT_ENABLED', String(enabled));
+  const ok2 = await setVar(token, 'CRON_MODE', schedKey);
+
+  if (ok1 && ok2) {
+    localStorage.setItem('agent_enabled', enabled);
+    localStorage.setItem('schedule_key', schedKey);
+    showToast(enabled ? '✅ Agent activé' : '⏸ Agent désactivé', enabled ? 'ok' : 'warn');
+  } else {
+    showToast('Erreur de mise à jour','err');
+    document.getElementById('agentToggle').checked = !enabled;
+    applyToggleUI(!enabled);
+  }
 }
 
-function applyToggleUI(enabled){
-  document.getElementById('agentToggle').checked=enabled;
-  document.getElementById('toggleLabel').textContent=enabled?'ON':'OFF';
-  document.getElementById('toggleLabel').style.color=enabled?'var(--success)':'var(--muted)';
-  const banner=document.getElementById('agentBanner');
-  banner.className=`status-banner ${enabled?'on':'off'}`;
-  document.querySelector('#agentBanner .banner-icon').textContent=enabled?'✅':'⏸';
-  document.getElementById('bannerText').innerHTML=enabled?'Agent <strong>activé</strong>. Tu recevras une notif Telegram si une offre est trouvée.':'Agent <strong>désactivé</strong>. Lance des recherches manuellement.';
-  document.querySelectorAll('#schedulePills .dot').forEach(d=>{d.className='dot'+(enabled?'':' off');});
+function applyToggleUI(enabled) {
+  document.getElementById('agentToggle').checked = enabled;
+  document.getElementById('toggleLabel').textContent = enabled ? 'ON' : 'OFF';
+  document.getElementById('toggleLabel').style.color = enabled ? 'var(--success)' : 'var(--muted)';
+  const banner = document.getElementById('agentBanner');
+  banner.className = `status-banner ${enabled ? 'on' : 'off'}`;
+  document.querySelector('#agentBanner .banner-icon').textContent = enabled ? '✅' : '⏸';
+  document.getElementById('bannerText').innerHTML = enabled
+    ? 'Agent <strong>activé</strong>. Tu recevras une notif Telegram si une offre est trouvée.'
+    : 'Agent <strong>désactivé</strong>. Lance des recherches manuellement.';
+  document.querySelectorAll('#schedulePills .dot').forEach(d => {
+    d.className = 'dot' + (enabled ? '' : ' off');
+  });
 }
 
-async function saveParams(){
-  const token=localStorage.getItem('gh_token')||document.getElementById('ghToken').value.trim();
-  if(!token||!tokenValid){showToast('Token requis','err');return;}
-  const btn=document.getElementById('saveParamsBtn');
-  btn.textContent='⏳ Sauvegarde…';btn.disabled=true;
-  const vars={
+// ── SAVE PARAMS
+async function saveParams() {
+  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+  if (!token || !tokenValid) { showToast('Token requis','err'); return; }
+
+  const btn = document.getElementById('saveParamsBtn');
+  btn.textContent = '⏳ Sauvegarde…'; btn.disabled = true;
+
+  const schedKey = document.getElementById('scheduleSelect').value;
+  const days = getDays();
+  const stops = getChips('stops')[0] || '1';
+
+  const vars = {
     ORIGIN:       getOrigins().join(','),
     MAX_PRICE:    document.getElementById('maxPrice').value,
     DATE_FROM:    document.getElementById('dateFrom').value,
     DATE_TO:      document.getElementById('dateTo').value,
     MIN_NIGHTS:   document.getElementById('stayMin').value,
     MAX_NIGHTS:   document.getElementById('stayMax').value,
-    MAX_STOPS:    getChips('stops')[0]||'1',
-    DAYS:         getDays(),
+    MAX_STOPS:    stops,
+    DAYS:         days,
     DESTINATIONS: document.getElementById('destinations').value.trim(),
-    CRON_MODE:    document.getElementById('scheduleSelect').value,
+    CRON_MODE:    schedKey,
   };
-  let allOk=true;
-  for(const[name,value]of Object.entries(vars)){const ok=await setVar(token,name,value);if(!ok){allOk=false;break;}}
-  if(allOk){showToast('Paramètres sauvegardés ✓','ok');addLog('ok','✓ Paramètres automatiques mis à jour');}
-  else{showToast('Erreur sauvegarde','err');}
-  btn.textContent='💾 Sauvegarder comme paramètres automatiques';btn.disabled=false;
+
+  let allOk = true;
+  for (const [name, value] of Object.entries(vars)) {
+    const ok = await setVar(token, name, value);
+    if (!ok) { allOk = false; break; }
+  }
+
+  if (allOk) {
+    showToast('Paramètres sauvegardés ✓','ok');
+    addLog('ok','✓ Paramètres automatiques mis à jour sur GitHub');
+  } else {
+    showToast('Erreur lors de la sauvegarde','err');
+  }
+
+  btn.textContent = '💾 Sauvegarder comme paramètres automatiques';
+  btn.disabled = false;
 }
 
-function renderPills(){const key=document.getElementById('scheduleSelect').value;const sched=SCHEDULES[key]||SCHEDULES['4xday'];const enabled=document.getElementById('agentToggle').checked;const dotClass=enabled?'dot':'dot off';document.getElementById('schedulePills').innerHTML=sched.pills.map(h=>`<div class="sched-pill"><span class="${dotClass}"></span>${h}</div>`).join('');}
-
-function toggleOrigin(el){el.classList.toggle('active');if([...document.querySelectorAll('[data-group="origin"].active')].length===0){el.classList.add('active');}updateOriginInfo();}
-function getOrigins(){return[...document.querySelectorAll('[data-group="origin"].active')].map(c=>c.dataset.val);}
-function updateOriginInfo(){const n=getOrigins().length;const info=document.getElementById('originInfo');if(n===1){info.textContent='1 aéroport sélectionné — fenêtre de dates complète';info.style.color='var(--muted)';}else{info.textContent=`${n} aéroports — fenêtre divisée par ${n} automatiquement`;info.style.color='var(--warn)';}}
-
-function toggleChip(el){const group=el.dataset.group;if(group==='stops'){document.querySelectorAll('[data-group="stops"]').forEach(c=>c.classList.remove('active'));el.classList.add('active');}else if(group==='days'){if(el.dataset.val==='any'){document.querySelectorAll('[data-group="days"]').forEach(c=>c.classList.remove('active'));el.classList.add('active');}else{document.querySelector('[data-group="days"][data-val="any"]').classList.remove('active');el.classList.toggle('active');if(!document.querySelector('[data-group="days"].active')){document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');}}}}
-function getChips(group){return[...document.querySelectorAll(`[data-group="${group}"].active`)].map(c=>c.dataset.val);}
-function getDays(){const active=getChips('days');if(active.includes('any')||active.length===0)return'any';return active.join(',');}
-
-function getProfiles(){try{return JSON.parse(localStorage.getItem('flight_profiles')||'[]');}catch{return[];}}
-function saveProfiles(p){localStorage.setItem('flight_profiles',JSON.stringify(p));}
-function getCriteria(){return{origins:getOrigins().join(','),max_price:document.getElementById('maxPrice').value,date_from:document.getElementById('dateFrom').value,date_to:document.getElementById('dateTo').value,min_nights:document.getElementById('stayMin').value,max_nights:document.getElementById('stayMax').value,max_stops:getChips('stops')[0]||'1',days:getDays(),destinations:document.getElementById('destinations').value.trim()};}
-
-function saveProfile(){const name=document.getElementById('profileName').value.trim();if(!name){showToast('Donne un nom','err');return;}const profiles=getProfiles();profiles.push({id:Date.now(),name,criteria:getCriteria()});saveProfiles(profiles);document.getElementById('profileName').value='';renderProfiles();showToast(`"${name}" sauvegardé ✓`,'ok');}
-
-function loadProfile(id){
-  const p=getProfiles().find(p=>p.id===id);if(!p)return;const c=p.criteria;
-  document.getElementById('maxPrice').value=c.max_price;document.getElementById('priceVal').textContent=c.max_price+'€';
-  document.getElementById('dateFrom').value=c.date_from;document.getElementById('dateTo').value=c.date_to;
-  document.getElementById('stayMin').value=c.min_nights;document.getElementById('stayMax').value=c.max_nights;
-  document.getElementById('destinations').value=c.destinations||'';
-  document.querySelectorAll('[data-group="stops"]').forEach(ch=>ch.classList.remove('active'));
-  const sc=document.querySelector(`[data-group="stops"][data-val="${c.max_stops}"]`);if(sc)sc.classList.add('active');
-  document.querySelectorAll('[data-group="days"]').forEach(ch=>ch.classList.remove('active'));
-  if(c.days==='any'){document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');}
-  else{(c.days||'').split(',').forEach(v=>{const chip=document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);if(chip)chip.classList.add('active');});}
-  if(c.origins){document.querySelectorAll('[data-group="origin"]').forEach(ch=>ch.classList.remove('active'));c.origins.split(',').forEach(v=>{const chip=document.querySelector(`[data-group="origin"][data-val="${v.trim()}"]`);if(chip)chip.classList.add('active');});updateOriginInfo();}
-  showToast(`"${p.name}" chargé ✓`,'ok');
+// ── ORIGINS
+function toggleOrigin(el) {
+  el.classList.toggle('active');
+  if ([...document.querySelectorAll('[data-group="origin"].active')].length === 0) {
+    el.classList.add('active');
+  }
+  updateOriginInfo();
 }
 
-function deleteProfile(id){saveProfiles(getProfiles().filter(p=>p.id!==id));renderProfiles();showToast('Profil supprimé','warn');}
-
-function renderProfiles(){
-  const list=document.getElementById('profilesList');const profiles=getProfiles();
-  if(!profiles.length){list.innerHTML='<div class="no-profiles">Aucun profil. Configure et clique "Sauver".</div>';return;}
-  const dayFmt=s=>(s||'tous').replace(/monday/g,'Lun').replace(/tuesday/g,'Mar').replace(/wednesday/g,'Mer').replace(/thursday/g,'Jeu').replace(/friday/g,'Ven').replace(/saturday/g,'Sam').replace(/sunday/g,'Dim').replace(/any/g,'Tous');
-  list.innerHTML=profiles.map(p=>{const c=p.criteria;const summary=`${c.max_price}€ · ${c.min_nights}-${c.max_nights}n · ${dayFmt(c.days)}${c.destinations?' · '+c.destinations:''}`;return`<div class="profile-item"><div class="profile-info"><div class="profile-name">${p.name}</div><div class="profile-summary">${summary}</div></div><div class="profile-actions"><button class="btn btn-save btn-sm" onclick="loadProfile(${p.id})">Charger</button><button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">✕</button></div></div>`;}).join('');
+function getOrigins() {
+  return [...document.querySelectorAll('[data-group="origin"].active')].map(c => c.dataset.val);
 }
 
-async function launchSearch(){
-  const token=localStorage.getItem('gh_token')||document.getElementById('ghToken').value.trim();
-  if(!token){showToast('Token manquant','err');return;}
-  const inputs={origin:getOrigins().join(','),max_price:document.getElementById('maxPrice').value,date_from:document.getElementById('dateFrom').value,date_to:document.getElementById('dateTo').value,min_nights:document.getElementById('stayMin').value,max_nights:document.getElementById('stayMax').value,max_stops:getChips('stops')[0]||'1',days:getDays(),destinations:document.getElementById('destinations').value.trim()};
+function updateOriginInfo() {
+  const n = getOrigins().length;
+  const info = document.getElementById('originInfo');
+  if (n === 1) {
+    info.textContent = '1 aéroport sélectionné — fenêtre de dates complète';
+    info.style.color = 'var(--muted)';
+  } else {
+    info.textContent = `${n} aéroports — fenêtre de dates divisée par ${n} automatiquement`;
+    info.style.color = 'var(--warn)';
+  }
+}
+
+// ── SCHEDULE PILLS
+function renderPills() {
+  const key = document.getElementById('scheduleSelect').value;
+  const sched = SCHEDULES[key] || SCHEDULES['4xday'];
+  const enabled = document.getElementById('agentToggle').checked;
+  const dotClass = enabled ? 'dot' : 'dot off';
+  document.getElementById('schedulePills').innerHTML = sched.pills.map(h =>
+    `<div class="sched-pill"><span class="${dotClass}"></span>${h}</div>`
+  ).join('');
+}
+
+// ── CHIPS
+function toggleChip(el) {
+  const group = el.dataset.group;
+  if (group === 'stops') {
+    document.querySelectorAll('[data-group="stops"]').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+  } else if (group === 'days') {
+    if (el.dataset.val === 'any') {
+      document.querySelectorAll('[data-group="days"]').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+    } else {
+      document.querySelector('[data-group="days"][data-val="any"]').classList.remove('active');
+      el.classList.toggle('active');
+      if (!document.querySelector('[data-group="days"].active')) {
+        document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
+      }
+    }
+  }
+}
+
+function getChips(group) {
+  return [...document.querySelectorAll(`[data-group="${group}"].active`)].map(c => c.dataset.val);
+}
+
+function getDays() {
+  const active = getChips('days');
+  if (active.includes('any') || active.length === 0) return 'any';
+  return active.join(',');
+}
+
+// ── PROFILS
+function getProfiles() {
+  try { return JSON.parse(localStorage.getItem('flight_profiles') || '[]'); } catch { return []; }
+}
+
+function saveProfiles(p) { localStorage.setItem('flight_profiles', JSON.stringify(p)); }
+
+function getCriteria() {
+  return {
+    max_price:  document.getElementById('maxPrice').value,
+    date_from:  document.getElementById('dateFrom').value,
+    date_to:    document.getElementById('dateTo').value,
+    min_nights: document.getElementById('stayMin').value,
+    max_nights: document.getElementById('stayMax').value,
+    max_stops:  getChips('stops')[0] || '1',
+    days:       getDays(),
+    destinations: document.getElementById('destinations').value.trim(),
+  };
+}
+
+function saveProfile() {
+  const name = document.getElementById('profileName').value.trim();
+  if (!name) { showToast('Donne un nom au profil','err'); return; }
+  const profiles = getProfiles();
+  profiles.push({ id: Date.now(), name, criteria: getCriteria() });
+  saveProfiles(profiles);
+  document.getElementById('profileName').value = '';
+  renderProfiles();
+  showToast(`Profil "${name}" sauvegardé ✓`,'ok');
+}
+
+function loadProfile(id) {
+  const p = getProfiles().find(p => p.id === id);
+  if (!p) return;
+  const c = p.criteria;
+  document.getElementById('maxPrice').value = c.max_price;
+  document.getElementById('priceVal').textContent = c.max_price + '€';
+  document.getElementById('dateFrom').value  = c.date_from;
+  document.getElementById('dateTo').value    = c.date_to;
+  document.getElementById('stayMin').value   = c.min_nights;
+  document.getElementById('stayMax').value   = c.max_nights;
+  document.getElementById('destinations').value = c.destinations || '';
+  document.querySelectorAll('[data-group="stops"]').forEach(ch => ch.classList.remove('active'));
+  const sc = document.querySelector(`[data-group="stops"][data-val="${c.max_stops}"]`);
+  if (sc) sc.classList.add('active');
+  document.querySelectorAll('[data-group="days"]').forEach(ch => ch.classList.remove('active'));
+  if (c.days === 'any') {
+    document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
+  } else {
+    (c.days||'').split(',').forEach(v => {
+      const chip = document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);
+      if (chip) chip.classList.add('active');
+    });
+  }
+  showToast(`Profil "${p.name}" chargé ✓`,'ok');
+}
+
+function deleteProfile(id) {
+  saveProfiles(getProfiles().filter(p => p.id !== id));
+  renderProfiles();
+  showToast('Profil supprimé','warn');
+}
+
+function renderProfiles() {
+  const list = document.getElementById('profilesList');
+  const profiles = getProfiles();
+  if (!profiles.length) {
+    list.innerHTML = '<div class="no-profiles">Aucun profil. Configure et clique "Sauver".</div>';
+    return;
+  }
+  const dayFmt = s => (s||'tous').replace(/monday/g,'Lun').replace(/tuesday/g,'Mar').replace(/wednesday/g,'Mer').replace(/thursday/g,'Jeu').replace(/friday/g,'Ven').replace(/saturday/g,'Sam').replace(/sunday/g,'Dim').replace(/any/g,'Tous');
+  list.innerHTML = profiles.map(p => {
+    const c = p.criteria;
+    const summary = `${c.max_price}€ · ${c.min_nights}-${c.max_nights}n · ${dayFmt(c.days)}${c.destinations?' · '+c.destinations:''}`;
+    return `<div class="profile-item">
+      <div class="profile-info">
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-summary">${summary}</div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-save btn-sm" onclick="loadProfile(${p.id})">Charger</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── LAUNCH
+async function launchSearch() {
+  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
+  if (!token) { showToast('Token manquant','err'); return; }
+  const inputs = {
+    origin:       getOrigins().join(','),
+    max_price:    document.getElementById('maxPrice').value,
+    date_from:    document.getElementById('dateFrom').value,
+    date_to:      document.getElementById('dateTo').value,
+    min_nights:   document.getElementById('stayMin').value,
+    max_nights:   document.getElementById('stayMax').value,
+    max_stops:    getChips('stops')[0] || '1',
+    days:         getDays(),
+    destinations: document.getElementById('destinations').value.trim(),
+  };
   setLoading(true);
   addLog('info',`▶ Lancement · ${new Date().toLocaleTimeString('fr-FR')}`);
-  addLog('info',`  Origines: ${inputs.origin} · ${inputs.max_price}€ · ${inputs.date_from}→${inputs.date_to}`);
-  addLog('info',`  ${inputs.min_nights}-${inputs.max_nights}n · ${inputs.days} · escales:${inputs.max_stops}`);
-  try{
-    const r=await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,{method:'POST',headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({ref:'main',inputs})});
-    if(r.status===204){addLog('ok','✓ Workflow déclenché !');showToast('Recherche lancée ✓','ok');setTimeout(()=>pollWorkflow(token),5000);}
-    else{const err=await r.json().catch(()=>({}));addLog('err',`✗ Erreur ${r.status} : ${err.message||''}`);showToast(`Erreur ${r.status}`,'err');}
-  }catch(e){addLog('err',`✗ ${e.message}`);}
+  addLog('info',`  ${inputs.max_price}€ · ${inputs.date_from} → ${inputs.date_to} · ${inputs.min_nights}-${inputs.max_nights}n · ${inputs.days} · escales: ${inputs.max_stops}`);
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
+      { method:'POST', headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' },
+        body: JSON.stringify({ ref:'main', inputs }) }
+    );
+    if (r.status === 204) {
+      addLog('ok','✓ Workflow déclenché !');
+      showToast('Recherche lancée ✓','ok');
+      setTimeout(() => pollWorkflow(token), 5000);
+    } else {
+      const err = await r.json().catch(()=>({}));
+      addLog('err',`✗ Erreur ${r.status} : ${err.message||''}`);
+      showToast(`Erreur ${r.status}`,'err');
+    }
+  } catch(e) {
+    addLog('err',`✗ ${e.message}`);
+  }
   setLoading(false);
 }
 
-async function pollWorkflow(token){try{const r=await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runs?per_page=1`,{headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json'}});if(!r.ok)return;const run=(await r.json()).workflow_runs?.[0];if(run){addLog('info',`  Run #${run.run_number} · ${run.status}`);addLog('info',`  🔗 ${run.html_url}`);}}catch{}}
+async function pollWorkflow(token) {
+  try {
+    const r = await fetch(
+      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runs?per_page=1`,
+      { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } }
+    );
+    if (!r.ok) return;
+    const run = (await r.json()).workflow_runs?.[0];
+    if (run) {
+      addLog('info',`  Run #${run.run_number} · ${run.status}`);
+      addLog('info',`  🔗 ${run.html_url}`);
+    }
+  } catch {}
+}
 
-function addLog(type,msg){const box=document.getElementById('logBox');box.querySelector('.log-empty')?.remove();const l=document.createElement('span');l.className=`log-line ${type}`;l.textContent=msg;box.appendChild(l);box.scrollTop=box.scrollHeight;}
-function clearLog(){document.getElementById('logBox').innerHTML='<span class="log-empty">Logs effacés.</span>';}
-function setLoading(on){document.getElementById('btnSpinner').style.display=on?'block':'none';document.getElementById('btnText').textContent=on?'Recherche en cours…':'Lancer maintenant';document.getElementById('launchBtn').disabled=on;}
-function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=type;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+// ── HELPERS
+function addLog(type, msg) {
+  const box = document.getElementById('logBox');
+  box.querySelector('.log-empty')?.remove();
+  const l = document.createElement('span');
+  l.className = `log-line ${type}`; l.textContent = msg;
+  box.appendChild(l); box.scrollTop = box.scrollHeight;
+}
+function clearLog() { document.getElementById('logBox').innerHTML = '<span class="log-empty">Logs effacés.</span>'; }
+function setLoading(on) {
+  document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
+  document.getElementById('btnText').textContent = on ? 'Recherche en cours…' : 'Lancer maintenant';
+  document.getElementById('launchBtn').disabled = on;
+}
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = type; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 </script>
 </body>
 </html>
