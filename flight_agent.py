@@ -7,9 +7,16 @@ Sources: FlyScraper (RapidAPI) + Ryanair API + SerpAPI fallback
 import os, json, time, hashlib, logging, re, random
 import requests
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
+
+# Fuseau France : gère automatiquement été (UTC+2) et hiver (UTC+1)
+PARIS_TZ = ZoneInfo("Europe/Paris")
+
+def paris_now():
+    return datetime.now(PARIS_TZ)
 
 # ── CONFIG ─────────────────────────────────────────────────────────────────
 TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_TOKEN", "")
@@ -26,6 +33,9 @@ DATE_TO     = os.environ.get("DATE_TO",   "")
 MIN_NIGHTS  = int(os.environ.get("MIN_NIGHTS", "2"))
 MAX_NIGHTS  = int(os.environ.get("MAX_NIGHTS", "5"))
 MAX_STOPS   = int(os.environ.get("MAX_STOPS",  "1"))
+# Budget d'appels à l'API payante (RapidAPI/FlyScraper) par run.
+# Une fois atteint, on bascule sur Ryanair (gratuit) / SerpAPI.
+MAX_API_CALLS = int(os.environ.get("MAX_API_CALLS", "300"))
 DAYS_RAW    = os.environ.get("DAYS", "any")
 DEST_RAW    = os.environ.get("DESTINATIONS", "")
 ORIGIN_RAW  = os.environ.get("ORIGIN", "TLS")
@@ -188,11 +198,14 @@ def deal_id(orig, dest, dep, ret, price):
 
 _flyscraper_errors = 0
 _flyscraper_ok     = 0
+_rapidapi_calls    = 0   # appels réellement envoyés à RapidAPI ce run
 
 def flyscraper_search(origin, dest, dep_str, ret_str):
-    global _flyscraper_errors, _flyscraper_ok
+    global _flyscraper_errors, _flyscraper_ok, _rapidapi_calls
     if not RAPIDAPI_KEY:
         return [], "no_key"
+
+    _rapidapi_calls += 1
 
     url = "https://flyScraper.p.rapidapi.com/flights/search"
     headers = {
@@ -346,14 +359,17 @@ def search_all(origin, dest, dep_str, ret_str):
     log_parts = []
     flyscraper_status = "skipped"
 
-    # 1. FlyScraper (prioritaire — toutes compagnies)
+    # 1. FlyScraper (prioritaire — toutes compagnies), tant qu'il reste du budget
     if RAPIDAPI_KEY:
-        fs_results, flyscraper_status = flyscraper_search(origin, dest, dep_str, ret_str)
-        if fs_results:
-            results += fs_results
-            log_parts.append(f"FS:{len(fs_results)}")
+        if _rapidapi_calls < MAX_API_CALLS:
+            fs_results, flyscraper_status = flyscraper_search(origin, dest, dep_str, ret_str)
+            if fs_results:
+                results += fs_results
+                log_parts.append(f"FS:{len(fs_results)}")
+        else:
+            flyscraper_status = "budget"  # budget d'appels épuisé
 
-    # 2. Ryanair (complément ou fallback)
+    # 2. Ryanair (complément ou fallback gratuit)
     ry = ryanair_search(origin, dest, dep_str, ret_str)
     if ry:
         # Dédoublonnage : éviter les doublons Ryanair déjà dans FlyScraper
@@ -363,8 +379,10 @@ def search_all(origin, dest, dep_str, ret_str):
             results += new_ry
             log_parts.append(f"RY:{len(new_ry)}")
 
-    # 3. SerpAPI si pas de FlyScraper
-    if SERPAPI_KEY and not RAPIDAPI_KEY:
+    # 3. SerpAPI en secours : si aucune offre et que FlyScraper est absent
+    #    ou indisponible (pas de clé, quota, erreur, budget épuisé).
+    flyscraper_unavailable = flyscraper_status in ("no_key", "quota", "error", "budget", "skipped")
+    if SERPAPI_KEY and not results and flyscraper_unavailable:
         sp = serpapi_search(origin, dest, dep_str, ret_str)
         if sp:
             results += sp
@@ -395,21 +413,35 @@ def send_telegram(message):
         log.error(f"Telegram: {e}")
 
 def skyscanner_link(origin, dest, dep_str, ret_str):
-    dep = dep_str.replace("-","")
-    ret = ret_str.replace("-","")
+    # Skyscanner attend les dates au format YYMMDD (6 chiffres)
+    dep = dep_str[2:].replace("-","")
+    ret = ret_str[2:].replace("-","")
     return f"https://www.skyscanner.fr/transport/vols/{origin.lower()}/{dest.lower()}/{dep}/{ret}/"
+
+def ryanair_link(origin, dest, dep_str, ret_str):
+    return (
+        "https://www.ryanair.com/fr/fr/trip/flights/select"
+        f"?adults=1&teens=0&children=0&infants=0&isConnectedFlight=false&isReturn=true"
+        f"&dateOut={dep_str}&dateIn={ret_str}"
+        f"&originIata={origin}&destinationIata={dest}"
+    )
 
 def fmt_deal(origin, dest, dep, ret, o):
     stops = "Direct ✅" if o["stops"] == 0 else f"{o['stops']} escale(s)"
     orig_label = airport_label(origin)
     dest_label = airport_label(dest)
-    link = skyscanner_link(origin, dest, dep, ret)
+    if o["source"] == "Ryanair":
+        link = ryanair_link(origin, dest, dep, ret)
+        link_label = "Réserver sur Ryanair"
+    else:
+        link = skyscanner_link(origin, dest, dep, ret)
+        link_label = "Voir sur Skyscanner"
     return (
         f"✈️ <b>{orig_label} → {dest_label}</b>\n"
         f"📅 {dep} → {ret}\n"
         f"💶 <b>{o['price']:.0f}€</b> A/R · {stops}\n"
         f"🏢 {o['airline']} · via {o['source']}\n"
-        f"🔗 <a href='{link}'>Voir sur Skyscanner</a>"
+        f"🔗 <a href='{link}'>{link_label}</a>"
     )
 
 # ══════════════════════════════════════════════════════════════════════════
@@ -418,7 +450,7 @@ def fmt_deal(origin, dest, dep, ret, o):
 
 def main():
     print("="*56)
-    print(f"Agent vols — {datetime.utcnow().strftime('%d/%m/%Y %H:%M')} UTC")
+    print(f"Agent vols — {paris_now().strftime('%d/%m/%Y %H:%M')} (heure FR)")
     print(f"Origines: {', '.join(ORIGINS)} | Seuil: {MAX_PRICE}€")
     print(f"Séjour: {MIN_NIGHTS}–{MAX_NIGHTS}j | Escales max: {MAX_STOPS}")
     print("="*56)
@@ -430,8 +462,7 @@ def main():
 
     # Vérification fréquence (runs auto seulement)
     if not IS_MANUAL:
-        current_hour = datetime.utcnow().hour
-        fr_hour = (current_hour + 2) % 24
+        fr_hour = paris_now().hour
         allowed_hours = {
             "hourly":  list(range(24)),
             "every2h": [0,2,4,6,8,10,12,14,16,18,20,22],
@@ -452,7 +483,6 @@ def main():
     new_seen = set()
     all_deals = []  # (origin, dest, dep, ret, offer)
     flyscraper_had_errors = False
-    rapidapi_calls = 0
 
     dates = build_date_range(nb_origins=len(ORIGINS))
     log.info(f"{len(dates)} dates · {len(ORIGINS)} origine(s)")
@@ -469,7 +499,6 @@ def main():
                     ret_str  = ret_date.strftime("%Y-%m-%d")
 
                     offers, fs_status = search_all(origin, dest, dep_str, ret_str)
-                    if RAPIDAPI_KEY: rapidapi_calls += 1
                     if fs_status in ("error","quota"): flyscraper_had_errors = True
 
                     # Garder uniquement la meilleure offre par destination
@@ -488,7 +517,8 @@ def main():
 
     log.info(f"{len(all_deals)} nouvelle(s) offre(s) sous {MAX_PRICE}€")
     if RAPIDAPI_KEY:
-        log.info(f"Quota RapidAPI utilisé ce run: ~{rapidapi_calls} requêtes")
+        extra = " (budget atteint — bascule Ryanair/SerpAPI)" if _rapidapi_calls >= MAX_API_CALLS else ""
+        log.info(f"Appels RapidAPI ce run: {_rapidapi_calls}/{MAX_API_CALLS}{extra}")
 
     if all_deals:
         origins_str = " · ".join(airport_label(o) for o in ORIGINS)
@@ -508,7 +538,7 @@ def main():
 
     elif not IS_MANUAL:
         # Notif quotidienne même si rien trouvé (une fois par jour à 8h)
-        fr_hour = (datetime.utcnow().hour + 2) % 24
+        fr_hour = paris_now().hour
         if fr_hour == 8:
             origins_str = " · ".join(airport_label(o) for o in ORIGINS)
             send_telegram(

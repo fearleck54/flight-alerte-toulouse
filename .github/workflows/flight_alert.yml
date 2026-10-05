@@ -83,6 +83,7 @@ jobs:
           MIN_NIGHTS:      ${{ github.event.inputs.min_nights || vars.MIN_NIGHTS || '2' }}
           MAX_NIGHTS:      ${{ github.event.inputs.max_nights || vars.MAX_NIGHTS || '5' }}
           MAX_STOPS:       ${{ github.event.inputs.max_stops  || vars.MAX_STOPS  || '1' }}
+          MAX_API_CALLS:   ${{ vars.MAX_API_CALLS || '300' }}
           DAYS:            ${{ github.event.inputs.days       || vars.DAYS       || 'any' }}
           DESTINATIONS:    ${{ github.event.inputs.destinations || vars.DESTINATIONS || '' }}
           IS_MANUAL:       ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
