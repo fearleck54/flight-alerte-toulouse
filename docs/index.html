@@ -2,828 +2,1640 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flight Alerts · Toulouse</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Alertes vols · Toulouse</title>
+<meta name="description" content="Configure tes alertes de bons plans vols depuis Toulouse et reçois-les sur Telegram.">
+<meta name="theme-color" content="#F6F1EC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121119" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23B9452D'/%3E%3Cpath fill='%23fff' d='M26 20v-2l-9-5.6V7a1.6 1.6 0 0 0-3.2 0v5.4L5 18v2l8.8-2.8V22l-2.2 1.7V25l3.9-1.1 3.9 1.1v-1.3L17.2 22v-4.8z'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* ── THÈME ─────────────────────────────────────────────────────────────── */
 :root{
-  --blue:#0770e3;--blue-light:#e8f2ff;--blue-mid:#b2d0f5;
-  --teal:#00a698;--bg:#f5f6f8;--white:#fff;
-  --text:#111236;--muted:#68697f;--border:#dde1e7;
-  --success:#00a698;--danger:#d1435b;--warn:#f59e0b;
-  --shadow:0 2px 12px rgba(17,18,54,0.08);--radius:12px;
+  color-scheme:light;
+  --bg:#F6F1EC; --bg-glow:#F4D9CC;
+  --surface:#FFFFFF; --surface-2:#FBF8F5; --surface-3:#F1EBE5;
+  --ink:#1E1A24; --ink-2:#3D3744; --muted:#6F6876;
+  --line:#E8DFD7; --line-strong:#D5C9BE;
+  --brick:#B9452D; --brick-hover:#A23A24; --brick-soft:#F8E3DA; --brick-ink:#8E3320; --on-brick:#FFFFFF;
+  --sky:#2E5BC9; --sky-soft:#E4ECFB;
+  --ok:#1C7A52; --ok-soft:#DCF1E5;
+  --warn:#8F5C0E; --warn-soft:#FBEFD6;
+  --danger:#B92F45; --danger-soft:#FBE2E6;
+  --pass-1:#2A2140; --pass-2:#4B2A3D; --pass-ink:#FBF4EE; --pass-muted:#CDBDC6; --pass-line:rgba(255,255,255,.18); --pass-accent:#FF9F7F;
+  --shadow-sm:0 1px 2px rgba(40,22,18,.05),0 2px 8px -4px rgba(40,22,18,.08);
+  --shadow:0 12px 32px -14px rgba(40,22,18,.28);
+  --r:14px; --r-lg:22px;
+  --font:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
 }
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#121119; --bg-glow:#2C1A1E;
+    --surface:#1B1A24; --surface-2:#211F2B; --surface-3:#2A2836;
+    --ink:#F3EEEA; --ink-2:#D8D1D6; --muted:#A49EAB;
+    --line:#2E2C3A; --line-strong:#3D3A4C;
+    --brick:#F08466; --brick-hover:#F59B80; --brick-soft:#3B2520; --brick-ink:#FFB59F; --on-brick:#24110B;
+    --sky:#90AEF5; --sky-soft:#1E2944;
+    --ok:#5CCB95; --ok-soft:#163126;
+    --warn:#F0BA5F; --warn-soft:#352812;
+    --danger:#F37F93; --danger-soft:#3B1C24;
+    --pass-1:#2C2445; --pass-2:#512C41;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+    --shadow:0 12px 32px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121119; --bg-glow:#2C1A1E;
+  --surface:#1B1A24; --surface-2:#211F2B; --surface-3:#2A2836;
+  --ink:#F3EEEA; --ink-2:#D8D1D6; --muted:#A49EAB;
+  --line:#2E2C3A; --line-strong:#3D3A4C;
+  --brick:#F08466; --brick-hover:#F59B80; --brick-soft:#3B2520; --brick-ink:#FFB59F; --on-brick:#24110B;
+  --sky:#90AEF5; --sky-soft:#1E2944;
+  --ok:#5CCB95; --ok-soft:#163126;
+  --warn:#F0BA5F; --warn-soft:#352812;
+  --danger:#F37F93; --danger-soft:#3B1C24;
+  --pass-1:#2C2445; --pass-2:#512C41;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
+  --shadow:0 12px 32px -14px rgba(0,0,0,.6);
+}
 
-nav{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;color:var(--text);text-decoration:none}
-.nav-brand svg{width:28px;height:28px}
-.nav-badge{background:var(--blue-light);color:var(--blue);font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:20px}
-.nav-right{display:flex;align-items:center;gap:8px}
-#statusDot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:background .3s}
-#statusDot.ok{background:var(--success);box-shadow:0 0 0 3px rgba(0,166,152,.2)}
-#statusDot.err{background:var(--danger)}
-#statusLabel{font-size:0.75rem;color:var(--muted);font-weight:500}
-
-.hero{background:linear-gradient(135deg,#0057b8,#0770e3 55%,#00a698);padding:36px 20px 52px;text-align:center;color:#fff;position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23fff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");pointer-events:none}
-.hero-plane{font-size:2.2rem;margin-bottom:10px;display:block;animation:fly 3s ease-in-out infinite alternate}
-@keyframes fly{from{transform:translateX(-6px) rotate(-3deg)}to{transform:translateX(6px) rotate(3deg)}}
-.hero h1{font-size:1.6rem;font-weight:700;margin-bottom:4px}
-.hero p{font-size:0.88rem;opacity:.85}
-
-main{max-width:720px;margin:-26px auto 0;padding:0 16px 60px;position:relative;z-index:1}
-
-.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
-.card-header{padding:16px 20px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.card-header h2{font-size:0.9rem;font-weight:600;flex:1}
-.icon{width:30px;height:30px;border-radius:8px;background:var(--blue-light);display:grid;place-items:center;font-size:.95rem;flex-shrink:0}
-.card-body{padding:18px 20px}
-
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-@media(max-width:480px){.form-grid{grid-template-columns:1fr}}
-.field{display:flex;flex-direction:column;gap:4px}
-.field label{font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.field input,.field select{height:42px;border:1.5px solid var(--border);border-radius:8px;padding:0 11px;font-size:.88rem;font-family:'Inter',sans-serif;color:var(--text);background:#fff;outline:none;transition:border-color .2s,box-shadow .2s}
-.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(7,112,227,.12)}
-.field input[type="range"]{height:auto;border:none;padding:8px 0;accent-color:var(--blue);box-shadow:none}
-.range-row{display:flex;align-items:center;gap:8px}
-.range-row input{flex:1}
-.range-val{font-size:.88rem;font-weight:700;color:var(--blue);min-width:48px;text-align:right}
-
-.token-row{display:flex;gap:8px;align-items:flex-end}
-.token-row .field{flex:1}
-.token-input-wrap{position:relative;display:flex}
-.token-input-wrap input{width:100%;padding-right:38px}
-.eye-btn{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.95rem;padding:4px}
-.token-status{display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:500;padding:3px 10px;border-radius:20px;margin-top:5px;transition:all .2s}
-.token-status.idle{background:#f0f1f3;color:var(--muted)}
-.token-status.checking{background:#fff8e0;color:#b07d00}
-.token-status.valid{background:#e6f9f5;color:var(--success)}
-.token-status.invalid{background:#fef0f2;color:var(--danger)}
-
-/* TOGGLE */
-.toggle-wrap{display:flex;align-items:center;gap:8px}
-.toggle-label{font-size:.78rem;font-weight:600}
-.toggle{position:relative;width:40px;height:22px}
-.toggle input{opacity:0;width:0;height:0}
-.toggle-slider{position:absolute;inset:0;background:#ccc;border-radius:22px;cursor:pointer;transition:.3s}
-.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-.toggle input:checked + .toggle-slider{background:var(--success)}
-.toggle input:checked + .toggle-slider::before{transform:translateX(18px)}
-
-.status-banner{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:8px;margin-bottom:14px;font-size:.82rem;font-weight:500;transition:all .3s}
-.status-banner.on{background:#e6f9f5;border:1.5px solid #a7f0e0;color:#007a6e}
-.status-banner.off{background:#fef0f2;border:1.5px solid #f8c4cc;color:#a02030}
-.banner-icon{font-size:1.1rem}
-
-/* CHIPS */
-.chip-group{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
-.chip{border:1.5px solid var(--border);border-radius:20px;padding:4px 13px;font-size:.78rem;font-weight:500;cursor:pointer;transition:all .15s;color:var(--muted);background:#fff;user-select:none}
-.chip:hover{border-color:var(--blue);color:var(--blue)}
-.chip.active{background:var(--blue-light);border-color:var(--blue);color:var(--blue);font-weight:600}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:42px;padding:0 20px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
-.btn-primary{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(7,112,227,.3)}
-.btn-primary:hover:not(:disabled){background:#0561c8;transform:translateY(-1px)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}
-.btn-ghost:hover{background:var(--border)}
-.btn-save{background:var(--blue-light);color:var(--blue);border:1.5px solid var(--blue-mid);min-width:86px}
-.btn-save:hover{background:var(--blue-mid)}
-.btn-success{background:#e6f9f5;color:var(--success);border:1.5px solid #a7f0e0}
-.btn-success:hover{background:#c8f0e8}
-.btn-danger{background:#fef0f2;color:var(--danger);border:1.5px solid #f8c4cc}
-.btn-danger:hover{background:#fdd}
-.btn-sm{height:34px;padding:0 13px;font-size:.78rem}
-.actions-row{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
-
-.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+/* ── BASE ──────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:76px}
+body{margin:0;font-family:var(--font);font-size:15px;line-height:1.5;color:var(--ink);background:var(--bg);
+  -webkit-font-smoothing:antialiased;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+body::before{content:'';position:fixed;inset:0 0 auto 0;height:440px;pointer-events:none;z-index:-1;
+  background:radial-gradient(70% 100% at 50% 0%,var(--bg-glow),transparent 72%)}
+button{font:inherit;color:inherit}
+a{color:inherit}
+code{font-family:var(--mono);font-size:.9em}
+:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.35}}
+@keyframes glide{from{transform:translate(-62%,-50%) rotate(90deg)}to{transform:translate(-38%,-50%) rotate(90deg)}}
 
-/* SAVE PARAMS */
-.save-params-row{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+/* ── EN-TÊTE ───────────────────────────────────────────────────────────── */
+.topbar{position:sticky;top:0;z-index:50;border-bottom:1px solid var(--line);
+  background:var(--bg);background:color-mix(in srgb,var(--bg) 82%,transparent);
+  -webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px)}
+.topbar-in{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:800;font-size:15.5px;letter-spacing:-.01em;line-height:1.15}
+.brand small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0}
+.brand-logo{width:36px;height:36px;border-radius:11px;background:var(--brick);color:var(--on-brick);display:grid;place-items:center;box-shadow:0 6px 14px -6px var(--brick)}
+.brand-logo .i{width:20px;height:20px}
+.conn{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);
+  background:var(--surface);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
+.conn[data-state="ok"] .conn-dot{background:var(--ok);box-shadow:0 0 0 3px var(--ok-soft)}
+.conn[data-state="checking"] .conn-dot{background:var(--warn);animation:pulse 1s infinite}
+.conn[data-state="err"] .conn-dot{background:var(--danger)}
 
-/* PROFILS */
-.profiles-list{display:flex;flex-direction:column;gap:7px}
-.profile-item{display:flex;align-items:center;gap:9px;border:1.5px solid var(--border);border-radius:8px;padding:9px 13px;background:#fff;transition:border-color .2s}
-.profile-item:hover{border-color:var(--blue-mid)}
-.profile-info{flex:1}
-.profile-name{font-size:.85rem;font-weight:600}
-.profile-summary{font-size:.72rem;color:var(--muted);margin-top:2px}
-.profile-actions{display:flex;gap:6px}
-.no-profiles{font-size:.8rem;color:var(--muted);font-style:italic;text-align:center;padding:14px 0}
-.save-profile-row{display:flex;gap:8px;margin-top:12px}
-.save-profile-row input{flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 11px;font-size:.85rem;font-family:'Inter',sans-serif;color:var(--text);outline:none}
-.save-profile-row input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(7,112,227,.12)}
+/* ── HERO ──────────────────────────────────────────────────────────────── */
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.hero{padding:28px 2px 20px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brick-ink)}
+.eyebrow .i{width:15px;height:15px;transform:rotate(45deg)}
+.hero h1{margin:10px 0 8px;font-size:clamp(30px,7.4vw,42px);line-height:1.06;letter-spacing:-.03em;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--brick);background:linear-gradient(transparent 72%,var(--brick-soft) 72%);padding:0 2px}
+.hero p{margin:0;color:var(--muted);font-size:15.5px;max-width:54ch;font-weight:500}
 
-/* SCHEDULE */
-.schedule-pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
-.sched-pill{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 13px;font-size:.78rem;font-weight:500;color:var(--muted);display:flex;align-items:center;gap:6px}
-.sched-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--success);transition:background .3s}
-.sched-pill .dot.off{background:var(--danger)}
+/* ── CARTE D'EMBARQUEMENT ──────────────────────────────────────────────── */
+.pass{margin:4px 0 22px;filter:drop-shadow(0 20px 26px rgba(42,33,64,.28))}
+.pass-top,.pass-bottom{color:var(--pass-ink);background:linear-gradient(100deg,var(--pass-1),var(--pass-2))}
+.pass-top{border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 22px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;
+  background:radial-gradient(90% 160% at 100% 0%,rgba(255,150,115,.26),transparent 60%),linear-gradient(100deg,var(--pass-1),var(--pass-2));
+  -webkit-mask:radial-gradient(circle 13px at 0 100%,#0000 96%,#000) left/51% 100% no-repeat,radial-gradient(circle 13px at 100% 100%,#0000 96%,#000) right/51% 100% no-repeat;
+          mask:radial-gradient(circle 13px at 0 100%,#0000 96%,#000) left/51% 100% no-repeat,radial-gradient(circle 13px at 100% 100%,#0000 96%,#000) right/51% 100% no-repeat}
+.pass-bottom{border-radius:0 0 var(--r-lg) var(--r-lg);border-top:2px dashed var(--pass-line);
+  -webkit-mask:radial-gradient(circle 13px at 0 0,#0000 96%,#000) left/51% 100% no-repeat,radial-gradient(circle 13px at 100% 0,#0000 96%,#000) right/51% 100% no-repeat;
+          mask:radial-gradient(circle 13px at 0 0,#0000 96%,#000) left/51% 100% no-repeat,radial-gradient(circle 13px at 100% 0,#0000 96%,#000) right/51% 100% no-repeat}
+.pass-col{min-width:0}
+.pass-col.right{text-align:right}
+.pass-label{display:block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--pass-muted)}
+.pass-code{display:flex;align-items:baseline;gap:6px;margin:6px 0 4px;font-family:var(--mono);font-weight:800;font-size:clamp(32px,9vw,46px);line-height:1;letter-spacing:.01em}
+.pass-col.right .pass-code{justify-content:flex-end}
+.pass-badge{font-family:var(--font);font-size:12px;font-weight:800;letter-spacing:0;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.16);align-self:center}
+.pass-sub{display:block;font-size:13px;font-weight:600;color:var(--pass-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pass-route{position:relative;width:clamp(48px,18vw,150px);height:28px}
+.route-line{position:absolute;left:0;right:0;top:50%;border-top:2px dashed rgba(255,255,255,.32)}
+.route-plane{position:absolute;left:50%;top:50%;width:24px;height:24px;color:var(--pass-accent);transform:translate(-50%,-50%) rotate(90deg);animation:glide 3.2s ease-in-out infinite alternate;filter:drop-shadow(0 0 6px rgba(255,159,127,.5))}
+.pass-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px 16px;padding:16px 22px}
+.pass-grid .wide{grid-column:span 2}
+.pass-grid strong{display:block;margin-top:4px;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pass-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 22px 16px;border-top:1px solid var(--pass-line);font-size:12.5px;font-weight:600;color:var(--pass-muted)}
+.barcode{flex:none;width:118px;height:26px;opacity:.55;background:repeating-linear-gradient(90deg,var(--pass-ink) 0 2px,transparent 2px 4px,var(--pass-ink) 4px 5px,transparent 5px 8px,var(--pass-ink) 8px 11px,transparent 11px 13px)}
+@media (max-width:560px){
+  .pass-top{padding:18px 18px 16px}
+  .pass-grid{grid-template-columns:repeat(3,minmax(0,1fr));padding:16px 18px}
+  .pass-grid .wide{grid-column:span 2}
+  .pass-foot{padding:12px 18px 16px}
+  .barcode{width:64px}
+}
+.callout{display:flex;gap:10px;align-items:flex-start;margin:-8px 0 18px;padding:12px 14px;border-radius:var(--r);font-size:13.5px;font-weight:600}
+.callout[data-tone="warn"]{background:var(--warn-soft);color:var(--warn)}
+.callout .i{margin-top:1px}
 
-/* LOG */
-.log-wrap{background:#0f1117;border-radius:8px;padding:12px 14px;min-height:100px;max-height:220px;overflow-y:auto;font-family:'Courier New',monospace;font-size:.75rem;line-height:1.7;color:#8b9ab8}
-.log-wrap::-webkit-scrollbar{width:4px}
-.log-wrap::-webkit-scrollbar-thumb{background:#2a2f3e;border-radius:2px}
-.log-line{display:block}
-.log-line.ok{color:#7ec8a0}
-.log-line.err{color:#f28b82}
-.log-line.info{color:#93c5fd}
-.log-line.warn{color:#fcd34d}
-.log-empty{color:#3a4155;font-style:italic}
+/* ── CARTES ────────────────────────────────────────────────────────────── */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.card-head-main{flex:1;min-width:0}
+.step{flex:none;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-family:var(--mono);font-size:13.5px;font-weight:800;background:var(--brick-soft);color:var(--brick-ink)}
+.step .i{width:17px;height:17px}
+.card-title{margin:0;font-size:17.5px;font-weight:800;letter-spacing:-.015em;line-height:1.3}
+.card-sub{margin:2px 0 0;font-size:13.5px;font-weight:500;color:var(--muted)}
+.sub-title{margin:22px 0 10px;font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--ink-2)}
+.field-label{display:block;margin:0 0 6px 2px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.hint,.msg{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;font-size:13px;font-weight:600;color:var(--muted)}
+.hint .i,.msg .i{width:16px;height:16px;margin-top:1px}
+[data-tone="warn"]{color:var(--warn)}
+[data-tone="err"]{color:var(--danger)}
+[data-tone="ok"]{color:var(--ok)}
+.sep{height:1px;background:var(--line);margin:22px 0 0}
 
-.divider{height:1px;background:var(--border);margin:16px 0}
+/* Champs */
+.input{width:100%;height:48px;padding:0 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);
+  font:inherit;font-size:15px;font-weight:600;color:var(--ink);transition:border-color .15s,box-shadow .15s;min-width:0}
+.input::placeholder{color:var(--muted);font-weight:500}
+.input:focus{outline:0;border-color:var(--sky);box-shadow:0 0 0 4px var(--sky-soft)}
+.input[aria-invalid="true"]{border-color:var(--danger)}
+input[type="date"].input{-webkit-appearance:none;appearance:none;display:block}
+input[type="date"]::-webkit-date-and-time-value{text-align:left}
+.field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:380px){.field-grid{grid-template-columns:minmax(0,1fr)}}
 
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--text);color:#fff;padding:11px 20px;border-radius:30px;font-size:.82rem;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .35s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
-#toast.show{transform:translateX(-50%) translateY(0)}
-#toast.ok{background:var(--success)}
-#toast.err{background:var(--danger)}
-#toast.warn{background:var(--warn);color:#000}
+/* Aéroports de départ */
+.opt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:8px}
+.opt{position:relative;text-align:left;padding:12px 14px;border-radius:var(--r);border:1.5px solid var(--line);background:var(--surface-2);cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.opt:hover{border-color:var(--line-strong)}
+.opt:active{transform:scale(.97)}
+.opt-code{display:block;font-family:var(--mono);font-size:19px;font-weight:800;letter-spacing:.02em}
+.opt-name{display:block;margin-top:2px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opt-check{position:absolute;top:10px;right:10px;width:20px;height:20px;padding:4px;border-radius:50%;background:var(--brick);color:var(--on-brick);stroke-width:3.2;opacity:0;transform:scale(.5);transition:.15s}
+.opt[aria-pressed="true"]{border-color:var(--brick);background:var(--brick-soft)}
+.opt[aria-pressed="true"] .opt-code{color:var(--brick-ink)}
+.opt[aria-pressed="true"] .opt-check{opacity:1;transform:none}
 
-footer{text-align:center;padding:18px;font-size:.72rem;color:var(--muted)}
-footer a{color:var(--blue);text-decoration:none}
+/* Puces */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.quick{margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);
+  font-size:13.5px;font-weight:700;color:var(--ink-2);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.chip:hover{border-color:var(--line-strong)}
+.chip[aria-pressed="true"]{background:var(--brick-soft);border-color:var(--brick);color:var(--brick-ink)}
+.chip-count{font-family:var(--mono);font-size:11.5px;opacity:.65}
+
+/* Destinations */
+.combo{position:relative}
+.tagbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:52px;padding:7px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface-2);cursor:text;transition:border-color .15s,box-shadow .15s}
+.tagbox:focus-within{border-color:var(--sky);box-shadow:0 0 0 4px var(--sky-soft)}
+.tags{display:contents}
+.tag{display:inline-flex;align-items:center;gap:6px;max-width:100%;height:34px;padding:0 3px 0 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);font-size:13.5px;font-weight:600}
+.tag b{font-family:var(--mono);font-size:12.5px;font-weight:800;color:var(--brick-ink)}
+.tag span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag-x{flex:none;width:28px;height:28px;border:0;border-radius:50%;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.tag-x:hover{background:var(--danger-soft);color:var(--danger)}
+.tag-x .i{width:14px;height:14px}
+.tag-input{flex:1;min-width:140px;height:36px;padding:0 6px;border:0;outline:0;background:transparent;font:inherit;font-size:15px;font-weight:600;color:var(--ink)}
+.tag-input::placeholder{color:var(--muted);font-weight:500}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;max-height:300px;overflow:auto;margin:0;padding:6px;list-style:none;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.sug li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+.sug li b{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.sug li[aria-selected="true"]{background:var(--brick-soft)}
+.sug li[aria-selected="true"] b{color:var(--brick-ink)}
+.sug li.sug-empty{cursor:default;color:var(--muted);font-weight:500}
+.dest-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 2px 14px;font-size:13px;font-weight:600;color:var(--muted)}
+.link-btn{border:0;background:none;padding:4px;cursor:pointer;font-size:13px;font-weight:800;color:var(--brick-ink)}
+
+/* Budget / curseurs */
+.big-out{display:flex;align-items:baseline;gap:6px;margin:2px 0 6px}
+.big-out output{font-family:var(--mono);font-size:50px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.big-out .unit{font-size:22px;font-weight:800;color:var(--muted)}
+.big-out .lbl{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted)}
+.big-out.small output{font-size:30px}
+input[type="range"]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:32px;margin:0;background:transparent;cursor:pointer;--pct:50%}
+input[type="range"]::-webkit-slider-runnable-track{height:8px;border-radius:99px;background:linear-gradient(to right,var(--brick) var(--pct),var(--surface-3) var(--pct))}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;background:var(--surface);border:3px solid var(--brick);box-shadow:0 4px 10px -2px rgba(40,22,18,.3)}
+input[type="range"]::-moz-range-track{height:8px;border-radius:99px;background:var(--surface-3)}
+input[type="range"]::-moz-range-progress{height:8px;border-radius:99px;background:var(--brick)}
+input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--surface);border:3px solid var(--brick)}
+.range-scale{display:flex;justify-content:space-between;margin:2px 2px 14px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* Nuits */
+.stepper-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;height:58px;overflow:hidden;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.stepper button{height:100%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--ink-2)}
+.stepper button:hover:not(:disabled){background:var(--surface-3)}
+.stepper button:disabled{opacity:.3;cursor:not-allowed}
+.stepper-val{text-align:center;line-height:1.1}
+.stepper-val output{display:block;font-family:var(--mono);font-size:22px;font-weight:800}
+.stepper-val small{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* Jours */
+.day-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{height:46px;padding:0;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);font-size:13.5px;font-weight:800;cursor:pointer;transition:.15s}
+.day:hover{border-color:var(--line-strong)}
+.day-grid.is-all .day{background:var(--brick-soft);border-color:transparent;color:var(--brick-ink)}
+.day[aria-pressed="true"]{background:var(--brick);border-color:var(--brick);color:var(--on-brick)}
+
+/* Contrôles segmentés */
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;padding:4px;border-radius:var(--r);background:var(--surface-3)}
+.seg label{position:relative}
+.seg input,.freq input{position:absolute;inset:0;z-index:1;margin:0;opacity:0;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;height:44px;padding:0 6px;border-radius:10px;font-size:14px;font-weight:800;color:var(--muted);text-align:center;transition:.15s}
+.seg input:checked+span{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.seg input:focus-visible+span,.freq input:focus-visible+span{outline:2px solid var(--sky);outline-offset:2px}
+
+/* Agent */
+.switch{flex:none;position:relative;width:56px;height:32px;margin-top:2px;border:0;border-radius:999px;background:var(--line-strong);cursor:pointer;transition:background .2s}
+.switch::after{content:'';position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transition:transform .2s}
+.switch[aria-checked="true"]{background:var(--ok)}
+.switch[aria-checked="true"]::after{transform:translateX(24px)}
+.status{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:700}
+.status[data-on="true"]{background:var(--ok-soft);color:var(--ok)}
+.status[data-on="false"]{background:var(--surface-3);color:var(--muted)}
+.freq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:8px}
+.freq{position:relative}
+.freq span{display:block;height:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface-2);transition:.15s}
+.freq b{display:block;font-size:14.5px}
+.freq small{display:block;margin-top:2px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.freq input:checked+span{border-color:var(--brick);background:var(--brick-soft)}
+.freq input:checked+span b{color:var(--brick-ink)}
+.timeline{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;margin-top:16px}
+.tick{height:30px;border-radius:5px;background:var(--surface-3);transition:background .2s}
+.tick.on{background:var(--brick)}
+.timeline.paused .tick.on{background:var(--line-strong)}
+.timeline-scale{display:flex;justify-content:space-between;margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.next{display:flex;align-items:center;gap:8px;margin:12px 0 0;font-size:13.5px;font-weight:700;color:var(--ink-2)}
+
+/* Profils */
+.profiles{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.profile{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 14px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.profile-main{flex:1;min-width:0}
+.profile-name{font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-sum{margin-top:2px;font-size:12.5px;font-weight:600;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{flex:none;width:38px;height:38px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.icon-btn:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-soft)}
+.empty{padding:18px;text-align:center;font-size:13.5px;font-weight:600;color:var(--muted);border:1.5px dashed var(--line);border-radius:var(--r)}
+.add-row{display:flex;gap:8px}
+
+/* Journal */
+.run{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px 14px;border-radius:var(--r);font-size:14px;font-weight:700}
+.run[data-kind="running"]{background:var(--sky-soft);color:var(--sky)}
+.run[data-kind="ok"]{background:var(--ok-soft);color:var(--ok)}
+.run[data-kind="err"]{background:var(--danger-soft);color:var(--danger)}
+.run[data-kind="unknown"]{background:var(--warn-soft);color:var(--warn)}
+.run-text{flex:1;min-width:0}
+.run a{display:inline-flex;align-items:center;gap:4px;font-weight:800;white-space:nowrap;color:inherit}
+.run a .i{width:15px;height:15px}
+.run .spin{flex:none}
+.log{max-height:300px;overflow:auto;margin:0;padding:4px 6px;list-style:none;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.log-row{display:grid;grid-template-columns:44px 16px minmax(0,1fr);gap:10px;align-items:start;padding:9px 6px;font-size:13.5px;font-weight:600;overflow-wrap:anywhere}
+.log-row+.log-row{border-top:1px solid var(--line)}
+.log-row time{padding-top:1px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.log-row .i{width:16px;height:16px;margin-top:2px}
+.log-row.ok .i{color:var(--ok)}
+.log-row.err .i{color:var(--danger)}
+.log-row.warn .i{color:var(--warn)}
+.log-row.info .i{color:var(--sky)}
+.log-empty{padding:16px;text-align:center;font-size:13.5px;font-weight:600;color:var(--muted)}
+
+/* Connexion */
+.token-row{display:flex;gap:8px}
+.pw{position:relative;flex:1;min-width:0}
+.pw .input{padding-right:48px;font-family:var(--mono);font-size:14px}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:9px;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.pw-eye:hover{background:var(--surface-3)}
+.help{margin-top:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2)}
+.help summary{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-size:14px;font-weight:700}
+.help summary::-webkit-details-marker{display:none}
+.help ol{margin:0;padding:0 18px 4px 38px;font-size:13.5px;font-weight:500;color:var(--ink-2)}
+.help li{margin:5px 0}
+.help a{color:var(--brick-ink);font-weight:800}
+.help-note{margin:6px 14px 14px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.token-done{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.token-done-text{flex:1;min-width:180px;margin:0;font-size:14px;font-weight:600}
+.token-done-text b{display:block;font-family:var(--mono);font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.token-done-btns{display:flex;gap:8px}
+.ok-badge{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok)}
+
+/* Boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 18px;border:1.5px solid transparent;border-radius:var(--r);
+  font:inherit;font-size:15px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .15s,border-color .15s,transform .1s,opacity .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--brick);color:var(--on-brick);box-shadow:0 8px 18px -8px var(--brick)}
+.btn-primary:hover:not(:disabled){background:var(--brick-hover)}
+.btn-secondary{background:var(--surface);border-color:var(--line-strong);color:var(--ink)}
+.btn-secondary:hover:not(:disabled){background:var(--surface-3)}
+.btn-sm{height:38px;padding:0 14px;border-radius:11px;font-size:13.5px}
+.spin{display:none;width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+.btn.is-busy .spin{display:inline-block}
+.btn.is-busy .i{display:none}
+.run .spin{display:inline-block}
+
+/* Barre d'actions */
+.actionbar{position:fixed;left:50%;bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;transform:translateX(-50%);width:min(728px,calc(100% - 24px));
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:10px 10px 10px 16px;border:1px solid var(--line);border-radius:20px;
+  background:var(--surface);background:color-mix(in srgb,var(--surface) 88%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:0 18px 40px -18px rgba(30,20,40,.5)}
+.save-state{display:flex;align-items:center;gap:8px;min-width:0;margin:0;font-size:13px;font-weight:700;color:var(--muted)}
+.save-state::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--line-strong)}
+.save-state span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.save-state[data-state="dirty"]{color:var(--warn)}
+.save-state[data-state="dirty"]::before{background:var(--warn);animation:pulse 1.6s infinite}
+.save-state[data-state="clean"]{color:var(--ok)}
+.save-state[data-state="clean"]::before{background:var(--ok)}
+@media (max-width:560px){
+  .actionbar{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);padding:10px}
+  .save-state{grid-column:1/-1;padding:0 4px 2px;font-size:12.5px}
+  .actionbar .btn{width:100%;padding:0 10px}
+  .hide-sm{display:none}
+}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:12px;width:max-content;max-width:calc(100% - 32px);padding:12px 12px 12px 16px;border-radius:var(--r);
+  background:#1E1A24;color:#F6F1EC;border:1px solid rgba(255,255,255,.1);font-size:14px;font-weight:700;box-shadow:0 14px 32px -12px rgba(0,0,0,.5);
+  transition:transform .25s cubic-bezier(.3,1.4,.5,1),opacity .2s}
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:#A49EAB}
+.toast[data-type="ok"]::before{background:#5CCB95}
+.toast[data-type="err"]::before{background:#F37F93}
+.toast[data-type="warn"]::before{background:#F0BA5F}
+.toast-act{flex:none;padding:6px 10px;border:0;border-radius:9px;background:rgba(255,255,255,.14);font-size:13px;font-weight:800;cursor:pointer}
+@media (max-width:560px){.toast{bottom:calc(132px + env(safe-area-inset-bottom))}}
+
+.foot{padding:8px 16px 0;text-align:center;font-size:12.5px;font-weight:600;color:var(--muted)}
+.foot a{color:var(--brick-ink);font-weight:800;text-decoration:none}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 
-<nav>
-  <a class="nav-brand" href="#">
-    <svg viewBox="0 0 28 28" fill="none">
-      <rect width="28" height="28" rx="7" fill="#0770e3"/>
-      <path d="M6 18l4-8 3 5 3-3 6 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="20" cy="9" r="2" fill="#00a698"/>
-    </svg>
-    Flight Alerts
-    <span class="nav-badge">TLS</span>
-  </a>
-  <div class="nav-right">
-    <div id="statusDot"></div>
-    <span id="statusLabel">Non configuré</span>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-plane" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-terminal" viewBox="0 0 24 24"><path d="M4 17l6-6-6-6M12 19h8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M17.9 17.9A10 10 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.1-5.9M9.9 4.2A9 9 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.2 3.2m-6.7-1.1a3 3 0 1 1-4.2-4.2M1 1l22 22"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top">
+      <span class="brand-logo"><svg class="i"><use href="#i-plane"/></svg></span>
+      <span>Alertes vols<small>Toulouse &amp; co.</small></span>
+    </a>
+    <button type="button" class="conn" id="connBtn" data-state="off">
+      <span class="conn-dot"></span><span id="connLabel">Non connecté</span>
+    </button>
   </div>
-</nav>
+</header>
 
-<div class="hero">
-  <span class="hero-plane">✈️</span>
-  <h1>Alertes vols depuis Toulouse</h1>
-  <p>Configure · Active · Reçois les bons plans sur Telegram</p>
-</div>
+<main class="wrap" id="top">
 
-<main>
+  <section class="hero">
+    <span class="eyebrow"><svg class="i"><use href="#i-plane"/></svg>Bons plans depuis le Sud-Ouest</span>
+    <h1>Où est-ce qu'on <em>s'envole</em>&nbsp;?</h1>
+    <p>Règle tes critères, lance une recherche ou laisse l'agent surveiller les prix pour toi. Les bons plans arrivent sur Telegram.</p>
+  </section>
 
-  <!-- TOKEN -->
-  <div class="card">
-    <div class="card-header">
-      <div class="icon">🔑</div>
-      <h2>Token GitHub</h2>
-    </div>
-    <div class="card-body">
+  <!-- CONNEXION -->
+  <section class="card" id="tokenCard" aria-label="Connexion GitHub">
+    <div id="tokenForm">
+      <div class="card-head">
+        <span class="step"><svg class="i"><use href="#i-key"/></svg></span>
+        <div class="card-head-main">
+          <h2 class="card-title">Connexion GitHub</h2>
+          <p class="card-sub">Ton token permet d'enregistrer les réglages et de lancer les recherches.</p>
+        </div>
+      </div>
+      <label class="field-label" for="tokenInput">Token d'accès personnel</label>
       <div class="token-row">
-        <div class="field">
-          <label>Personal Access Token</label>
-          <div class="token-input-wrap">
-            <input type="password" id="ghToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" oninput="onTokenInput()">
-            <button class="eye-btn" onclick="toggleEye()">👁</button>
-          </div>
+        <div class="pw">
+          <input class="input" id="tokenInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Colle ton token ici">
+          <button type="button" class="pw-eye" id="eyeBtn" aria-label="Afficher le token"><svg class="i"><use href="#i-eye"/></svg></button>
         </div>
-        <button class="btn btn-save" onclick="saveToken()">Sauver</button>
+        <button type="button" class="btn btn-primary" id="connectBtn"><span class="spin"></span>Connecter</button>
       </div>
-      <span class="token-status idle" id="tokenStatus">● Token non renseigné</span>
+      <p class="msg" id="tokenMsg" hidden></p>
+      <details class="help">
+        <summary><svg class="i"><use href="#i-info"/></svg>Comment créer un token&nbsp;?</summary>
+        <ol>
+          <li>Ouvre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">la page de création de token GitHub</a>.</li>
+          <li><b>Repository access</b> : choisis uniquement <code>flight-alerte-toulouse</code>.</li>
+          <li><b>Permissions</b> du dépôt : <b>Actions</b> et <b>Variables</b> en <i>Read and write</i>.</li>
+          <li>Génère le token, copie-le et colle-le ici.</li>
+        </ol>
+        <p class="help-note">Le token reste uniquement sur cet appareil, dans le stockage du navigateur.</p>
+      </details>
     </div>
-  </div>
-
-  <!-- AGENT ON/OFF -->
-  <div class="card">
-    <div class="card-header">
-      <div class="icon">⚡</div>
-      <h2>Agent automatique</h2>
-      <div class="toggle-wrap">
-        <span class="toggle-label" id="toggleLabel" style="color:var(--muted)">OFF</span>
-        <label class="toggle">
-          <input type="checkbox" id="agentToggle" onchange="toggleAgent()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="status-banner off" id="agentBanner">
-        <span class="banner-icon">⏸</span>
-        <span id="bannerText">Agent <strong>désactivé</strong>. Lance des recherches manuellement.</span>
-      </div>
-
-      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:14px">
-        <div class="field" style="flex:1">
-          <label>Fréquence</label>
-          <select id="scheduleSelect" onchange="renderPills()">
-            <option value="hourly">Toutes les heures</option>
-            <option value="every2h">Toutes les 2h</option>
-            <option value="every3h">Toutes les 3h</option>
-            <option value="4xday" selected>4× par jour (8h, 14h, 20h, 0h)</option>
-            <option value="3xday">3× par jour (8h, 14h, 21h)</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="schedule-pills" id="schedulePills"></div>
-      <p style="font-size:.72rem;color:var(--muted);line-height:1.6">En mode ON, l'agent tourne selon la fréquence et envoie une notif Telegram si une offre passe sous ton seuil.</p>
-    </div>
-  </div>
-
-  <!-- CRITÈRES -->
-  <div class="card">
-    <div class="card-header">
-      <div class="icon">🎯</div>
-      <h2>Critères de recherche</h2>
-    </div>
-    <div class="card-body">
-
-      <div class="field" style="margin-bottom:16px">
-        <label>Prix maximum</label>
-        <div class="range-row">
-          <input type="range" id="maxPrice" min="30" max="300" value="80" step="5" oninput="document.getElementById('priceVal').textContent=this.value+'€'">
-          <span class="range-val" id="priceVal">80€</span>
-        </div>
-      </div>
-
-      <div class="form-grid" style="margin-bottom:16px">
-        <div class="field">
-          <label>Date départ min</label>
-          <input type="date" id="dateFrom">
-        </div>
-        <div class="field">
-          <label>Date départ max</label>
-          <input type="date" id="dateTo">
-        </div>
-        <div class="field">
-          <label>Nuits min</label>
-          <input type="number" id="stayMin" value="2" min="1" max="30">
-        </div>
-        <div class="field">
-          <label>Nuits max</label>
-          <input type="number" id="stayMax" value="5" min="1" max="30">
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="field" style="margin-bottom:14px">
-        <label>Jours de départ</label>
-        <div class="chip-group">
-          <span class="chip active" data-group="days" data-val="any" onclick="toggleChip(this)">Tous</span>
-          <span class="chip" data-group="days" data-val="monday" onclick="toggleChip(this)">Lun</span>
-          <span class="chip" data-group="days" data-val="tuesday" onclick="toggleChip(this)">Mar</span>
-          <span class="chip" data-group="days" data-val="wednesday" onclick="toggleChip(this)">Mer</span>
-          <span class="chip" data-group="days" data-val="thursday" onclick="toggleChip(this)">Jeu</span>
-          <span class="chip" data-group="days" data-val="friday" onclick="toggleChip(this)">Ven</span>
-          <span class="chip" data-group="days" data-val="saturday" onclick="toggleChip(this)">Sam</span>
-          <span class="chip" data-group="days" data-val="sunday" onclick="toggleChip(this)">Dim</span>
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:14px">
-        <label>Escales maximum</label>
-        <div class="chip-group">
-          <span class="chip active" data-group="stops" data-val="0" onclick="toggleChip(this)">Direct</span>
-          <span class="chip" data-group="stops" data-val="1" onclick="toggleChip(this)">1 escale max</span>
-          <span class="chip" data-group="stops" data-val="2" onclick="toggleChip(this)">Peu importe</span>
-        </div>
-      </div>
-
-      <div class="field" style="margin-bottom:0">
-        <label>Destinations (vide = toutes)</label>
-        <input type="text" id="destinations" placeholder="BCN, MAD, LIS, CDG…">
-      </div>
-
-      <!-- SAUVEGARDER PARAMÈTRES AUTO -->
-      <div class="save-params-row">
-        <button class="btn btn-success" style="flex:1" id="saveParamsBtn" onclick="saveParams()" disabled>
-          💾 Sauvegarder comme paramètres automatiques
-        </button>
-      </div>
-      <p style="font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.5">Ces paramètres seront utilisés par les runs automatiques.</p>
-
-      <div class="divider"></div>
-      <p style="font-size:.8rem;font-weight:600;margin-bottom:8px">📋 Profils de recherche</p>
-      <div class="profiles-list" id="profilesList"></div>
-      <div class="save-profile-row">
-        <input type="text" id="profileName" placeholder="Nom du profil (ex: Week-end Barcelone)">
-        <button class="btn btn-save btn-sm" onclick="saveProfile()" style="height:38px">Sauver</button>
+    <div class="token-done" id="tokenDone" hidden>
+      <span class="ok-badge"><svg class="i"><use href="#i-check"/></svg></span>
+      <p class="token-done-text">Connecté au dépôt<b>fearleck54/flight-alerte-toulouse</b></p>
+      <div class="token-done-btns">
+        <button type="button" class="btn btn-secondary btn-sm" id="changeTokenBtn">Changer</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Déconnecter</button>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- LANCEMENT MANUEL -->
-  <div class="card">
-    <div class="card-header">
-      <div class="icon">🚀</div>
-      <h2>Lancer une recherche</h2>
-    </div>
-    <div class="card-body">
-      <div class="actions-row">
-        <button class="btn btn-primary" id="launchBtn" onclick="launchSearch()" disabled>
-          <span id="btnSpinner" class="spinner"></span>
-          <span id="btnText">Lancer maintenant</span>
-        </button>
-        <button class="btn btn-ghost" onclick="clearLog()">Effacer</button>
+  <!-- RÉSUMÉ -->
+  <section class="pass" aria-label="Résumé de ta recherche">
+    <div class="pass-top">
+      <div class="pass-col">
+        <span class="pass-label">Départ</span>
+        <span class="pass-code" id="pFrom">TLS</span>
+        <span class="pass-sub" id="pFromSub">Toulouse</span>
       </div>
-      <div class="field" style="margin-bottom:8px"><label>Logs</label></div>
-      <div class="log-wrap" id="logBox">
-        <span class="log-empty">Lance une recherche pour voir les résultats ici.</span>
+      <div class="pass-route" aria-hidden="true"><span class="route-line"></span><svg class="route-plane"><use href="#i-plane"/></svg></div>
+      <div class="pass-col right">
+        <span class="pass-label">Arrivée</span>
+        <span class="pass-code" id="pTo">TOUT</span>
+        <span class="pass-sub" id="pToSub">Vols directs</span>
       </div>
     </div>
-  </div>
+    <div class="pass-bottom">
+      <div class="pass-grid">
+        <div><span class="pass-label">Budget</span><strong id="pPrice">≤ 80 €</strong></div>
+        <div><span class="pass-label">Séjour</span><strong id="pStay">2 à 5 nuits</strong></div>
+        <div><span class="pass-label">Escales</span><strong id="pStops">1 max</strong></div>
+        <div class="wide"><span class="pass-label">Période</span><strong id="pDates">—</strong></div>
+        <div><span class="pass-label">Départs</span><strong id="pDays">Tous les jours</strong></div>
+      </div>
+      <div class="pass-foot"><span id="pEst">—</span><span class="barcode" aria-hidden="true"></span></div>
+    </div>
+  </section>
+  <p class="callout" id="estNote" data-tone="warn" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
 
+  <!-- 1. DÉPART -->
+  <section class="card" aria-labelledby="t1">
+    <div class="card-head">
+      <span class="step">1</span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="t1">D'où pars-tu&nbsp;?</h2>
+        <p class="card-sub">Un ou plusieurs aéroports de départ.</p>
+      </div>
+    </div>
+    <div class="opt-grid" id="originList"></div>
+    <p class="hint" id="originHint"></p>
+  </section>
+
+  <!-- 2. DESTINATIONS -->
+  <section class="card" aria-labelledby="t2">
+    <div class="card-head">
+      <span class="step">2</span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="t2">Où veux-tu aller&nbsp;?</h2>
+        <p class="card-sub">Laisse vide pour scanner toutes les destinations directes.</p>
+      </div>
+    </div>
+    <div class="combo">
+      <div class="tagbox" id="tagbox">
+        <span class="tags" id="destTags"></span>
+        <input class="tag-input" id="destInput" type="text" role="combobox" aria-label="Ajouter une destination" aria-autocomplete="list" aria-expanded="false" aria-controls="destSug" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+      <ul class="sug" id="destSug" role="listbox" aria-label="Suggestions d'aéroports" hidden></ul>
+    </div>
+    <div class="dest-meta"><span id="destCount"></span><button type="button" class="link-btn" id="clearDests" hidden>Tout effacer</button></div>
+    <div class="chips" id="presets"></div>
+  </section>
+
+  <!-- 3. BUDGET -->
+  <section class="card" aria-labelledby="t3">
+    <div class="card-head">
+      <span class="step">3</span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="t3">Ton budget</h2>
+        <p class="card-sub">Prix maximum aller-retour, par personne.</p>
+      </div>
+    </div>
+    <div class="big-out"><output id="priceOut" for="priceRange">80</output><span class="unit">€</span><span class="lbl">max A/R</span></div>
+    <input type="range" id="priceRange" min="20" max="400" step="5" value="80" aria-label="Prix maximum en euros">
+    <div class="range-scale"><span>20 €</span><span>200 €</span><span>400 €</span></div>
+    <div class="chips" id="priceQuick"></div>
+  </section>
+
+  <!-- 4. QUAND -->
+  <section class="card" aria-labelledby="t4">
+    <div class="card-head">
+      <span class="step">4</span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="t4">Quand&nbsp;?</h2>
+        <p class="card-sub">Période de départ, durée du séjour et jours qui t'arrangent.</p>
+      </div>
+    </div>
+    <div class="field-grid">
+      <div><label class="field-label" for="dateFrom">Départ au plus tôt</label><input class="input" type="date" id="dateFrom"></div>
+      <div><label class="field-label" for="dateTo">Départ au plus tard</label><input class="input" type="date" id="dateTo"></div>
+    </div>
+    <div class="chips quick" id="dateQuick"></div>
+    <p class="msg" id="dateMsg" hidden></p>
+
+    <h3 class="sub-title">Durée du séjour</h3>
+    <div class="stepper-grid">
+      <div>
+        <span class="field-label">Minimum</span>
+        <div class="stepper">
+          <button type="button" data-n="min" data-d="-1" aria-label="Une nuit de moins au minimum"><svg class="i"><use href="#i-minus"/></svg></button>
+          <div class="stepper-val"><output id="minN">2</output><small id="minNUnit">nuits</small></div>
+          <button type="button" data-n="min" data-d="1" aria-label="Une nuit de plus au minimum"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+      <div>
+        <span class="field-label">Maximum</span>
+        <div class="stepper">
+          <button type="button" data-n="max" data-d="-1" aria-label="Une nuit de moins au maximum"><svg class="i"><use href="#i-minus"/></svg></button>
+          <div class="stepper-val"><output id="maxN">5</output><small id="maxNUnit">nuits</small></div>
+          <button type="button" data-n="max" data-d="1" aria-label="Une nuit de plus au maximum"><svg class="i"><use href="#i-plus"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="sub-title">Jours de départ</h3>
+    <div class="day-grid" id="dayGrid"></div>
+    <div class="chips quick" id="dayQuick"></div>
+  </section>
+
+  <!-- 5. ESCALES -->
+  <section class="card" aria-labelledby="t5">
+    <div class="card-head">
+      <span class="step">5</span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="t5">Escales</h2>
+        <p class="card-sub">Les vols directs sont souvent les meilleurs plans low-cost.</p>
+      </div>
+    </div>
+    <div class="seg" id="stopsSeg" role="radiogroup" aria-labelledby="t5">
+      <label><input type="radio" name="stops" value="0"><span>Direct</span></label>
+      <label><input type="radio" name="stops" value="1"><span>1 escale max</span></label>
+      <label><input type="radio" name="stops" value="2"><span>Peu importe</span></label>
+    </div>
+  </section>
+
+  <!-- AGENT -->
+  <section class="card" aria-labelledby="tA">
+    <div class="card-head">
+      <span class="step"><svg class="i"><use href="#i-zap"/></svg></span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="tA">Recherche automatique</h2>
+        <p class="card-sub">L'agent relance ta recherche tout seul et t'alerte sur Telegram.</p>
+      </div>
+      <button type="button" class="switch" id="agentSwitch" role="switch" aria-checked="false" aria-labelledby="tA"></button>
+    </div>
+    <div class="status" id="agentStatus" data-on="false"><svg class="i"><use href="#i-zap"/></svg><span></span></div>
+
+    <h3 class="sub-title">Fréquence</h3>
+    <div class="freq-grid" id="freqGrid" role="radiogroup" aria-label="Fréquence"></div>
+    <div class="timeline" id="timeline" role="img"></div>
+    <div class="timeline-scale" aria-hidden="true"><span>0 h</span><span>6 h</span><span>12 h</span><span>18 h</span><span>24 h</span></div>
+    <p class="next" id="nextRun"><svg class="i"><use href="#i-clock"/></svg><span></span></p>
+
+    <div class="sep"></div>
+    <h3 class="sub-title">Budget d'appels FlyScraper</h3>
+    <div class="big-out small"><output id="apiOut" for="apiRange">300</output><span class="lbl">appels max par lancement</span></div>
+    <input type="range" id="apiRange" min="50" max="1000" step="50" value="300" aria-label="Nombre maximum d'appels FlyScraper par lancement">
+    <p class="hint" id="apiHint"></p>
+    <p class="hint"><svg class="i"><use href="#i-info"/></svg><span>L'interrupteur agit tout de suite. La fréquence et le budget s'appliquent quand tu cliques sur « Enregistrer ».</span></p>
+  </section>
+
+  <!-- PROFILS -->
+  <section class="card" aria-labelledby="tP">
+    <div class="card-head">
+      <span class="step"><svg class="i"><use href="#i-bookmark"/></svg></span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="tP">Profils</h2>
+        <p class="card-sub">Tes recherches favorites, gardées sur cet appareil.</p>
+      </div>
+    </div>
+    <div class="profiles" id="profiles"></div>
+    <form class="add-row" id="profileForm">
+      <input class="input" id="profileName" maxlength="40" placeholder="Nom (ex. Week-end au soleil)" aria-label="Nom du profil">
+      <button type="submit" class="btn btn-secondary"><svg class="i"><use href="#i-plus"/></svg>Sauver</button>
+    </form>
+  </section>
+
+  <!-- JOURNAL -->
+  <section class="card" aria-labelledby="tJ">
+    <div class="card-head">
+      <span class="step"><svg class="i"><use href="#i-terminal"/></svg></span>
+      <div class="card-head-main">
+        <h2 class="card-title" id="tJ">Journal</h2>
+        <p class="card-sub">Suivi des lancements et des enregistrements.</p>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm" id="clearLog">Effacer</button>
+    </div>
+    <div class="run" id="runStatus" hidden></div>
+    <ol class="log" id="logList"><li class="log-empty">Rien pour l'instant. Lance une recherche pour la suivre ici.</li></ol>
+  </section>
+
+  <footer class="foot">Alertes vols Toulouse · <a href="https://github.com/fearleck54/flight-alerte-toulouse" target="_blank" rel="noopener">fearleck54/flight-alerte-toulouse</a></footer>
 </main>
 
-<footer>Flight Alerts TLS · <a href="https://github.com/fearleck54/flight-alerte-toulouse" target="_blank">fearleck54/flight-alerte-toulouse</a></footer>
-<div id="toast"></div>
+<div class="actionbar" role="region" aria-label="Actions">
+  <p class="save-state" id="saveState" data-state="off"><span>Non connecté</span></p>
+  <button type="button" class="btn btn-secondary" id="saveBtn"><span class="spin"></span><svg class="i"><use href="#i-save"/></svg><span>Enregistrer<span class="hide-sm"> pour l'auto</span></span></button>
+  <button type="button" class="btn btn-primary" id="launchBtn"><span class="spin"></span><svg class="i"><use href="#i-play"/></svg><span>Lancer<span class="hide-sm"> maintenant</span></span></button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-const GITHUB_OWNER = 'fearleck54';
-const GITHUB_REPO  = 'flight-alerte-toulouse';
-const WORKFLOW_ID  = 'flight_alert.yml';
+'use strict';
 
+// ── CONFIG ──────────────────────────────────────────────────────────────────
+const OWNER = 'fearleck54';
+const REPO = 'flight-alerte-toulouse';
+const WORKFLOW = 'flight_alert.yml';
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+
+// Aligné sur AIRPORT_NAMES et ALL_DIRECT_ROUTES de flight_agent.py
+const AIRPORTS = {"TLS":"Toulouse","BCN":"Barcelone","MAD":"Madrid","LIS":"Lisbonne","OPO":"Porto","FCO":"Rome Fiumicino","MXP":"Milan Malpensa","VCE":"Venise","NAP":"Naples","ATH":"Athènes","PRG":"Prague","BUD":"Budapest","WAW":"Varsovie","VIE":"Vienne","AMS":"Amsterdam","BRU":"Bruxelles","DUB":"Dublin","EDI":"Édimbourg","MAN":"Manchester","STN":"Londres Stansted","LTN":"Londres Luton","LGW":"Londres Gatwick","LHR":"Londres Heathrow","BRS":"Bristol","CDG":"Paris CDG","ORY":"Paris Orly","LYS":"Lyon","NCE":"Nice","GVA":"Genève","PMI":"Majorque","IBZ":"Ibiza","MAH":"Minorque","LPA":"Gran Canaria","TFS":"Tenerife Sud","FUE":"Fuerteventura","ACE":"Lanzarote","AGP":"Malaga","ALC":"Alicante","SVQ":"Séville","VLC":"Valence","FAO":"Faro","RAK":"Marrakech","CMN":"Casablanca","TUN":"Tunis","DJE":"Djerba","MIR":"Monastir","NBE":"Enfidha","ORN":"Oran","ALG":"Alger","TLM":"Tlemcen","CPH":"Copenhague","ARN":"Stockholm","OSL":"Oslo","HEL":"Helsinki","IST":"Istanbul","DBV":"Dubrovnik","SPU":"Split","CFU":"Corfou","HER":"Héraklion","RHO":"Rhodes","SKG":"Thessalonique","OLB":"Olbia","AJA":"Ajaccio","BIA":"Bastia","BGY":"Milan Bergame","BVA":"Paris Beauvais","CRL":"Bruxelles Charleroi","CIA":"Rome Ciampino","PSA":"Pise","EIN":"Eindhoven","KRK":"Cracovie","WRO":"Wroclaw","GDN":"Gdansk","ZTH":"Zakynthos","JMK":"Mykonos","KGS":"Kos","PVK":"Preveza","BOD":"Bordeaux","MRS":"Marseille","NTE":"Nantes","MLH":"Bâle-Mulhouse","BER":"Berlin","OTP":"Bucarest","SOF":"Sofia","TIV":"Tivat","SKP":"Skopje","AAE":"Annaba","BJA":"Béjaïa","CZL":"Constantine","ESS":"Essaouira","NDR":"Nador","OUD":"Oujda","RBA":"Rabat","TNG":"Tanger","FES":"Fès","AGA":"Agadir"};
+const ORIGINS = ['TLS', 'BOD', 'MRS', 'CDG', 'ORY'];
+const ROUTE_COUNT = {TLS: 64, BOD: 52, MRS: 57, CDG: 57, ORY: 42};
+
+const PRESETS = [
+  {id: 'sun', label: 'Soleil & îles', codes: ['PMI','IBZ','MAH','LPA','TFS','FUE','ACE','AGP','FAO','OLB','AJA','BIA','CFU','HER','RHO','ZTH','JMK','KGS','DBV','SPU']},
+  {id: 'cap', label: 'Capitales', codes: ['MAD','LIS','FCO','ATH','PRG','BUD','WAW','VIE','AMS','BRU','DUB','CPH','ARN','OSL','HEL','BER','SOF','OTP']},
+  {id: 'mag', label: 'Maghreb', codes: ['RAK','CMN','AGA','FES','TNG','RBA','ESS','NDR','OUD','TUN','DJE','MIR','NBE','ALG','ORN','TLM','AAE','BJA','CZL']},
+  {id: 'uk', label: 'UK & Irlande', codes: ['STN','LTN','LGW','LHR','MAN','EDI','BRS','DUB']},
+];
+const DAYS = [['monday','Lun','lundi'],['tuesday','Mar','mardi'],['wednesday','Mer','mercredi'],['thursday','Jeu','jeudi'],['friday','Ven','vendredi'],['saturday','Sam','samedi'],['sunday','Dim','dimanche']];
+const DAY_KEYS = DAYS.map(d => d[0]);
+const STOPS = {'0': 'Direct', '1': '1 max', '2': 'Peu importe'};
 const SCHEDULES = {
-  hourly:  { pills: Array.from({length:24},(_,i)=>i+'h').filter((_,i)=>i%4===0), label:'Toutes les heures' },
-  every2h: { pills: ['0h','2h','4h','6h','8h','10h','12h','14h','16h','18h','20h','22h'], label:'Toutes les 2h' },
-  every3h: { pills: ['0h','3h','6h','9h','12h','15h','18h','21h'], label:'Toutes les 3h' },
-  '4xday': { pills: ['08h00','14h00','20h00','00h00'], label:'4× par jour' },
-  '3xday': { pills: ['08h00','14h00','21h00'], label:'3× par jour' },
+  hourly:  {label: 'Chaque heure',   hint: '24 passages par jour',     hours: [...Array(24).keys()]},
+  every2h: {label: 'Toutes les 2 h', hint: '12 passages par jour',     hours: [0,2,4,6,8,10,12,14,16,18,20,22]},
+  every3h: {label: 'Toutes les 3 h', hint: '8 passages par jour',      hours: [0,3,6,9,12,15,18,21]},
+  '4xday': {label: '4× par jour',    hint: '8 h · 14 h · 20 h · minuit', hours: [0,8,14,20]},
+  '3xday': {label: '3× par jour',    hint: '8 h · 14 h · 21 h',        hours: [8,14,21]},
 };
+const DATE_QUICK = [{id: '30', label: '30 jours', from: 1, to: 30}, {id: '90', label: '3 mois', from: 7, to: 90}, {id: '180', label: '6 mois', from: 7, to: 180}];
+const PRICE_QUICK = [50, 80, 120, 200];
+const SEC_PER_SEARCH = 1.1;   // pause + appels réseau, estimation moyenne
+const WORKFLOW_LIMIT_MIN = 60; // timeout-minutes du workflow
 
-// ── INIT
-window.addEventListener('DOMContentLoaded', () => {
-  const saved = localStorage.getItem('gh_token');
-  if (saved) { document.getElementById('ghToken').value = saved; validateToken(saved); }
+// ── OUTILS ──────────────────────────────────────────────────────────────────
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const parseISO = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '').trim()); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+const norm = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const fmtDate = s => { const d = parseISO(s); return d ? d.toLocaleDateString('fr-FR', {day: 'numeric', month: 'short'}) : '—'; };
+const fmtNum = n => n.toLocaleString('fr-FR');
+const plural = (n, word) => `${n} ${word}${n > 1 ? 's' : ''}`;
+const parseCodes = raw => [...new Set(String(raw || '').toUpperCase().split(/[\s,;]+/).filter(c => /^[A-Z]{3}$/.test(c)))];
+const airportName = c => AIRPORTS[c] || c;
+const icon = (id, cls = 'i') => `<svg class="${cls}"><use href="#i-${id}"/></svg>`;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+const FR_DAYS = Object.fromEntries(DAYS.map(d => [d[2], d[0]]));
+const parseDays = raw => {
+  const s = String(raw || '').trim().toLowerCase();
+  if (!s || s === 'any' || s === 'all') return [];
+  const list = [...new Set(s.split(/[,;]/).map(x => x.trim()).map(x => FR_DAYS[x] || x).filter(x => DAY_KEYS.includes(x)))];
+  return list.length === 7 ? [] : list;
+};
+const daysVar = list => (list.length && list.length < 7) ? DAY_KEYS.filter(k => list.includes(k)).join(',') : 'any';
 
-  const today = new Date();
-  const p7  = new Date(today); p7.setDate(today.getDate()+7);
-  const p90 = new Date(today); p90.setDate(today.getDate()+90);
-  document.getElementById('dateFrom').value = fmt(p7);
-  document.getElementById('dateTo').value   = fmt(p90);
+// ── ÉTAT ────────────────────────────────────────────────────────────────────
+const TODAY = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
+const state = {
+  origins: ['TLS'], dests: [], maxPrice: 80,
+  dateFrom: iso(addDays(TODAY, 7)), dateTo: iso(addDays(TODAY, 90)),
+  minNights: 2, maxNights: 5, days: [], stops: '1',
+  cron: '4xday', maxApiCalls: 300, enabled: store.get('agent_enabled') !== 'false',
+};
+let token = store.get('gh_token') || '';
+let conn = 'off';
+let savedVars = null;   // dernière version connue des variables GitHub
+let lastEstimate = 0;
 
-  const savedSched = localStorage.getItem('schedule_key') || '4xday';
-  document.getElementById('scheduleSelect').value = savedSched;
-  renderPills();
-  renderProfiles();
-
-  const localEnabled = localStorage.getItem('agent_enabled') === 'true';
-  applyToggleUI(localEnabled);
-});
-
-const fmt = d => d.toISOString().split('T')[0];
-
-// ── TOKEN
-let tokenValid = false, tokenTimer = null;
-
-function onTokenInput() {
-  clearTimeout(tokenTimer);
-  setTokenStatus('idle','● Saisie en cours…');
-  tokenValid = false; updateBtns();
-  const val = document.getElementById('ghToken').value.trim();
-  if (val.length > 10) {
-    setTokenStatus('checking','⏳ Vérification…');
-    tokenTimer = setTimeout(() => validateToken(val), 900);
-  }
-}
-
-async function validateToken(token) {
-  try {
-    const r = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
-      headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' }
-    });
-    if (r.ok) {
-      tokenValid = true;
-      setTokenStatus('valid','✓ Token valide');
-      document.getElementById('statusDot').className = 'ok';
-      document.getElementById('statusLabel').textContent = 'Prêt';
-      fetchAgentState(token);
-    } else {
-      tokenValid = false;
-      setTokenStatus('invalid','✗ Token invalide');
-      document.getElementById('statusDot').className = 'err';
-      document.getElementById('statusLabel').textContent = 'Erreur';
-    }
-  } catch { setTokenStatus('invalid','✗ Erreur réseau'); }
-  updateBtns();
-}
-
-function saveToken() {
-  const val = document.getElementById('ghToken').value.trim();
-  if (!val) { showToast('Entre un token','err'); return; }
-  localStorage.setItem('gh_token', val);
-  validateToken(val);
-  showToast('Token sauvegardé ✓','ok');
-}
-
-function toggleEye() {
-  const i = document.getElementById('ghToken');
-  i.type = i.type === 'password' ? 'text' : 'password';
-}
-
-function setTokenStatus(cls, txt) {
-  const el = document.getElementById('tokenStatus');
-  el.className = `token-status ${cls}`; el.textContent = txt;
-}
-
-function updateBtns() {
-  document.getElementById('launchBtn').disabled = !tokenValid;
-  document.getElementById('saveParamsBtn').disabled = !tokenValid;
-}
-
-// ── VARIABLES GITHUB
-async function getVar(token, name) {
-  try {
-    const r = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables/${name}`,
-      { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } }
-    );
-    if (r.ok) return (await r.json()).value;
-  } catch {}
-  return null;
-}
-
-async function setVar(token, name, value) {
-  const headers = { Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' };
-  const base = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/variables`;
-  const body = JSON.stringify({ name, value: String(value) });
-  let r = await fetch(`${base}/${name}`, { method:'PATCH', headers, body });
-  if (r.status === 404) r = await fetch(base, { method:'POST', headers, body });
-  return r.ok || r.status === 201 || r.status === 204;
-}
-
-// ── AGENT STATE
-async function fetchAgentState(token) {
-  const enabled = await getVar(token, 'AGENT_ENABLED');
-  const isOn = enabled !== 'false';
-  applyToggleUI(isOn);
-  localStorage.setItem('agent_enabled', isOn);
-
-  const sched = await getVar(token, 'CRON_MODE');
-  if (sched && SCHEDULES[sched]) {
-    document.getElementById('scheduleSelect').value = sched;
-    localStorage.setItem('schedule_key', sched);
-    renderPills();
-  }
-
-  // Charger les paramètres sauvegardés
-  const params = {
-    MAX_PRICE: 'maxPrice', DATE_FROM: 'dateFrom', DATE_TO: 'dateTo',
-    MIN_NIGHTS: 'stayMin', MAX_NIGHTS: 'stayMax',
-    DESTINATIONS: 'destinations',
+// Variables GitHub lues par le workflow (mêmes noms que flight_alert.yml)
+function buildVars() {
+  return {
+    ORIGIN: state.origins.join(','),
+    DESTINATIONS: state.dests.join(','),
+    MAX_PRICE: String(state.maxPrice),
+    DATE_FROM: state.dateFrom,
+    DATE_TO: state.dateTo,
+    MIN_NIGHTS: String(state.minNights),
+    MAX_NIGHTS: String(state.maxNights),
+    DAYS: daysVar(state.days),
+    MAX_STOPS: state.stops,
+    CRON_MODE: state.cron,
+    MAX_API_CALLS: String(state.maxApiCalls),
   };
-  for (const [varName, fieldId] of Object.entries(params)) {
-    const val = await getVar(token, varName);
-    if (val !== null) {
-      document.getElementById(fieldId).value = val;
-      if (fieldId === 'maxPrice') document.getElementById('priceVal').textContent = val + '€';
-    }
-  }
+}
 
-  // Chips stops
-  const stops = await getVar(token, 'MAX_STOPS');
-  if (stops !== null) {
-    document.querySelectorAll('[data-group="stops"]').forEach(c => c.classList.remove('active'));
-    const chip = document.querySelector(`[data-group="stops"][data-val="${stops}"]`);
-    if (chip) chip.classList.add('active');
+function applyVars(v) {
+  if (v.ORIGIN) {
+    const o = v.ORIGIN.split(/[,;]/).map(s => s.trim().toUpperCase()).filter(c => ORIGINS.includes(c));
+    if (o.length) state.origins = [...new Set(o)];
   }
+  if (v.DESTINATIONS != null) state.dests = parseCodes(v.DESTINATIONS);
+  if (v.MAX_PRICE && !isNaN(+v.MAX_PRICE)) state.maxPrice = Math.max(5, Math.round(+v.MAX_PRICE));
+  if (parseISO(v.DATE_FROM)) state.dateFrom = v.DATE_FROM.trim();
+  if (parseISO(v.DATE_TO)) state.dateTo = v.DATE_TO.trim();
+  if (v.MIN_NIGHTS && !isNaN(+v.MIN_NIGHTS)) state.minNights = clamp(Math.round(+v.MIN_NIGHTS), 1, 30);
+  if (v.MAX_NIGHTS && !isNaN(+v.MAX_NIGHTS)) state.maxNights = clamp(Math.round(+v.MAX_NIGHTS), 1, 30);
+  if (state.maxNights < state.minNights) state.maxNights = state.minNights;
+  if (v.DAYS != null) state.days = parseDays(v.DAYS);
+  if (v.MAX_STOPS != null && v.MAX_STOPS.trim() !== '' && !isNaN(+v.MAX_STOPS)) state.stops = String(clamp(Math.round(+v.MAX_STOPS), 0, 2));
+  if (v.CRON_MODE && SCHEDULES[v.CRON_MODE.trim()]) state.cron = v.CRON_MODE.trim();
+  if (v.MAX_API_CALLS && !isNaN(+v.MAX_API_CALLS)) state.maxApiCalls = clamp(Math.round(+v.MAX_API_CALLS), 0, 5000);
+  state.enabled = String(v.AGENT_ENABLED ?? 'true').trim().toLowerCase() !== 'false';
+}
 
-  // Chips origin
-  const originVar = await getVar(token, 'ORIGIN');
-  if (originVar) {
-    document.querySelectorAll('[data-group="origin"]').forEach(c => c.classList.remove('active'));
-    originVar.split(',').forEach(v => {
-      const chip = document.querySelector(`[data-group="origin"][data-val="${v.trim()}"]`);
-      if (chip) chip.classList.add('active');
-    });
-    updateOriginInfo();
+// ── GITHUB ──────────────────────────────────────────────────────────────────
+function gh(path, opt = {}) {
+  const headers = {Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json'};
+  if (opt.body) headers['Content-Type'] = 'application/json';
+  return fetch(API + path, {...opt, headers});
+}
+
+async function setVar(name, value) {
+  // GitHub refuse les variables vides : un espace vaut « vide » pour le script
+  const body = JSON.stringify({name, value: value === '' ? ' ' : String(value)});
+  let r = await gh(`/actions/variables/${name}`, {method: 'PATCH', body});
+  if (r.status === 404) r = await gh('/actions/variables', {method: 'POST', body});
+  return r.ok ? null : r.status;
+}
+
+function setConn(s, label) {
+  conn = s;
+  $('#connBtn').dataset.state = s;
+  $('#connLabel').textContent = label;
+}
+
+function setTokenMsg(tone, text) {
+  const el = $('#tokenMsg');
+  if (!text) { el.hidden = true; return; }
+  el.hidden = false;
+  el.dataset.tone = tone;
+  el.innerHTML = icon(tone === 'ok' ? 'check' : tone === 'err' ? 'alert' : 'clock') + `<span>${esc(text)}</span>`;
+}
+
+function showTokenForm(show) {
+  $('#tokenForm').hidden = !show;
+  $('#tokenDone').hidden = show;
+}
+
+let connecting = false;
+async function connect(value, {silent = false} = {}) {
+  const t = String(value || '').trim();
+  if (!t) { setTokenMsg('err', 'Colle d’abord ton token.'); $('#tokenInput').focus(); return false; }
+  if (connecting) return false;
+  connecting = true;
+  $('#connectBtn').classList.add('is-busy');
+  token = t;
+  setConn('checking', 'Vérification…');
+  setTokenMsg('checking', 'Vérification du token…');
+  let r = null;
+  try { r = await gh(''); } catch {}
+  connecting = false;
+  $('#connectBtn').classList.remove('is-busy');
+
+  if (r && r.ok) {
+    store.set('gh_token', t);
+    setConn('ok', 'Connecté');
+    setTokenMsg('', '');
+    showTokenForm(false);
+    if (!silent) toast('Connecté à GitHub ✓', 'ok');
+    await loadRemote();
+    return true;
   }
+  token = '';
+  savedVars = null;
+  if (!r) { setConn('err', 'Hors ligne'); setTokenMsg('err', 'Impossible de joindre GitHub. Vérifie ta connexion.'); }
+  else if (r.status === 401) { store.del('gh_token'); setConn('err', 'Token refusé'); setTokenMsg('err', 'Token refusé : il est expiré ou mal copié.'); }
+  else { setConn('err', 'Accès refusé'); setTokenMsg('err', `Ce token n’a pas accès au dépôt ${OWNER}/${REPO}.`); }
+  showTokenForm(true);
+  updateDirty();
+  return false;
+}
 
-  // Chips days
-  const days = await getVar(token, 'DAYS');
-  if (days !== null) {
-    document.querySelectorAll('[data-group="days"]').forEach(c => c.classList.remove('active'));
-    if (days === 'any' || days === '') {
-      document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
+function disconnect() {
+  store.del('gh_token');
+  token = '';
+  savedVars = null;
+  $('#tokenInput').value = '';
+  setConn('off', 'Non connecté');
+  setTokenMsg('', '');
+  showTokenForm(true);
+  updateDirty();
+  toast('Token oublié sur cet appareil', 'warn');
+}
+
+async function loadRemote() {
+  try {
+    const r = await gh('/actions/variables?per_page=50');
+    if (!r.ok) {
+      savedVars = null;
+      log('warn', r.status === 403 ? 'Lecture des réglages refusée : ajoute la permission « Variables » au token.' : `Lecture des réglages impossible (erreur ${r.status}).`);
     } else {
-      days.split(',').forEach(v => {
-        const chip = document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);
-        if (chip) chip.classList.add('active');
-      });
+      const data = await r.json();
+      const v = {};
+      (data.variables || []).forEach(x => { v[x.name] = x.value; });
+      applyVars(v);
+      store.set('agent_enabled', String(state.enabled));
+      savedVars = buildVars();
+      log('ok', 'Réglages automatiques chargés depuis GitHub');
     }
+  } catch {
+    savedVars = null;
+    log('err', 'Erreur réseau pendant le chargement des réglages');
   }
+  renderAll();
+}
+
+function requireConn() {
+  if (conn === 'ok') return true;
+  toast('Connecte d’abord ton token GitHub', 'warn');
+  showTokenForm(true);
+  $('#tokenCard').scrollIntoView({behavior: 'smooth', block: 'center'});
+  setTimeout(() => $('#tokenInput').focus({preventScroll: true}), 350);
+  return false;
+}
+
+// ── ENREGISTRER / LANCER ────────────────────────────────────────────────────
+function setBusy(btn, on) {
+  btn.classList.toggle('is-busy', on);
+  btn.disabled = on;
+}
+
+async function saveParams() {
+  if (!requireConn() || !validateDates(true)) return;
+  const v = buildVars();
+  const changed = Object.keys(v).filter(k => !savedVars || savedVars[k] !== v[k]);
+  if (!changed.length) { toast('Déjà à jour ✓', 'ok'); return; }
+
+  const btn = $('#saveBtn');
+  setBusy(btn, true);
+  const results = await Promise.all(changed.map(async k => [k, await setVar(k, v[k]).catch(() => 0)]));
+  setBusy(btn, false);
+
+  const failed = results.filter(([, s]) => s !== null);
+  savedVars = {...(savedVars || {})};
+  results.filter(([, s]) => s === null).forEach(([k]) => { savedVars[k] = v[k]; });
+  if (!savedVars.CRON_MODE) savedVars = null;
+
+  if (!failed.length) {
+    savedVars = {...v};
+    toast('Réglages automatiques enregistrés ✓', 'ok');
+    log('ok', `Enregistré sur GitHub : ${changed.join(', ')}`);
+  } else {
+    const s = failed[0][1];
+    const why = s === 403 ? 'permission « Variables » manquante sur le token' : s === 0 ? 'erreur réseau' : `erreur ${s}`;
+    toast('L’enregistrement a échoué', 'err');
+    log('err', `Échec pour ${failed.map(([k]) => k).join(', ')} : ${why}`);
+  }
+  updateDirty();
 }
 
 async function toggleAgent() {
-  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
-  if (!token || !tokenValid) {
-    showToast('Token requis','err');
-    document.getElementById('agentToggle').checked = !document.getElementById('agentToggle').checked;
-    return;
-  }
-  const enabled = document.getElementById('agentToggle').checked;
-  applyToggleUI(enabled);
-
-  const schedKey = document.getElementById('scheduleSelect').value;
-  const ok1 = await setVar(token, 'AGENT_ENABLED', String(enabled));
-  const ok2 = await setVar(token, 'CRON_MODE', schedKey);
-
-  if (ok1 && ok2) {
-    localStorage.setItem('agent_enabled', enabled);
-    localStorage.setItem('schedule_key', schedKey);
-    showToast(enabled ? '✅ Agent activé' : '⏸ Agent désactivé', enabled ? 'ok' : 'warn');
+  if (!requireConn()) return;
+  const next = !state.enabled;
+  state.enabled = next;
+  renderAgent();
+  const sw = $('#agentSwitch');
+  sw.disabled = true;
+  const [a, b] = await Promise.all([
+    setVar('AGENT_ENABLED', String(next)).catch(() => 0),
+    setVar('CRON_MODE', state.cron).catch(() => 0),
+  ]);
+  sw.disabled = false;
+  if (a === null && b === null) {
+    store.set('agent_enabled', String(next));
+    if (savedVars) savedVars.CRON_MODE = state.cron;
+    toast(next ? 'Recherche automatique activée ✓' : 'Recherche automatique en pause', next ? 'ok' : 'warn');
+    log(next ? 'ok' : 'warn', next ? `Agent activé (${SCHEDULES[state.cron].label.toLowerCase()})` : 'Agent mis en pause');
   } else {
-    showToast('Erreur de mise à jour','err');
-    document.getElementById('agentToggle').checked = !enabled;
-    applyToggleUI(!enabled);
+    state.enabled = !next;
+    renderAgent();
+    toast('Impossible de modifier l’agent', 'err');
+    log('err', `Changement d’état refusé (erreur ${a || b})`);
+  }
+  updateDirty();
+}
+
+async function launch() {
+  if (!requireConn() || !validateDates(true)) return;
+  const v = buildVars();
+  const inputs = {
+    origin: v.ORIGIN, max_price: v.MAX_PRICE, date_from: v.DATE_FROM, date_to: v.DATE_TO,
+    min_nights: v.MIN_NIGHTS, max_nights: v.MAX_NIGHTS, max_stops: v.MAX_STOPS, days: v.DAYS,
+    // Un espace force « toutes les destinations » au lieu de reprendre la variable enregistrée
+    destinations: v.DESTINATIONS || ' ',
+  };
+  const btn = $('#launchBtn');
+  setBusy(btn, true);
+  const since = Date.now();
+  log('info', `Lancement : ${state.origins.join(' + ')} → ${state.dests.length ? plural(state.dests.length, 'destination') : 'toutes les directes'} · ≤ ${state.maxPrice} € · ${fmtDate(state.dateFrom)} → ${fmtDate(state.dateTo)}`);
+  try {
+    const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, {method: 'POST', body: JSON.stringify({ref: 'main', inputs})});
+    if (r.status === 204) {
+      toast('Recherche lancée ✓', 'ok');
+      log('ok', 'Workflow déclenché sur GitHub Actions');
+      trackRun(since);
+    } else {
+      const e = await r.json().catch(() => ({}));
+      const why = r.status === 403 ? 'permission « Actions » en écriture manquante' : (e.message || `erreur ${r.status}`);
+      toast('Lancement impossible', 'err');
+      log('err', `Lancement refusé : ${why}`);
+    }
+  } catch {
+    toast('Erreur réseau', 'err');
+    log('err', 'Erreur réseau au lancement');
+  }
+  setBusy(btn, false);
+}
+
+// Suivi du run déclenché, jusqu'à sa fin
+let runPoll = null, runSeq = 0;
+function trackRun(since) {
+  clearTimeout(runPoll);
+  const seq = ++runSeq;
+  const started = Date.now();
+  let runId = null, tries = 0;
+  setRun('running', 'Recherche envoyée, en attente de GitHub…');
+  const tick = async () => {
+    if (seq !== runSeq) return;
+    try {
+      if (!runId) {
+        const r = await gh(`/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`);
+        if (r.ok) {
+          const runs = (await r.json()).workflow_runs || [];
+          const run = runs.find(x => new Date(x.created_at).getTime() >= since - 60000);
+          if (run) {
+            runId = run.id;
+            log('info', `Run #${run.run_number} démarré`);
+            if (showRun(run)) return;
+          }
+        }
+        if (!runId && ++tries > 15) {
+          setRun('unknown', 'Run introuvable pour l’instant : regarde l’onglet Actions.', `https://github.com/${OWNER}/${REPO}/actions`);
+          return;
+        }
+      } else {
+        const r = await gh(`/actions/runs/${runId}`);
+        if (r.ok && showRun(await r.json())) return;
+      }
+    } catch {}
+    if (Date.now() - started > (WORKFLOW_LIMIT_MIN + 15) * 60000) return;
+    runPoll = setTimeout(tick, runId ? 8000 : 4000);
+  };
+  runPoll = setTimeout(tick, 3000);
+}
+
+function showRun(run) {
+  const n = `Run #${run.run_number}`;
+  if (run.status !== 'completed') {
+    setRun('running', run.status === 'in_progress' ? `${n} en cours… les alertes partent sur Telegram dès la fin.` : `${n} en file d’attente…`, run.html_url);
+    return false;
+  }
+  if (run.conclusion === 'success') {
+    setRun('ok', `${n} terminé ✓ Si un vol passe sous ton seuil, il est sur Telegram.`, run.html_url);
+    log('ok', `${n} terminé avec succès`);
+  } else {
+    setRun('err', `${n} : ${run.conclusion || 'échec'}. Consulte les logs pour comprendre.`, run.html_url);
+    log('err', `${n} terminé en ${run.conclusion || 'échec'}`);
+  }
+  return true;
+}
+
+function setRun(kind, text, url) {
+  const el = $('#runStatus');
+  el.hidden = false;
+  el.dataset.kind = kind;
+  const lead = kind === 'running' ? '<span class="spin"></span>' : icon(kind === 'ok' ? 'check' : 'alert');
+  el.innerHTML = `${lead}<span class="run-text">${esc(text)}</span>` +
+    (url ? `<a href="${esc(url)}" target="_blank" rel="noopener">Voir${icon('ext')}</a>` : '');
+}
+
+// ── VALIDATION & ESTIMATION ─────────────────────────────────────────────────
+function dateIssue() {
+  const f = parseISO(state.dateFrom), t = parseISO(state.dateTo);
+  if (!f || !t) return ['err', 'Choisis une date de début et une date de fin.'];
+  if (f > t) return ['err', 'La date de fin est avant la date de début.'];
+  if (f < TODAY) return ['warn', 'La date de début est passée : les jours écoulés seront ignorés par les compagnies.'];
+  return null;
+}
+
+function validateDates(announce) {
+  const issue = dateIssue();
+  if (issue && issue[0] === 'err') {
+    if (announce) {
+      toast(issue[1], 'err');
+      $('#dateFrom').scrollIntoView({behavior: 'smooth', block: 'center'});
+    }
+    return false;
+  }
+  return true;
+}
+
+// Même logique que build_date_range() + boucles de main() côté Python
+function estimate() {
+  const f = parseISO(state.dateFrom), t = parseISO(state.dateTo);
+  if (!f || !t || f > t) return 0;
+  const allowed = state.days.length ? new Set(state.days.map(k => DAY_KEYS.indexOf(k))) : null;
+  let n = 0;
+  for (let d = new Date(f); d <= t; d.setDate(d.getDate() + 1)) {
+    if (!allowed || allowed.has((d.getDay() + 6) % 7)) n++;
+  }
+  const no = state.origins.length;
+  if (no > 1) n = Math.min(n, Math.max(3, Math.floor(n / no)));
+  const nights = state.maxNights - state.minNights + 1;
+  return state.origins.reduce((sum, o) => sum + n * (state.dests.length || ROUTE_COUNT[o] || 0) * nights, 0);
+}
+
+// ── RENDU ───────────────────────────────────────────────────────────────────
+function renderOrigins() {
+  $$('#originList .opt').forEach(b => b.setAttribute('aria-pressed', state.origins.includes(b.dataset.origin)));
+  const n = state.origins.length, hint = $('#originHint');
+  if (n === 1) {
+    hint.removeAttribute('data-tone');
+    hint.innerHTML = icon('info') + `<span>Toute la période est explorée depuis ${esc(airportName(state.origins[0]))}.</span>`;
+  } else {
+    hint.dataset.tone = 'warn';
+    hint.innerHTML = icon('alert') + `<span>${n} aéroports : la période est partagée entre eux pour limiter le nombre de recherches.</span>`;
   }
 }
 
-function applyToggleUI(enabled) {
-  document.getElementById('agentToggle').checked = enabled;
-  document.getElementById('toggleLabel').textContent = enabled ? 'ON' : 'OFF';
-  document.getElementById('toggleLabel').style.color = enabled ? 'var(--success)' : 'var(--muted)';
-  const banner = document.getElementById('agentBanner');
-  banner.className = `status-banner ${enabled ? 'on' : 'off'}`;
-  document.querySelector('#agentBanner .banner-icon').textContent = enabled ? '✅' : '⏸';
-  document.getElementById('bannerText').innerHTML = enabled
-    ? 'Agent <strong>activé</strong>. Tu recevras une notif Telegram si une offre est trouvée.'
-    : 'Agent <strong>désactivé</strong>. Lance des recherches manuellement.';
-  document.querySelectorAll('#schedulePills .dot').forEach(d => {
-    d.className = 'dot' + (enabled ? '' : ' off');
+function renderDests() {
+  $('#destTags').innerHTML = state.dests.map(c =>
+    `<span class="tag"><b>${c}</b>${AIRPORTS[c] ? `<span>${esc(AIRPORTS[c])}</span>` : ''}` +
+    `<button type="button" class="tag-x" data-remove="${c}" aria-label="Retirer ${esc(airportName(c))}">${icon('x')}</button></span>`
+  ).join('');
+  const n = state.dests.length;
+  $('#destInput').placeholder = n ? 'Ajouter une ville ou un code…' : 'Toutes · tape une ville ou un code…';
+  $('#destCount').textContent = n ? `${plural(n, 'destination')} ${n > 1 ? 'choisies' : 'choisie'}` : 'Toutes les destinations directes de chaque aéroport';
+  $('#clearDests').hidden = !n;
+  $$('#presets .chip').forEach(b => {
+    const p = PRESETS.find(x => x.id === b.dataset.preset);
+    b.setAttribute('aria-pressed', p ? p.codes.every(c => state.dests.includes(c)) : !n);
   });
 }
 
-// ── SAVE PARAMS
-async function saveParams() {
-  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
-  if (!token || !tokenValid) { showToast('Token requis','err'); return; }
+function renderPrice() {
+  const r = $('#priceRange');
+  r.max = Math.max(400, state.maxPrice);
+  r.value = state.maxPrice;
+  r.style.setProperty('--pct', `${(state.maxPrice - r.min) / (r.max - r.min) * 100}%`);
+  $('#priceOut').textContent = state.maxPrice;
+  $$('#priceQuick .chip').forEach(b => b.setAttribute('aria-pressed', +b.dataset.price === state.maxPrice));
+}
 
-  const btn = document.getElementById('saveParamsBtn');
-  btn.textContent = '⏳ Sauvegarde…'; btn.disabled = true;
+function renderDates() {
+  $('#dateFrom').value = state.dateFrom;
+  $('#dateTo').value = state.dateTo;
+  $('#dateTo').min = state.dateFrom;
+  $$('#dateQuick .chip').forEach(b => {
+    const q = DATE_QUICK.find(x => x.id === b.dataset.range);
+    b.setAttribute('aria-pressed', state.dateFrom === iso(addDays(TODAY, q.from)) && state.dateTo === iso(addDays(TODAY, q.to)));
+  });
+  const issue = dateIssue(), msg = $('#dateMsg');
+  $('#dateFrom').setAttribute('aria-invalid', !!issue && issue[0] === 'err');
+  $('#dateTo').setAttribute('aria-invalid', !!issue && issue[0] === 'err');
+  if (!issue) { msg.hidden = true; return; }
+  msg.hidden = false;
+  msg.dataset.tone = issue[0];
+  msg.innerHTML = icon('alert') + `<span>${esc(issue[1])}</span>`;
+}
 
-  const schedKey = document.getElementById('scheduleSelect').value;
-  const days = getDays();
-  const stops = getChips('stops')[0] || '1';
+function renderNights() {
+  const {minNights: a, maxNights: b} = state;
+  $('#minN').textContent = a;
+  $('#maxN').textContent = b;
+  $('#minNUnit').textContent = a > 1 ? 'nuits' : 'nuit';
+  $('#maxNUnit').textContent = b > 1 ? 'nuits' : 'nuit';
+  $('[data-n="min"][data-d="-1"]').disabled = a <= 1;
+  $('[data-n="min"][data-d="1"]').disabled = a >= 30;
+  $('[data-n="max"][data-d="-1"]').disabled = b <= 1;
+  $('[data-n="max"][data-d="1"]').disabled = b >= 30;
+}
 
-  const vars = {
-    ORIGIN:       getOrigins().join(','),
-    MAX_PRICE:    document.getElementById('maxPrice').value,
-    DATE_FROM:    document.getElementById('dateFrom').value,
-    DATE_TO:      document.getElementById('dateTo').value,
-    MIN_NIGHTS:   document.getElementById('stayMin').value,
-    MAX_NIGHTS:   document.getElementById('stayMax').value,
-    MAX_STOPS:    stops,
-    DAYS:         days,
-    DESTINATIONS: document.getElementById('destinations').value.trim() || ' ',
-    CRON_MODE:    schedKey,
-  };
+function renderDays() {
+  const all = !state.days.length;
+  $('#dayGrid').classList.toggle('is-all', all);
+  $$('#dayGrid .day').forEach(b => b.setAttribute('aria-pressed', !all && state.days.includes(b.dataset.day)));
+  $$('#dayQuick .chip').forEach(b => {
+    const v = b.dataset.dq;
+    b.setAttribute('aria-pressed', v === 'all' ? all : daysVar(state.days) === 'friday,saturday');
+  });
+}
 
-  let allOk = true;
-  for (const [name, value] of Object.entries(vars)) {
-    const ok = await setVar(token, name, value);
-    if (!ok) { allOk = false; break; }
-  }
+function renderStops() {
+  $$('#stopsSeg input').forEach(i => { i.checked = i.value === state.stops; });
+}
 
-  if (allOk) {
-    showToast('Paramètres sauvegardés ✓','ok');
-    addLog('ok','✓ Paramètres automatiques mis à jour sur GitHub');
+function renderAgent() {
+  const on = state.enabled, sched = SCHEDULES[state.cron];
+  $('#agentSwitch').setAttribute('aria-checked', on);
+  const st = $('#agentStatus');
+  st.dataset.on = on;
+  st.querySelector('span').textContent = on ? 'Active : tu reçois les bons plans sur Telegram.' : 'En pause : aucune recherche automatique.';
+  $$('#freqGrid input').forEach(i => { i.checked = i.value === state.cron; });
+  const tl = $('#timeline');
+  tl.classList.toggle('paused', !on);
+  tl.setAttribute('aria-label', `Passages : ${sched.hint}`);
+  $$('#timeline .tick').forEach((t, h) => t.classList.toggle('on', sched.hours.includes(h)));
+  let parisHour = new Date().getHours();
+  try { parisHour = +new Intl.DateTimeFormat('fr-FR', {hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Paris'}).format(new Date()); } catch {}
+  const next = sched.hours.find(h => h > parisHour) ?? sched.hours[0];
+  $('#nextRun span').textContent = on
+    ? `Prochain passage vers ${next === 0 ? 'minuit' : next + ' h'} (heure de Paris).`
+    : 'Active l’interrupteur pour reprendre les passages automatiques.';
+  const r = $('#apiRange');
+  r.value = clamp(state.maxApiCalls, +r.min, +r.max);
+  r.style.setProperty('--pct', `${(r.value - r.min) / (r.max - r.min) * 100}%`);
+  $('#apiOut').textContent = state.maxApiCalls;
+  renderApiHint();
+}
+
+function renderApiHint() {
+  const est = lastEstimate, budget = state.maxApiCalls, h = $('#apiHint');
+  h.innerHTML = icon('info') + `<span>${est > budget
+    ? `Avec tes critères (≈ ${fmtNum(est)} recherches), les ${fmtNum(budget)} premières passent par FlyScraper, la suite par Ryanair (gratuit) et SerpAPI.`
+    : `Tes critères (≈ ${fmtNum(est)} recherches) tiennent dans ce budget.`}</span>`;
+}
+
+function renderPass() {
+  const o = state.origins, d = state.dests;
+  $('#pFrom').innerHTML = esc(o[0]) + (o.length > 1 ? `<span class="pass-badge">+${o.length - 1}</span>` : '');
+  $('#pFromSub').textContent = o.map(airportName).join(' · ');
+  if (!d.length) {
+    $('#pTo').textContent = 'TOUT';
+    $('#pToSub').textContent = 'Vols directs';
   } else {
-    showToast('Erreur lors de la sauvegarde','err');
+    $('#pTo').innerHTML = esc(d[0]) + (d.length > 1 ? `<span class="pass-badge">+${d.length - 1}</span>` : '');
+    $('#pToSub').textContent = d.slice(0, 3).map(airportName).join(' · ') + (d.length > 3 ? ' …' : '');
   }
+  $('#pPrice').textContent = `≤ ${state.maxPrice} €`;
+  $('#pStay').textContent = state.minNights === state.maxNights ? plural(state.minNights, 'nuit') : `${state.minNights} à ${state.maxNights} nuits`;
+  $('#pStops').textContent = STOPS[state.stops];
+  $('#pDates').textContent = `${fmtDate(state.dateFrom)} → ${fmtDate(state.dateTo)}`;
+  $('#pDays').textContent = state.days.length ? DAYS.filter(x => state.days.includes(x[0])).map(x => x[1]).join(' ') : 'Tous les jours';
 
-  btn.textContent = '💾 Sauvegarder comme paramètres automatiques';
-  btn.disabled = false;
-}
-
-// ── ORIGINS
-function toggleOrigin(el) {
-  el.classList.toggle('active');
-  if ([...document.querySelectorAll('[data-group="origin"].active')].length === 0) {
-    el.classList.add('active');
-  }
-  updateOriginInfo();
-}
-
-function getOrigins() {
-  return [...document.querySelectorAll('[data-group="origin"].active')].map(c => c.dataset.val);
-}
-
-function updateOriginInfo() {
-  const n = getOrigins().length;
-  const info = document.getElementById('originInfo');
-  if (n === 1) {
-    info.textContent = '1 aéroport sélectionné — fenêtre de dates complète';
-    info.style.color = 'var(--muted)';
+  const est = estimate();
+  lastEstimate = est;
+  const mins = Math.max(1, Math.round(est * SEC_PER_SEARCH / 60));
+  const dur = mins >= 60 ? `${Math.floor(mins / 60)} h ${pad(mins % 60)}` : `${mins} min`;
+  $('#pEst').textContent = est ? `≈ ${fmtNum(est)} recherches · ~${dur} par lancement` : 'Aucune recherche : vérifie la période';
+  const note = $('#estNote');
+  if (mins > WORKFLOW_LIMIT_MIN * 0.85) {
+    note.hidden = false;
+    note.querySelector('span').textContent = `Recherche très large (~${dur}) : GitHub coupe le workflow au bout d’1 h. Réduis la période, les destinations, les nuits ou les aéroports.`;
   } else {
-    info.textContent = `${n} aéroports — fenêtre de dates divisée par ${n} automatiquement`;
-    info.style.color = 'var(--warn)';
+    note.hidden = true;
   }
 }
 
-// ── SCHEDULE PILLS
-function renderPills() {
-  const key = document.getElementById('scheduleSelect').value;
-  const sched = SCHEDULES[key] || SCHEDULES['4xday'];
-  const enabled = document.getElementById('agentToggle').checked;
-  const dotClass = enabled ? 'dot' : 'dot off';
-  document.getElementById('schedulePills').innerHTML = sched.pills.map(h =>
-    `<div class="sched-pill"><span class="${dotClass}"></span>${h}</div>`
+function updateDirty() {
+  const el = $('#saveState'), txt = el.querySelector('span');
+  if (conn !== 'ok') { el.dataset.state = 'off'; txt.textContent = 'Non connecté · connecte ton token'; return; }
+  if (!savedVars) { el.dataset.state = 'off'; txt.textContent = 'Réglages GitHub non chargés'; return; }
+  const v = buildVars();
+  const n = Object.keys(v).filter(k => savedVars[k] !== v[k]).length;
+  el.dataset.state = n ? 'dirty' : 'clean';
+  txt.textContent = n ? `${plural(n, 'modification')} à enregistrer pour l’auto` : 'Réglages auto à jour';
+}
+
+function changed() {
+  renderPass();
+  renderApiHint();
+  updateDirty();
+}
+
+function renderAll() {
+  renderOrigins(); renderDests(); renderPrice(); renderDates(); renderNights();
+  renderDays(); renderStops(); renderPass(); renderAgent(); updateDirty();
+}
+
+// ── DESTINATIONS (autocomplétion) ───────────────────────────────────────────
+let sugItems = [], sugIndex = -1;
+
+function addDest(code) {
+  const c = String(code).toUpperCase();
+  if (!/^[A-Z]{3}$/.test(c)) return;
+  if (!state.dests.includes(c)) state.dests.push(c);
+  $('#destInput').value = '';
+  closeSug();
+  renderDests();
+  changed();
+}
+
+function removeDest(code) {
+  state.dests = state.dests.filter(c => c !== code);
+  renderDests();
+  changed();
+}
+
+function closeSug() {
+  sugItems = []; sugIndex = -1;
+  $('#destSug').hidden = true;
+  $('#destInput').setAttribute('aria-expanded', 'false');
+  $('#destInput').removeAttribute('aria-activedescendant');
+}
+
+function updateSug() {
+  const input = $('#destInput'), box = $('#destSug');
+  const q = input.value.trim();
+  if (!q) { closeSug(); return; }
+  const nq = norm(q), up = q.toUpperCase();
+  const scored = [];
+  for (const [c, name] of Object.entries(AIRPORTS)) {
+    if (state.dests.includes(c)) continue;
+    const nn = norm(name);
+    const s = c === up ? 0 : c.startsWith(up) ? 1 : nn.startsWith(nq) ? 2 : nn.includes(nq) ? 3 : -1;
+    if (s >= 0) scored.push([s, name, c]);
+  }
+  scored.sort((a, b) => a[0] - b[0] || a[1].localeCompare(b[1], 'fr'));
+  sugItems = scored.slice(0, 7).map(x => x[2]);
+  if (!sugItems.length && /^[A-Za-z]{3}$/.test(q) && !state.dests.includes(up)) sugItems = [up];
+  box.hidden = false;
+  input.setAttribute('aria-expanded', 'true');
+  if (!sugItems.length) {
+    sugIndex = -1;
+    box.innerHTML = '<li class="sug-empty">Aucun aéroport trouvé. Tu peux aussi taper un code à 3 lettres.</li>';
+    input.removeAttribute('aria-activedescendant');
+    return;
+  }
+  sugIndex = 0;
+  box.innerHTML = sugItems.map((c, i) =>
+    `<li role="option" id="sug-${i}" data-code="${c}" aria-selected="${i === 0}"><span>${esc(AIRPORTS[c] || 'Code personnalisé')}</span><b>${c}</b></li>`
   ).join('');
+  input.setAttribute('aria-activedescendant', 'sug-0');
 }
 
-// ── CHIPS
-function toggleChip(el) {
-  const group = el.dataset.group;
-  if (group === 'stops') {
-    document.querySelectorAll('[data-group="stops"]').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-  } else if (group === 'days') {
-    if (el.dataset.val === 'any') {
-      document.querySelectorAll('[data-group="days"]').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-    } else {
-      document.querySelector('[data-group="days"][data-val="any"]').classList.remove('active');
-      el.classList.toggle('active');
-      if (!document.querySelector('[data-group="days"].active')) {
-        document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
-      }
-    }
-  }
+function moveSug(delta) {
+  if (!sugItems.length) return;
+  sugIndex = (sugIndex + delta + sugItems.length) % sugItems.length;
+  $$('#destSug li[role="option"]').forEach((li, i) => li.setAttribute('aria-selected', i === sugIndex));
+  $('#destInput').setAttribute('aria-activedescendant', `sug-${sugIndex}`);
+  $(`#sug-${sugIndex}`)?.scrollIntoView({block: 'nearest'});
 }
 
-function getChips(group) {
-  return [...document.querySelectorAll(`[data-group="${group}"].active`)].map(c => c.dataset.val);
-}
+// ── PROFILS ─────────────────────────────────────────────────────────────────
+const PKEY = 'flight_profiles';
+const getProfiles = () => { try { const p = JSON.parse(store.get(PKEY) || '[]'); return Array.isArray(p) ? p : []; } catch { return []; } };
+const setProfiles = p => store.set(PKEY, JSON.stringify(p));
 
-function getDays() {
-  const active = getChips('days');
-  if (active.includes('any') || active.length === 0) return 'any';
-  return active.join(',');
-}
-
-// ── PROFILS
-function getProfiles() {
-  try { return JSON.parse(localStorage.getItem('flight_profiles') || '[]'); } catch { return []; }
-}
-
-function saveProfiles(p) { localStorage.setItem('flight_profiles', JSON.stringify(p)); }
-
-function getCriteria() {
+function criteria() {
   return {
-    max_price:  document.getElementById('maxPrice').value,
-    date_from:  document.getElementById('dateFrom').value,
-    date_to:    document.getElementById('dateTo').value,
-    min_nights: document.getElementById('stayMin').value,
-    max_nights: document.getElementById('stayMax').value,
-    max_stops:  getChips('stops')[0] || '1',
-    days:       getDays(),
-    destinations: document.getElementById('destinations').value.trim(),
+    origins: [...state.origins], dests: [...state.dests], max_price: state.maxPrice,
+    date_from: state.dateFrom, date_to: state.dateTo, min_nights: state.minNights,
+    max_nights: state.maxNights, max_stops: state.stops, days: daysVar(state.days),
   };
 }
 
-function saveProfile() {
-  const name = document.getElementById('profileName').value.trim();
-  if (!name) { showToast('Donne un nom au profil','err'); return; }
-  const profiles = getProfiles();
-  profiles.push({ id: Date.now(), name, criteria: getCriteria() });
-  saveProfiles(profiles);
-  document.getElementById('profileName').value = '';
-  renderProfiles();
-  showToast(`Profil "${name}" sauvegardé ✓`,'ok');
+function applyCriteria(c) {
+  // Compatible avec les profils de l'ancienne version du site
+  const o = (Array.isArray(c.origins) ? c.origins : []).filter(x => ORIGINS.includes(x));
+  if (o.length) state.origins = o;
+  state.dests = Array.isArray(c.dests) ? parseCodes(c.dests.join(',')) : parseCodes(c.destinations);
+  if (c.max_price && !isNaN(+c.max_price)) state.maxPrice = Math.round(+c.max_price);
+  if (parseISO(c.date_from)) state.dateFrom = c.date_from;
+  if (parseISO(c.date_to)) state.dateTo = c.date_to;
+  if (c.min_nights) state.minNights = clamp(+c.min_nights, 1, 30);
+  if (c.max_nights) state.maxNights = clamp(+c.max_nights, 1, 30);
+  if (state.maxNights < state.minNights) state.maxNights = state.minNights;
+  if (c.max_stops != null && !isNaN(+c.max_stops)) state.stops = String(clamp(+c.max_stops, 0, 2));
+  state.days = parseDays(c.days);
 }
 
-function loadProfile(id) {
-  const p = getProfiles().find(p => p.id === id);
-  if (!p) return;
-  const c = p.criteria;
-  document.getElementById('maxPrice').value = c.max_price;
-  document.getElementById('priceVal').textContent = c.max_price + '€';
-  document.getElementById('dateFrom').value  = c.date_from;
-  document.getElementById('dateTo').value    = c.date_to;
-  document.getElementById('stayMin').value   = c.min_nights;
-  document.getElementById('stayMax').value   = c.max_nights;
-  document.getElementById('destinations').value = c.destinations || '';
-  document.querySelectorAll('[data-group="stops"]').forEach(ch => ch.classList.remove('active'));
-  const sc = document.querySelector(`[data-group="stops"][data-val="${c.max_stops}"]`);
-  if (sc) sc.classList.add('active');
-  document.querySelectorAll('[data-group="days"]').forEach(ch => ch.classList.remove('active'));
-  if (c.days === 'any') {
-    document.querySelector('[data-group="days"][data-val="any"]').classList.add('active');
-  } else {
-    (c.days||'').split(',').forEach(v => {
-      const chip = document.querySelector(`[data-group="days"][data-val="${v.trim()}"]`);
-      if (chip) chip.classList.add('active');
-    });
-  }
-  showToast(`Profil "${p.name}" chargé ✓`,'ok');
-}
-
-function deleteProfile(id) {
-  saveProfiles(getProfiles().filter(p => p.id !== id));
-  renderProfiles();
-  showToast('Profil supprimé','warn');
+function profileSummary(c) {
+  const o = (Array.isArray(c.origins) && c.origins.length ? c.origins : ['TLS']).join('+');
+  const d = Array.isArray(c.dests) ? c.dests : parseCodes(c.destinations);
+  const to = d.length ? (d.length <= 3 ? d.join(' ') : `${d.slice(0, 3).join(' ')} +${d.length - 3}`) : 'toutes';
+  const days = parseDays(c.days);
+  const dayTxt = days.length ? DAYS.filter(x => days.includes(x[0])).map(x => x[1]).join(' ') : 'tous les jours';
+  return `${o} → ${to} · ≤ ${c.max_price} € · ${c.min_nights}–${c.max_nights} n · ${dayTxt}`;
 }
 
 function renderProfiles() {
-  const list = document.getElementById('profilesList');
-  const profiles = getProfiles();
+  const list = $('#profiles'), profiles = getProfiles();
   if (!profiles.length) {
-    list.innerHTML = '<div class="no-profiles">Aucun profil. Configure et clique "Sauver".</div>';
+    list.innerHTML = '<div class="empty">Aucun profil. Règle tes critères, donne-leur un nom et clique sur « Sauver ».</div>';
     return;
   }
-  const dayFmt = s => (s||'tous').replace(/monday/g,'Lun').replace(/tuesday/g,'Mar').replace(/wednesday/g,'Mer').replace(/thursday/g,'Jeu').replace(/friday/g,'Ven').replace(/saturday/g,'Sam').replace(/sunday/g,'Dim').replace(/any/g,'Tous');
-  list.innerHTML = profiles.map(p => {
-    const c = p.criteria;
-    const summary = `${c.max_price}€ · ${c.min_nights}-${c.max_nights}n · ${dayFmt(c.days)}${c.destinations?' · '+c.destinations:''}`;
-    return `<div class="profile-item">
-      <div class="profile-info">
-        <div class="profile-name">${p.name}</div>
-        <div class="profile-summary">${summary}</div>
+  list.innerHTML = profiles.map(p => `
+    <div class="profile">
+      <div class="profile-main">
+        <div class="profile-name">${esc(p.name)}</div>
+        <div class="profile-sum">${esc(profileSummary(p.criteria || {}))}</div>
       </div>
-      <div class="profile-actions">
-        <button class="btn btn-save btn-sm" onclick="loadProfile(${p.id})">Charger</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">✕</button>
-      </div>
-    </div>`;
-  }).join('');
+      <button type="button" class="btn btn-secondary btn-sm" data-load="${p.id}">Charger</button>
+      <button type="button" class="icon-btn" data-del="${p.id}" aria-label="Supprimer le profil ${esc(p.name)}">${icon('trash')}</button>
+    </div>`).join('');
 }
 
-// ── LAUNCH
-async function launchSearch() {
-  const token = localStorage.getItem('gh_token') || document.getElementById('ghToken').value.trim();
-  if (!token) { showToast('Token manquant','err'); return; }
-  const inputs = {
-    origin:       getOrigins().join(','),
-    max_price:    document.getElementById('maxPrice').value,
-    date_from:    document.getElementById('dateFrom').value,
-    date_to:      document.getElementById('dateTo').value,
-    min_nights:   document.getElementById('stayMin').value,
-    max_nights:   document.getElementById('stayMax').value,
-    max_stops:    getChips('stops')[0] || '1',
-    days:         getDays(),
-    destinations: document.getElementById('destinations').value.trim(),
-  };
-  setLoading(true);
-  addLog('info',`▶ Lancement · ${new Date().toLocaleTimeString('fr-FR')}`);
-  addLog('info',`  ${inputs.max_price}€ · ${inputs.date_from} → ${inputs.date_to} · ${inputs.min_nights}-${inputs.max_nights}n · ${inputs.days} · escales: ${inputs.max_stops}`);
-  try {
-    const r = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/${WORKFLOW_ID}/dispatches`,
-      { method:'POST', headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' },
-        body: JSON.stringify({ ref:'main', inputs }) }
-    );
-    if (r.status === 204) {
-      addLog('ok','✓ Workflow déclenché !');
-      showToast('Recherche lancée ✓','ok');
-      setTimeout(() => pollWorkflow(token), 5000);
-    } else {
-      const err = await r.json().catch(()=>({}));
-      addLog('err',`✗ Erreur ${r.status} : ${err.message||''}`);
-      showToast(`Erreur ${r.status}`,'err');
-    }
-  } catch(e) {
-    addLog('err',`✗ ${e.message}`);
+function saveProfile(e) {
+  e.preventDefault();
+  const input = $('#profileName'), name = input.value.trim();
+  if (!name) { toast('Donne un nom au profil', 'warn'); input.focus(); return; }
+  const profiles = getProfiles();
+  const existing = profiles.find(p => p.name.toLowerCase() === name.toLowerCase());
+  if (existing) existing.criteria = criteria();
+  else profiles.push({id: Date.now(), name, criteria: criteria()});
+  setProfiles(profiles);
+  input.value = '';
+  renderProfiles();
+  toast(existing ? `Profil « ${name} » mis à jour ✓` : `Profil « ${name} » sauvé ✓`, 'ok');
+}
+
+function loadProfile(id) {
+  const p = getProfiles().find(x => String(x.id) === String(id));
+  if (!p) return;
+  applyCriteria(p.criteria || {});
+  renderAll();
+  $('.pass').scrollIntoView({behavior: 'smooth', block: 'start'});
+  toast(`Profil « ${p.name} » chargé`, 'ok');
+}
+
+function deleteProfile(id) {
+  const profiles = getProfiles();
+  const idx = profiles.findIndex(x => String(x.id) === String(id));
+  if (idx < 0) return;
+  const [removed] = profiles.splice(idx, 1);
+  setProfiles(profiles);
+  renderProfiles();
+  toast(`Profil « ${removed.name} » supprimé`, 'warn', {label: 'Annuler', fn: () => {
+    const p = getProfiles();
+    p.splice(idx, 0, removed);
+    setProfiles(p);
+    renderProfiles();
+  }});
+}
+
+// ── JOURNAL & TOAST ─────────────────────────────────────────────────────────
+const LOG_ICON = {ok: 'check', err: 'alert', warn: 'alert', info: 'info'};
+function log(type, msg) {
+  const list = $('#logList');
+  list.querySelector('.log-empty')?.remove();
+  const row = document.createElement('li');
+  row.className = `log-row ${type}`;
+  const time = new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+  row.innerHTML = `<time>${time}</time>${icon(LOG_ICON[type] || 'info')}<span></span>`;
+  row.querySelector('span').textContent = msg;
+  list.prepend(row);
+  while (list.children.length > 60) list.lastElementChild.remove();
+}
+
+let toastTimer = null;
+function toast(msg, type = '', action = null) {
+  const t = $('#toast');
+  t.dataset.type = type;
+  t.innerHTML = '<span></span>';
+  t.querySelector('span').textContent = msg;
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'toast-act';
+    b.textContent = action.label;
+    b.addEventListener('click', () => { action.fn(); t.classList.remove('show'); });
+    t.appendChild(b);
   }
-  setLoading(false);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), action ? 6000 : 3200);
 }
 
-async function pollWorkflow(token) {
-  try {
-    const r = await fetch(
-      `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/runs?per_page=1`,
-      { headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' } }
-    );
-    if (!r.ok) return;
-    const run = (await r.json()).workflow_runs?.[0];
-    if (run) {
-      addLog('info',`  Run #${run.run_number} · ${run.status}`);
-      addLog('info',`  🔗 ${run.html_url}`);
+// ── INITIALISATION ──────────────────────────────────────────────────────────
+function build() {
+  $('#originList').innerHTML = ORIGINS.map(c =>
+    `<button type="button" class="opt" data-origin="${c}" aria-pressed="false"><span class="opt-code">${c}</span><span class="opt-name">${esc(airportName(c))}</span>${icon('check', 'i opt-check')}</button>`
+  ).join('');
+  $('#presets').innerHTML = `<button type="button" class="chip" data-preset="all" aria-pressed="false">Toutes les directes</button>` +
+    PRESETS.map(p => `<button type="button" class="chip" data-preset="${p.id}" aria-pressed="false">${esc(p.label)}<span class="chip-count">${p.codes.length}</span></button>`).join('');
+  $('#priceQuick').innerHTML = PRICE_QUICK.map(p => `<button type="button" class="chip" data-price="${p}" aria-pressed="false">${p} €</button>`).join('');
+  $('#dateQuick').innerHTML = DATE_QUICK.map(q => `<button type="button" class="chip" data-range="${q.id}" aria-pressed="false">${q.label}</button>`).join('');
+  $('#dayGrid').innerHTML = DAYS.map(([k, s, l]) => `<button type="button" class="day" data-day="${k}" aria-pressed="false" aria-label="${l}">${s}</button>`).join('');
+  $('#dayQuick').innerHTML = `<button type="button" class="chip" data-dq="all" aria-pressed="false">Tous les jours</button><button type="button" class="chip" data-dq="we" aria-pressed="false">Week-end (ven · sam)</button>`;
+  $('#freqGrid').innerHTML = Object.entries(SCHEDULES).map(([k, s]) =>
+    `<label class="freq"><input type="radio" name="freq" value="${k}"><span><b>${s.label}</b><small>${s.hint}</small></span></label>`
+  ).join('');
+  $('#timeline').innerHTML = Array.from({length: 24}, (_, h) => `<i class="tick" title="${h} h"></i>`).join('');
+}
+
+function wire() {
+  // Connexion
+  $('#connBtn').addEventListener('click', () => {
+    if (conn !== 'ok') showTokenForm(true);
+    $('#tokenCard').scrollIntoView({behavior: 'smooth', block: 'center'});
+    if (conn !== 'ok') setTimeout(() => $('#tokenInput').focus({preventScroll: true}), 350);
+  });
+  $('#connectBtn').addEventListener('click', () => connect($('#tokenInput').value));
+  let tokenTimer = null;
+  $('#tokenInput').addEventListener('keydown', e => { if (e.key === 'Enter') { clearTimeout(tokenTimer); connect(e.target.value); } });
+  $('#tokenInput').addEventListener('input', e => {
+    clearTimeout(tokenTimer);
+    setTokenMsg('', '');
+    if (e.target.value.trim().length >= 36) tokenTimer = setTimeout(() => connect(e.target.value), 700);
+  });
+  $('#eyeBtn').addEventListener('click', () => {
+    const i = $('#tokenInput'), show = i.type === 'password';
+    i.type = show ? 'text' : 'password';
+    $('#eyeBtn').setAttribute('aria-label', show ? 'Masquer le token' : 'Afficher le token');
+    $('#eyeBtn').innerHTML = icon(show ? 'eye-off' : 'eye');
+  });
+  $('#changeTokenBtn').addEventListener('click', () => { showTokenForm(true); $('#tokenInput').focus(); });
+  $('#logoutBtn').addEventListener('click', disconnect);
+
+  // Départ
+  $('#originList').addEventListener('click', e => {
+    const b = e.target.closest('.opt');
+    if (!b) return;
+    const c = b.dataset.origin;
+    if (state.origins.includes(c)) {
+      if (state.origins.length === 1) { toast('Garde au moins un aéroport de départ', 'warn'); return; }
+      state.origins = state.origins.filter(x => x !== c);
+    } else {
+      state.origins = ORIGINS.filter(x => x === c || state.origins.includes(x));
     }
-  } catch {}
+    renderOrigins();
+    changed();
+  });
+
+  // Destinations
+  const input = $('#destInput');
+  $('#tagbox').addEventListener('click', e => {
+    const x = e.target.closest('.tag-x');
+    if (x) { removeDest(x.dataset.remove); input.focus(); return; }
+    input.focus();
+  });
+  input.addEventListener('input', () => {
+    if (/[,;]/.test(input.value)) {
+      const parts = input.value.split(/[,;]/);
+      const last = parts.pop();
+      parseCodes(parts.join(',')).forEach(c => { if (!state.dests.includes(c)) state.dests.push(c); });
+      input.value = last.trimStart();
+      renderDests();
+      changed();
+    }
+    updateSug();
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); if ($('#destSug').hidden) updateSug(); else moveSug(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveSug(-1); }
+    else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (sugIndex >= 0 && sugItems[sugIndex]) addDest(sugItems[sugIndex]);
+      else if (/^[A-Za-z]{3}$/.test(input.value.trim())) addDest(input.value.trim());
+    }
+    else if (e.key === 'Escape') closeSug();
+    else if (e.key === 'Backspace' && !input.value && state.dests.length) removeDest(state.dests[state.dests.length - 1]);
+  });
+  input.addEventListener('focus', () => { if (input.value.trim()) updateSug(); });
+  input.addEventListener('blur', () => setTimeout(closeSug, 120));
+  $('#destSug').addEventListener('pointerdown', e => {
+    const li = e.target.closest('li[data-code]');
+    if (!li) return;
+    e.preventDefault();
+    addDest(li.dataset.code);
+  });
+  $('#presets').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    const p = PRESETS.find(x => x.id === b.dataset.preset);
+    if (!p) state.dests = [];
+    else if (p.codes.every(c => state.dests.includes(c))) state.dests = state.dests.filter(c => !p.codes.includes(c));
+    else p.codes.forEach(c => { if (!state.dests.includes(c)) state.dests.push(c); });
+    renderDests();
+    changed();
+  });
+  $('#clearDests').addEventListener('click', () => { state.dests = []; renderDests(); changed(); });
+
+  // Budget
+  $('#priceRange').addEventListener('input', e => { state.maxPrice = +e.target.value; renderPrice(); changed(); });
+  $('#priceQuick').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    state.maxPrice = +b.dataset.price;
+    renderPrice();
+    changed();
+  });
+
+  // Dates
+  ['dateFrom', 'dateTo'].forEach(id => $('#' + id).addEventListener('change', e => {
+    if (parseISO(e.target.value)) state[id] = e.target.value;
+    renderDates();
+    changed();
+  }));
+  $('#dateQuick').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    const q = DATE_QUICK.find(x => x.id === b.dataset.range);
+    state.dateFrom = iso(addDays(TODAY, q.from));
+    state.dateTo = iso(addDays(TODAY, q.to));
+    renderDates();
+    changed();
+  });
+
+  // Nuits
+  $$('.stepper button').forEach(b => b.addEventListener('click', () => {
+    const d = +b.dataset.d;
+    if (b.dataset.n === 'min') {
+      state.minNights = clamp(state.minNights + d, 1, 30);
+      if (state.minNights > state.maxNights) state.maxNights = state.minNights;
+    } else {
+      state.maxNights = clamp(state.maxNights + d, 1, 30);
+      if (state.maxNights < state.minNights) state.minNights = state.maxNights;
+    }
+    renderNights();
+    changed();
+  }));
+
+  // Jours
+  $('#dayGrid').addEventListener('click', e => {
+    const b = e.target.closest('.day');
+    if (!b) return;
+    const k = b.dataset.day;
+    if (!state.days.length) state.days = [k];
+    else if (state.days.includes(k)) state.days = state.days.filter(x => x !== k);
+    else state.days = [...state.days, k];
+    if (state.days.length === 7) state.days = [];
+    renderDays();
+    changed();
+  });
+  $('#dayQuick').addEventListener('click', e => {
+    const b = e.target.closest('.chip');
+    if (!b) return;
+    state.days = b.dataset.dq === 'we' ? ['friday', 'saturday'] : [];
+    renderDays();
+    changed();
+  });
+
+  // Escales
+  $('#stopsSeg').addEventListener('change', e => { state.stops = e.target.value; changed(); });
+
+  // Agent
+  $('#agentSwitch').addEventListener('click', toggleAgent);
+  $('#freqGrid').addEventListener('change', e => { state.cron = e.target.value; renderAgent(); changed(); });
+  $('#apiRange').addEventListener('input', e => { state.maxApiCalls = +e.target.value; renderAgent(); changed(); });
+
+  // Profils
+  $('#profileForm').addEventListener('submit', saveProfile);
+  $('#profiles').addEventListener('click', e => {
+    const load = e.target.closest('[data-load]'), del = e.target.closest('[data-del]');
+    if (load) loadProfile(load.dataset.load);
+    if (del) deleteProfile(del.dataset.del);
+  });
+
+  // Journal
+  $('#clearLog').addEventListener('click', () => {
+    $('#logList').innerHTML = '<li class="log-empty">Journal vidé.</li>';
+  });
+
+  // Actions
+  $('#saveBtn').addEventListener('click', saveParams);
+  $('#launchBtn').addEventListener('click', launch);
+
+  window.addEventListener('beforeunload', e => {
+    if ($('#saveState').dataset.state === 'dirty') { e.preventDefault(); e.returnValue = ''; }
+  });
 }
 
-// ── HELPERS
-function addLog(type, msg) {
-  const box = document.getElementById('logBox');
-  box.querySelector('.log-empty')?.remove();
-  const l = document.createElement('span');
-  l.className = `log-line ${type}`; l.textContent = msg;
-  box.appendChild(l); box.scrollTop = box.scrollHeight;
-}
-function clearLog() { document.getElementById('logBox').innerHTML = '<span class="log-empty">Logs effacés.</span>'; }
-function setLoading(on) {
-  document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
-  document.getElementById('btnText').textContent = on ? 'Recherche en cours…' : 'Lancer maintenant';
-  document.getElementById('launchBtn').disabled = on;
-}
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = type; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+build();
+wire();
+renderAll();
+renderProfiles();
+if (token) {
+  $('#tokenInput').value = token;
+  showTokenForm(false);
+  connect(token, {silent: true});
+} else {
+  showTokenForm(true);
 }
 </script>
 </body>
