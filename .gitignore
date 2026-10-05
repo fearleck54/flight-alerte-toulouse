@@ -1,0 +1,11 @@
+# Cache local des offres déjà vues (géré par le cache GitHub Actions)
+seen_deals.json
+
+# Variables d'environnement locales — ne jamais versionner
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
