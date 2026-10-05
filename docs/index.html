@@ -107,7 +107,7 @@ code{font-family:var(--mono);font-size:.9em}
 .hero p{margin:0;color:var(--muted);font-size:15.5px;max-width:54ch;font-weight:500}
 
 /* ── CARTE D'EMBARQUEMENT ──────────────────────────────────────────────── */
-.pass{margin:4px 0 22px;filter:drop-shadow(0 20px 26px rgba(42,33,64,.28))}
+.pass{margin:0 0 22px;filter:drop-shadow(0 20px 26px rgba(42,33,64,.28))}
 .pass-top,.pass-bottom{color:var(--pass-ink);background:linear-gradient(100deg,var(--pass-1),var(--pass-2))}
 .pass-top{border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 22px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;
   background:radial-gradient(90% 160% at 100% 0%,rgba(255,150,115,.26),transparent 60%),linear-gradient(100deg,var(--pass-1),var(--pass-2));
@@ -138,6 +138,8 @@ code{font-family:var(--mono);font-size:.9em}
   .pass-foot{padding:12px 18px 16px}
   .barcode{width:64px}
 }
+.recap-title{display:flex;align-items:center;gap:8px;margin:26px 2px 12px;font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.recap-title .i{width:16px;height:16px;color:var(--brick)}
 .callout{display:flex;gap:10px;align-items:flex-start;margin:-8px 0 18px;padding:12px 14px;border-radius:var(--r);font-size:13.5px;font-weight:600}
 .callout[data-tone="warn"]{background:var(--warn-soft);color:var(--warn)}
 .callout .i{margin-top:1px}
@@ -324,6 +326,9 @@ input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;b
 .token-done-text{flex:1;min-width:180px;margin:0;font-size:14px;font-weight:600}
 .token-done-text b{display:block;font-family:var(--mono);font-size:13px;font-weight:700;overflow-wrap:anywhere}
 .token-done-btns{display:flex;gap:8px}
+.perm{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 14px;border-radius:var(--r);background:var(--warn-soft);color:var(--warn);font-size:13.5px;font-weight:600}
+.perm .i{margin-top:1px}
+.perm a{display:inline-block;margin-top:6px;color:inherit;font-weight:800}
 .ok-badge{flex:none;width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--ok-soft);color:var(--ok)}
 
 /* Boutons */
@@ -462,35 +467,13 @@ input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;b
         <button type="button" class="btn btn-secondary btn-sm" id="logoutBtn">Déconnecter</button>
       </div>
     </div>
-  </section>
-
-  <!-- RÉSUMÉ -->
-  <section class="pass" aria-label="Résumé de ta recherche">
-    <div class="pass-top">
-      <div class="pass-col">
-        <span class="pass-label">Départ</span>
-        <span class="pass-code" id="pFrom">TLS</span>
-        <span class="pass-sub" id="pFromSub">Toulouse</span>
-      </div>
-      <div class="pass-route" aria-hidden="true"><span class="route-line"></span><svg class="route-plane"><use href="#i-plane"/></svg></div>
-      <div class="pass-col right">
-        <span class="pass-label">Arrivée</span>
-        <span class="pass-code" id="pTo">TOUT</span>
-        <span class="pass-sub" id="pToSub">Vols directs</span>
-      </div>
-    </div>
-    <div class="pass-bottom">
-      <div class="pass-grid">
-        <div><span class="pass-label">Budget</span><strong id="pPrice">≤ 80 €</strong></div>
-        <div><span class="pass-label">Séjour</span><strong id="pStay">2 à 5 nuits</strong></div>
-        <div><span class="pass-label">Escales</span><strong id="pStops">1 max</strong></div>
-        <div class="wide"><span class="pass-label">Période</span><strong id="pDates">—</strong></div>
-        <div><span class="pass-label">Départs</span><strong id="pDays">Tous les jours</strong></div>
-      </div>
-      <div class="pass-foot"><span id="pEst">—</span><span class="barcode" aria-hidden="true"></span></div>
+    <div class="perm" id="permMsg" hidden>
+      <svg class="i"><use href="#i-alert"/></svg>
+      <div><b>Permissions manquantes sur ton token : <span id="permList"></span>.</b>
+      Mets-les en <i>Read and write</i> dans les réglages du token, puis recharge la page.
+      <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">Ouvrir mes tokens GitHub</a></div>
     </div>
   </section>
-  <p class="callout" id="estNote" data-tone="warn" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
 
   <!-- 1. DÉPART -->
   <section class="card" aria-labelledby="t1">
@@ -596,6 +579,35 @@ input[type="range"]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;b
       <label><input type="radio" name="stops" value="2"><span>Peu importe</span></label>
     </div>
   </section>
+
+  <!-- RÉCAPITULATIF -->
+  <h2 class="recap-title" id="recap"><svg class="i"><use href="#i-check"/></svg>Récapitulatif</h2>
+  <section class="pass" aria-label="Résumé de ta recherche">
+    <div class="pass-top">
+      <div class="pass-col">
+        <span class="pass-label">Départ</span>
+        <span class="pass-code" id="pFrom">TLS</span>
+        <span class="pass-sub" id="pFromSub">Toulouse</span>
+      </div>
+      <div class="pass-route" aria-hidden="true"><span class="route-line"></span><svg class="route-plane"><use href="#i-plane"/></svg></div>
+      <div class="pass-col right">
+        <span class="pass-label">Arrivée</span>
+        <span class="pass-code" id="pTo">TOUT</span>
+        <span class="pass-sub" id="pToSub">Vols directs</span>
+      </div>
+    </div>
+    <div class="pass-bottom">
+      <div class="pass-grid">
+        <div><span class="pass-label">Budget</span><strong id="pPrice">≤ 80 €</strong></div>
+        <div><span class="pass-label">Séjour</span><strong id="pStay">2 à 5 nuits</strong></div>
+        <div><span class="pass-label">Escales</span><strong id="pStops">1 max</strong></div>
+        <div class="wide"><span class="pass-label">Période</span><strong id="pDates">—</strong></div>
+        <div><span class="pass-label">Départs</span><strong id="pDays">Tous</strong></div>
+      </div>
+      <div class="pass-foot"><span id="pEst">—</span><span class="barcode" aria-hidden="true"></span></div>
+    </div>
+  </section>
+  <p class="callout" id="estNote" data-tone="warn" hidden><svg class="i"><use href="#i-alert"/></svg><span></span></p>
 
   <!-- AGENT -->
   <section class="card" aria-labelledby="tA">
@@ -740,6 +752,12 @@ let token = store.get('gh_token') || '';
 let conn = 'off';
 let savedVars = null;   // dernière version connue des variables GitHub
 let lastEstimate = 0;
+const missingPerms = new Set();
+function setPerm(name, missing) {
+  if (missing) missingPerms.add(name); else missingPerms.delete(name);
+  $('#permMsg').hidden = !missingPerms.size;
+  $('#permList').textContent = [...missingPerms].join(' et ');
+}
 
 // Variables GitHub lues par le workflow (mêmes noms que flight_alert.yml)
 function buildVars() {
@@ -849,6 +867,7 @@ function disconnect() {
   store.del('gh_token');
   token = '';
   savedVars = null;
+  missingPerms.clear(); setPerm('', false);
   $('#tokenInput').value = '';
   setConn('off', 'Non connecté');
   setTokenMsg('', '');
@@ -860,6 +879,7 @@ function disconnect() {
 async function loadRemote() {
   try {
     const r = await gh('/actions/variables?per_page=50');
+    setPerm('Variables', r.status === 403);
     if (!r.ok) {
       savedVars = null;
       log('warn', r.status === 403 ? 'Lecture des réglages refusée : ajoute la permission « Variables » au token.' : `Lecture des réglages impossible (erreur ${r.status}).`);
@@ -917,6 +937,7 @@ async function saveParams() {
   } else {
     const s = failed[0][1];
     const why = s === 403 ? 'permission « Variables » manquante sur le token' : s === 0 ? 'erreur réseau' : `erreur ${s}`;
+    if (s === 403) setPerm('Variables', true);
     toast('L’enregistrement a échoué', 'err');
     log('err', `Échec pour ${failed.map(([k]) => k).join(', ')} : ${why}`);
   }
@@ -943,6 +964,7 @@ async function toggleAgent() {
   } else {
     state.enabled = !next;
     renderAgent();
+    if (a === 403 || b === 403) setPerm('Variables', true);
     toast('Impossible de modifier l’agent', 'err');
     log('err', `Changement d’état refusé (erreur ${a || b})`);
   }
@@ -951,6 +973,11 @@ async function toggleAgent() {
 
 async function launch() {
   if (!requireConn() || !validateDates(true)) return;
+  const mins = Math.round(lastEstimate * SEC_PER_SEARCH / 60);
+  if (mins > WORKFLOW_LIMIT_MIN * 0.85 && !confirm(`Cette recherche prendrait ~${mins} min, au-delà de la limite d’1 h de GitHub : elle risque d’être coupée sans t’envoyer d’alerte.\n\nLancer quand même ?`)) {
+    $('#recap').scrollIntoView({behavior: 'smooth', block: 'start'});
+    return;
+  }
   const v = buildVars();
   const inputs = {
     origin: v.ORIGIN, max_price: v.MAX_PRICE, date_from: v.DATE_FROM, date_to: v.DATE_TO,
@@ -964,6 +991,7 @@ async function launch() {
   log('info', `Lancement : ${state.origins.join(' + ')} → ${state.dests.length ? plural(state.dests.length, 'destination') : 'toutes les directes'} · ≤ ${state.maxPrice} € · ${fmtDate(state.dateFrom)} → ${fmtDate(state.dateTo)}`);
   try {
     const r = await gh(`/actions/workflows/${WORKFLOW}/dispatches`, {method: 'POST', body: JSON.stringify({ref: 'main', inputs})});
+    setPerm('Actions', r.status === 403);
     if (r.status === 204) {
       toast('Recherche lancée ✓', 'ok');
       log('ok', 'Workflow déclenché sur GitHub Actions');
@@ -1205,7 +1233,7 @@ function renderPass() {
   $('#pStay').textContent = state.minNights === state.maxNights ? plural(state.minNights, 'nuit') : `${state.minNights} à ${state.maxNights} nuits`;
   $('#pStops').textContent = STOPS[state.stops];
   $('#pDates').textContent = `${fmtDate(state.dateFrom)} → ${fmtDate(state.dateTo)}`;
-  $('#pDays').textContent = state.days.length ? DAYS.filter(x => state.days.includes(x[0])).map(x => x[1]).join(' ') : 'Tous les jours';
+  $('#pDays').textContent = state.days.length ? DAYS.filter(x => state.days.includes(x[0])).map(x => x[1]).join(' ') : 'Tous';
 
   const est = estimate();
   lastEstimate = est;
@@ -1379,7 +1407,7 @@ function loadProfile(id) {
   if (!p) return;
   applyCriteria(p.criteria || {});
   renderAll();
-  $('.pass').scrollIntoView({behavior: 'smooth', block: 'start'});
+  $('#recap').scrollIntoView({behavior: 'smooth', block: 'start'});
   toast(`Profil « ${p.name} » chargé`, 'ok');
 }
 
