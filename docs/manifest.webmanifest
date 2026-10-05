@@ -1,0 +1,16 @@
+{
+  "name": "Alertes vols Toulouse",
+  "short_name": "Alertes vols",
+  "description": "Configure tes alertes de bons plans vols et reçois-les sur Telegram.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F1EC",
+  "theme_color": "#B9452D",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
