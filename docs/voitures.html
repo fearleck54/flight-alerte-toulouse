@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chasseur d'Affaires Auto</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#16181d;--mute:#5d6572;--line:#e1e4ea;--acc:#1f6feb;--acc-ink:#fff;--ok:#1a7f4b;--warn:#a15c00;--bad:#b42318;--okbg:#e6f5ec;--warnbg:#fff3df;--badbg:#fde8e6}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1115;--card:#171a21;--ink:#eceff4;--mute:#9aa4b2;--line:#272c36;--acc:#5b9dff;--acc-ink:#07111f;--ok:#4cc38a;--warn:#f0b35a;--bad:#ff8a80;--okbg:#12281d;--warnbg:#2c2210;--badbg:#341716}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:4px 0 2px}
+h2{font-size:17px;margin:0 0 12px}
+.sub{color:var(--mute);margin:0 0 18px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+label{display:block;font-size:13px;color:var(--mute);margin-bottom:4px}
+select,input[type=number],textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:190px;resize:vertical;font-size:13px}
+.checks{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.checks label{display:inline-flex;gap:6px;align-items:center;margin:0;color:var(--ink);font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
+button,.btn{display:inline-block;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;text-decoration:none}
+button.primary,.btn.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+.sites{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.site{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.site h3{margin:0;font-size:15px}
+.site p{margin:0;color:var(--mute);font-size:13px;flex:1}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-part{background:var(--warnbg);color:var(--warn)}.b-bad{background:var(--badbg);color:var(--bad)}
+.res{border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
+.res h3{margin:0 0 4px;font-size:16px}
+.res dl{margin:8px 0 0;display:grid;grid-template-columns:130px 1fr;gap:4px 10px;font-size:14px}
+.res dt{color:var(--mute)}.res dd{margin:0;word-break:break-word}
+.why{margin-top:10px;padding:8px 10px;border-radius:8px;background:var(--okbg);color:var(--ok);font-weight:600;font-size:14px}
+.why.mid{background:var(--warnbg);color:var(--warn)}.why.low{background:var(--badbg);color:var(--bad)}
+.warn{color:var(--warn);font-size:13px;margin-top:6px}
+.rej{color:var(--mute);font-size:13px;border-top:1px solid var(--line);padding:8px 0}
+.note{font-size:13px;color:var(--mute)}
+.msg{margin:10px 0;padding:10px 12px;border-radius:8px;background:var(--warnbg);color:var(--warn);font-size:14px}
+@media (max-width:520px){.res dl{grid-template-columns:1fr}.res dt{margin-top:6px}}
+</style>
+</head>
+<body>
+<main>
+<h1>Chasseur d'Affaires Auto</h1>
+<p class="sub">Définis tes critères, ouvre les recherches déjà filtrées en France et en Allemagne, puis colle les annonces pour les comparer et trouver les meilleures affaires.</p>
+
+<section>
+<h2>1. Critères</h2>
+<div class="grid">
+<div><label for="cat">Catégorie</label><select id="cat"></select></div>
+<div><label for="brand">Marque</label><select id="brand"></select></div>
+<div><label for="model">Modèle</label><select id="model"></select></div>
+<div><label for="year">Première immatriculation (à partir de)</label><input id="year" type="number" min="2000" max="2030" placeholder="ex. 2020"></div>
+<div><label for="price">Prix maximum TTC (€)</label><input id="price" type="number" min="0" step="500" placeholder="ex. 25000"></div>
+<div><label for="km">Kilométrage maximum</label><input id="km" type="number" min="0" step="5000" placeholder="ex. 80000"></div>
+</div>
+<div class="row">
+<div class="checks"><span style="font-size:13px;color:var(--mute)">Finition :</span>
+<label><input type="checkbox" id="t-haute" checked> Haute</label>
+<label><input type="checkbox" id="t-milieu" checked> Milieu</label>
+<label><input type="checkbox" id="t-entree" checked> Entrée de gamme</label></div>
+</div>
+<div class="row">
+<div class="checks">
+<label><input type="checkbox" id="pro" checked> Vendeur professionnel uniquement</label>
+<label><input type="checkbox" id="acc" checked> Non accidenté, bon état</label>
+</div>
+</div>
+</section>
+
+<section>
+<h2>2. Recherches prêtes à ouvrir</h2>
+<div id="sites"></div>
+<p class="note" style="margin-top:12px">La finition ne peut pas être filtrée par lien (chaque marque nomme ses finitions différemment) : elle est vérifiée à l'étape 3.</p>
+</section>
+
+<section>
+<h2>3. Analyse des annonces</h2>
+<p class="note" style="margin-top:0">Ouvre une annonce, copie tout son texte (titre, prix, kilométrage, équipements, vendeur) et colle-le ici. Sépare les annonces par une ligne <code>---</code>, ou commence chacune par son lien. Au moins 3 annonces donnent un classement fiable.</p>
+<textarea id="paste" placeholder="https://www.autoscout24.fr/offres/...&#10;BMW 320d M Sport ...&#10;21 990 € · 45 000 km · 03/2021&#10;...&#10;---&#10;..."></textarea>
+<div class="row">
+<button class="primary" id="go">Analyser et classer</button>
+<button id="sample">Charger un exemple</button>
+<button id="clear">Vider</button>
+<button id="copy" hidden>Copier le résumé</button>
+</div>
+<div id="out"></div>
+</section>
+
+<p class="note">Les liens AutoScout24 (France et Allemagne) ont été testés : prix, année, kilométrage et vendeur professionnel sont bien appliqués. Le filtre « non accidenté » n'a pas pu être confirmé, c'est donc l'étape 3 qui écarte les annonces mentionnant un accident. Pour mobile.de, LeBonCoin, La Centrale, ParuVendu et Autosphere, certains filtres sont à confirmer sur le site. Prix des annonces allemandes : prévoir en plus carte grise, certificat de conformité, éventuel malus CO2, transport, et vérifier si la TVA est récupérable.</p>
+</main>
+
+<script>
+// [marque, slug marque, modèle, catégorie, slug AutoScout24 FR, slug AutoScout24 DE]
+const MODELS = [["Volkswagen","volkswagen","Polo","Citadine","polo","polo"],["Volkswagen","volkswagen","Golf","Compacte","golf","golf"],["Volkswagen","volkswagen","Passat","Berline","passat","passat"],["Volkswagen","volkswagen","Tiguan","SUV","tiguan","tiguan"],["Volkswagen","volkswagen","T-Roc","SUV","t-roc","t-roc"],["BMW","bmw","Série 1","Compacte","serie-1","1er"],["BMW","bmw","Série 3","Berline","serie-3","3er"],["BMW","bmw","Série 5","Berline","serie-5","5er"],["BMW","bmw","X1","SUV","x1","x1"],["BMW","bmw","X3","SUV","x3","x3"],["Audi","audi","A1","Citadine","a1","a1"],["Audi","audi","A3","Compacte","a3","a3"],["Audi","audi","A4","Berline","a4","a4"],["Audi","audi","A6","Berline","a6","a6"],["Audi","audi","Q3","SUV","q3","q3"],["Audi","audi","Q5","SUV","q5","q5"],["Mercedes-Benz","mercedes-benz","Classe A","Compacte","classe-a","a-klasse"],["Mercedes-Benz","mercedes-benz","Classe C","Berline","classe-c","c-klasse"],["Mercedes-Benz","mercedes-benz","Classe E","Berline","classe-e","e-klasse"],["Peugeot","peugeot","208","Citadine","208","208"],["Peugeot","peugeot","308","Compacte","308","308"],["Peugeot","peugeot","3008","SUV","3008","3008"],["Peugeot","peugeot","5008","Monospace","5008","5008"],["Renault","renault","Clio","Citadine","clio","clio"],["Renault","renault","Mégane","Compacte","megane","megane"],["Renault","renault","Captur","SUV","captur","captur"],["Renault","renault","Scénic","Monospace","scenic","scenic"],["Skoda","skoda","Fabia","Citadine","fabia","fabia"],["Skoda","skoda","Octavia","Berline","octavia","octavia"],["Skoda","skoda","Kodiaq","SUV","kodiaq","kodiaq"],["Skoda","skoda","Superb","Berline","superb","superb"],["Toyota","toyota","Yaris","Citadine","yaris","yaris"],["Toyota","toyota","Corolla","Compacte","corolla","corolla"],["Toyota","toyota","C-HR","SUV","c-hr","c-hr"],["Toyota","toyota","RAV4","SUV","rav4","rav4"],["Volvo","volvo","V60","Break","v60","v60"],["Volvo","volvo","XC40","SUV","xc40","xc40"],["Volvo","volvo","XC60","SUV","xc60","xc60"],["Opel","opel","Corsa","Citadine","corsa","corsa"],["Opel","opel","Astra","Compacte","astra","astra"],["Opel","opel","Mokka","SUV","mokka","mokka"],["Ford","ford","Fiesta","Citadine","fiesta","fiesta"],["Ford","ford","Focus","Compacte","focus","focus"],["Ford","ford","Kuga","SUV","kuga","kuga"],["Tesla","tesla","Model 3","Berline","model-3","model-3"],["Tesla","tesla","Model Y","SUV","model-y","model-y"],["Seat","seat","Ibiza","Citadine","ibiza","ibiza"],["Seat","seat","Leon","Compacte","leon","leon"],["Mini","mini","Cooper","Citadine","cooper",null]];
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY = 'chasseur-auto-v1';
+
+/* ---------- critères ---------- */
+const cats = [...new Set(MODELS.map(m => m[3]))].sort();
+const brands = [...new Set(MODELS.map(m => m[0]))].sort();
+function fillSelect(sel, items, first){ sel.innerHTML = ''; sel.append(new Option(first, '')); items.forEach(([v,t]) => sel.append(new Option(t, v))); }
+fillSelect($('cat'), cats.map(c => [c,c]), 'Toutes');
+fillSelect($('brand'), brands.map(b => [b,b]), 'Toutes');
+
+function refreshModels(keep){
+  const cat = $('cat').value, brand = $('brand').value;
+  const list = MODELS.map((m,i) => [m,i]).filter(([m]) => (!cat || m[3]===cat) && (!brand || m[0]===brand));
+  fillSelect($('model'), list.map(([m,i]) => [String(i), brand ? m[2] : m[0]+' '+m[2]]), 'Tous');
+  if(keep && list.some(([,i]) => String(i)===keep)) $('model').value = keep;
+}
+$('cat').onchange = () => { refreshModels($('model').value); save(); render(); };
+$('brand').onchange = () => { refreshModels($('model').value); save(); render(); };
+$('model').onchange = () => {
+  const m = MODELS[$('model').value];
+  if(m && !$('brand').value){ $('brand').value = m[0]; }
+  save(); render();
+};
+
+function criteria(){
+  const m = $('model').value !== '' ? MODELS[+$('model').value] : null;
+  const brand = $('brand').value || (m ? m[0] : '');
+  const any = MODELS.find(x => x[0]===brand);
+  return {
+    brand, make: any ? any[1] : '', m,
+    year: +$('year').value || 0, price: +$('price').value || 0, km: +$('km').value || 0,
+    trims: ['haute','milieu','entree'].filter(t => $('t-'+t).checked),
+    pro: $('pro').checked, acc: $('acc').checked, cat: $('cat').value
+  };
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify({cat:$('cat').value,brand:$('brand').value,model:$('model').value,year:$('year').value,price:$('price').value,km:$('km').value,
+    th:$('t-haute').checked,tm:$('t-milieu').checked,te:$('t-entree').checked,pro:$('pro').checked,acc:$('acc').checked})); }catch(e){}
+}
+function load(){
+  let s = null; try{ s = JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
+  if(!s) return refreshModels();
+  $('cat').value = s.cat||''; $('brand').value = s.brand||''; refreshModels(s.model||'');
+  $('year').value = s.year||''; $('price').value = s.price||''; $('km').value = s.km||'';
+  $('t-haute').checked = s.th!==false; $('t-milieu').checked = s.tm!==false; $('t-entree').checked = s.te!==false;
+  $('pro').checked = s.pro!==false; $('acc').checked = s.acc!==false;
+}
+['year','price','km','t-haute','t-milieu','t-entree','pro','acc'].forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
+
+/* ---------- liens de recherche ---------- */
+const noAccent = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'');
+function as24(dom, cy, c){
+  const slug = c.m ? (dom==='fr' ? c.m[4] : c.m[5]) : null;
+  const p = new URLSearchParams({atype:'C', cy, sort:'price', desc:'0', ustate:'N,U'});
+  if(c.pro) p.set('custtype','D');
+  if(c.acc) p.set('damaged_listing','exclude');
+  if(c.year) p.set('fregfrom', c.year);
+  if(c.price) p.set('priceto', c.price);
+  if(c.km) p.set('kmto', c.km);
+  return `https://www.autoscout24.${dom}/lst/${c.make}${slug ? '/'+slug : ''}?${p}`;
+}
+function sitesFor(c){
+  const label = (c.brand + ' ' + (c.m ? c.m[2] : '')).trim();
+  const q = encodeURIComponent(label);
+  const crit = [label, c.year && 'à partir de '+c.year, c.price && 'max '+c.price+' €', c.km && 'max '+c.km+' km', c.pro && 'vendeur pro', c.acc && 'non accidenté'].filter(Boolean).join(', ');
+  const out = [];
+  out.push({n:'AutoScout24 France', d:'Annonces de professionnels en France.', s:'ok', u:as24('fr','F',c)});
+  out.push({n:'AutoScout24 Allemagne', d:'Annonces de professionnels en Allemagne (site allemand).', s:'ok', u:as24('de','D',c)});
+  out.push({n:'AutoScout24 FR, annonces d\'Allemagne', d:'Interface en français, annonces de vendeurs allemands.', s:'part', u:as24('fr','D',c)});
+  const mp = new URLSearchParams({isSearchRequest:'true', vc:'Car', dam:'0', damageUnrepaired:'NO_DAMAGE_UNREPAIRED', sb:'p', od:'up'});
+  if(c.year) mp.set('fr', c.year+':'); if(c.price) mp.set('p', ':'+c.price); if(c.km) mp.set('ml', ':'+c.km);
+  out.push({n:'mobile.de', d:'Prix, année, kilométrage et non accidenté sont préremplis. Choisis la marque, le modèle et « Händler » (vendeur pro) sur le site. Il bloque les robots, d\'où les critères à saisir.', s:'part', u:'https://suchen.mobile.de/fahrzeuge/search.html?'+mp});
+  const lb = new URLSearchParams({category:'2', text:label, sort:'price', order:'asc'});
+  if(c.pro) lb.set('owner_type','pro'); if(c.price) lb.set('price','min-'+c.price); if(c.year) lb.set('regdate', c.year+'-max'); if(c.km) lb.set('mileage','min-'+c.km);
+  out.push({n:'LeBonCoin', d:'Recherche avec filtre « Professionnel ». À vérifier sur le site.', s:'part', u:'https://www.leboncoin.fr/recherche?'+lb});
+  const lc = new URLSearchParams({sortBy:'priceAsc'});
+  if(c.m) lc.set('makesModelsCommercialNames', noAccent(c.brand).toUpperCase()+':'+noAccent(c.m[2]).toUpperCase()); else if(c.brand) lc.set('makesModelsCommercialNames', noAccent(c.brand).toUpperCase());
+  if(c.price) lc.set('priceMax', c.price); if(c.year) lc.set('yearMin', c.year); if(c.km) lc.set('mileageMax', c.km);
+  out.push({n:'La Centrale', d:'Prix, année et kilométrage préremplis. Choisis « Professionnel » sur le site.', s:'part', u:'https://www.lacentrale.fr/listing?'+lc, crit});
+  out.push({n:'ParuVendu', d:'Ouvre le site : saisis les critères copiés ci-dessus.', s:'bad', u:'https://www.paruvendu.fr/auto-moto/', crit});
+  out.push({n:'Autosphere', d:'Réseau de concessions : ouvre le site et saisis les critères.', s:'bad', u:'https://www.autosphere.fr/', crit});
+  return {list:out, crit};
+}
+const BADGE = {ok:['b-ok','Filtres testés'], part:['b-part','Filtres partiels'], bad:['b-bad','À saisir sur le site']};
+function render(){
+  const c = criteria(), box = $('sites');
+  if(!c.make){ box.innerHTML = '<div class="msg">Choisis une marque (et si possible un modèle) pour générer les liens.</div>'; return; }
+  const {list, crit} = sitesFor(c);
+  box.innerHTML = '<div class="sites">' + list.map(s => `<div class="site"><h3>${esc(s.n)} <span class="badge ${BADGE[s.s][0]}">${BADGE[s.s][1]}</span></h3><p>${esc(s.d)}</p>
+    <div><a class="btn primary" href="${esc(s.u)}" target="_blank" rel="noopener noreferrer">Ouvrir la recherche</a></div></div>`).join('') + '</div>'
+    + `<div class="row"><button id="cpcrit">Copier mes critères</button><span class="note">${esc(crit)}</span></div>`;
+  $('cpcrit').onclick = () => copy(crit, $('cpcrit'));
+}
+async function copy(text, btn){
+  const old = btn.textContent;
+  try{ await navigator.clipboard.writeText(text); btn.textContent = 'Copié'; }catch(e){ btn.textContent = 'Copie impossible'; }
+  setTimeout(() => btn.textContent = old, 1500);
+}
+
+/* ---------- extraction ---------- */
+const num = s => parseInt(String(s).replace(/[^\d]/g,''), 10);
+const EQUIP = [
+ ['toit ouvrant / panoramique', /toit ouvrant|toit panoramique|schiebedach|panoramadach|panoramic/i],
+ ['sièges chauffants', /si[eè]ges? chauffants?|sitzheizung/i],
+ ['caméra de recul / 360°', /cam[eé]ra|r[üu]ckfahrkamera|360/i],
+ ['navigation / GPS', /navigation|\bgps\b|\bnavi\b/i],
+ ['attelage', /attelage|anh[äa]ngerkupplung|\bahk\b/i],
+ ['phares LED / Matrix', /\bled\b|matrix|laser/i],
+ ['cuir', /\bcuir\b|leder|alcantara/i],
+ ['régulateur adaptatif', /r[ée]gulateur adaptatif|\bacc\b|abstandstempomat|distronic/i],
+ ['CarPlay / Android Auto', /carplay|android auto/i],
+ ['affichage tête haute', /t[êe]te haute|head[- ]?up/i],
+ ['clé mains libres', /mains libres|keyless/i],
+ ['hayon électrique', /hayon (?:[ée]lectrique|motoris[ée])|elektr\.? ?heckklappe/i],
+ ['son premium', /bose|harman|burmester|bang ?& ?olufsen|focal|meridian/i],
+ ['jantes alliage 18"+', /jantes?.{0,15}(?:18|19|20|21)|(?:18|19|20|21)\s*(?:"|pouces|zoll)/i]
+];
+const TRIM = {
+ haute: /\bm[ -]?sport\b|\bamg\b|s[ -]?line|r[ -]?line|gt[ -]?line|\bgti\b|\bgtd\b|\binitiale\b|\binscription\b|\bexclusive\b|\bprestige\b|\bultimate\b|\bsummit\b|r[ -]?design|\bluxury\b|\bgt\b|\blaunch edition\b|first edition|\bexecutive\b|\bpremium\b/i,
+ milieu: /\bbusiness\b|\bcomfort(?:line)?\b|\bconfort\b|\bactive\b|\bstyle\b|\ballure\b|\bdynamic\b|\bzen\b|\btechno\b|\badvance\b|\belegance\b|\b[ée]l[ée]gance\b|\bdesign\b|\bsport[ -]?line\b|\bedition\b|\bevolution\b|\bintens\b/i,
+ entree: /\baccess\b|\bessentiel\b|\bstart\b|\bbasis\b|\bbase\b|\blife\b|\btrendline\b|\bvisia\b|\bpure\b|\bstandard\b/i
+};
+const TRIMNAME = {haute:'Finition haute', milieu:'Finition milieu de gamme', entree:'Finition entrée de gamme'};
+const FUELS = [['hybride rechargeable', /plug-?in|rechargeable|phev/i], ['hybride', /hybrid|hybride/i], ['électrique', /[ée]lectrique|elektro|\bbev\b/i], ['diesel', /diesel|\bhdi\b|\btdi\b|\bdci\b|\bcdi\b/i], ['essence', /essence|benzin|\btsi\b|\btfsi\b|\bpuretech\b|\btce\b|\bhybrid\b/i]];
+const BAD = /accident[ée]|unfall(?!frei)|unfallschaden|[ée]pave|moteur hs|à réparer|a reparer|defekt|motorschaden|bastler|ersatzteil|non roulant|nicht fahrbereit|sinistr[ée]|\bvei\b|dommages? (?:importants?|carrosserie)|\bschaden\b(?!sfrei)/i;
+const NEG = /non[ -]accident[ée]e?s?|sans accident|pas d.accident|aucun accident|unfallfrei|nicht unfallbesch[äa]digt|sans dommage|kein unfall/gi;
+const GOOD = /non accident[ée]|sans accident|pas d.accident|unfallfrei|premi[èe]re main|scheckheft|carnet d.entretien|garantie/i;
+const PRIVATE = /particulier|privatverk|privatanbieter|\bprivat\b/i;
+const DEALER = /professionnel|vendeur pro|concession|garage|h[äa]ndler|gewerblich|autohaus|dealer|\bgmbh\b|\bsarl\b|\bsas\b|automobiles?\b|\bkfz\b/i;
+
+function findPrice(t){
+  const res = [/(?:€\s*)(\d{1,3}(?:[.\s  ']\d{3})+|\d{4,6})/gi, /(\d{1,3}(?:[.\s  ']\d{3})+|\d{4,6})(?:[,.]\d{2})?\s*(?:€|eur\b|euros?|,-)/gi];
+  for(const re of res){
+    let m; while((m = re.exec(t))){
+      const around = t.slice(m.index, m.index + m[0].length + 14).toLowerCase();
+      if(/\/\s*mois|pro monat|\bmtl|par mois|\/mo\b|à partir de .{0,6}\/|loyer/.test(around)) continue;
+      const v = num(m[1]); if(v >= 2000 && v <= 300000) return v;
+    }
+  }
+  return null;
+}
+function findKm(t){
+  const re = /(\d{1,3}(?:[.\s  ]\d{3})+|\d{2,6})\s*km\b(?!\s*\/\s*h)/gi; let m;
+  while((m = re.exec(t))){ const v = num(m[1]); if(v >= 0 && v <= 500000) return v; }
+  return null;
+}
+function findYear(t){
+  let m = t.match(/(?:\bEZ\b|erstzulassung|mise en circulation|immatriculation|immat\.?|baujahr|ann[ée]e)[^\d]{0,20}(?:\d{1,2}\s*[\/.\-]\s*)?((?:19|20)\d{2})/i);
+  if(m) return +m[1];
+  m = t.match(/\b\d{1,2}\s*\/\s*((?:19|20)\d{2})\b/); if(m) return +m[1];
+  m = t.match(/\b(20[0-2]\d)\b/); return m ? +m[1] : null;
+}
+function median(a){ const s = [...a].sort((x,y)=>x-y), n = s.length; return n ? (n%2 ? s[(n-1)/2] : (s[n/2-1]+s[n/2])/2) : null; }
+
+function parseListing(block){
+  const t = block.trim();
+  const url = (t.match(/https?:\/\/[^\s<>"')]+/i)||[])[0] || '';
+  const lines = t.split(/\n/).map(l => l.trim()).filter(Boolean);
+  const title = (lines.find(l => !/^https?:\/\//i.test(l) && l.length > 3) || 'Annonce sans titre').slice(0, 110);
+  const price = findPrice(t), km = findKm(t), year = findYear(t);
+  const pw = t.match(/(\d{2,3})\s*(ch|cv|ps|hp|kw)\b/i);
+  const fuel = (FUELS.find(([,re]) => re.test(t))||[])[0] || '';
+  const equip = EQUIP.filter(([,re]) => re.test(t)).map(e => e[0]);
+  let trim = null; for(const k of ['haute','milieu','entree']){ const m = t.match(TRIM[k]); if(m){ trim = {k, word:m[0].trim()}; break; } }
+  let seller = '', re = /(?:vendeur|h[äa]ndler|verk[äa]ufer|anbieter|concession(?:naire)?)\s*[:\-]?\s*([^\n]{3,70})/gi, m;
+  while((m = re.exec(t))){ const v = m[1].split(/,|\s[·|]\s|\(\d|\b\d{5}\b/)[0].trim(); if(!v) continue; if(!/^(professionnel|pro\b|particulier|gewerblich|privat)/i.test(v)){ seller = v; break; } }
+  const city = ((t.match(/(?:\bD-)?(\d{5})\s+([A-ZÀ-ÖØ-Ý][\p{L}'\- ]{1,30})/u))||[]).slice(1,3);
+  const rating = (t.match(/(\d[.,]\d)\s*(?:\/\s*5|★|sterne|[ée]toiles?|stars?)/i)||[])[1];
+  const rcount = (t.match(/\(?(\d{1,5})\s*(?:avis|bewertungen|reviews?)\)?/i)||[])[1];
+  const de = /\.de\b|mobile\.de/i.test(url) || /erstzulassung|h[äa]ndler|mwst|\bEZ\b/i.test(t);
+  return {
+    url, title, price, km, year, power: pw ? pw[1]+' '+pw[2].toLowerCase().replace('ps','ch').replace('cv','ch') : '', fuel, equip, trim,
+    seller, city: city[1] ? city[1].trim()+' ('+city[0]+')' : '', rating: rating ? rating.replace(',','.') : '', rcount: rcount||'',
+    country: de ? 'Allemagne' : 'France',
+    pro: PRIVATE.test(t) ? false : (DEALER.test(t) ? true : null),
+    accident: BAD.test(t.replace(NEG,' ')), good: GOOD.test(t), vatNote: /mwst\.? ausweisbar|tva r[ée]cup/i.test(t)
+  };
+}
+function splitBlocks(txt){
+  const t = txt.replace(/\r/g,'').trim(); if(!t) return [];
+  if(/^\s*-{3,}\s*$/m.test(t)) return t.split(/^\s*-{3,}\s*$/m).map(s => s.trim()).filter(Boolean);
+  const parts = t.split(/\n(?=\s*https?:\/\/)/); return parts.map(s => s.trim()).filter(Boolean);
+}
+
+/* ---------- analyse ---------- */
+let lastSummary = '';
+function analyse(){
+  const c = criteria(), blocks = splitBlocks($('paste').value), out = $('out');
+  $('copy').hidden = true;
+  if(!blocks.length){ out.innerHTML = '<div class="msg">Colle d\'abord le texte d\'au moins une annonce.</div>'; return; }
+  const all = blocks.map(parseListing), rejected = [], kept = [];
+  all.forEach(a => {
+    const why = [];
+    if(a.price == null) why.push('prix introuvable');
+    else if(c.price && a.price > c.price) why.push(`prix ${a.price} € au-dessus du maximum`);
+    if(c.year && a.year && a.year < c.year) why.push(`immatriculée en ${a.year}, avant ${c.year}`);
+    if(c.km && a.km != null && a.km > c.km) why.push(`${a.km} km au-dessus du maximum`);
+    if(c.pro && a.pro === false) why.push('vendeur particulier');
+    if(c.acc && a.accident) why.push('mention d\'accident ou de dommage');
+    if(a.trim && c.trims.length && !c.trims.includes(a.trim.k)) why.push(TRIMNAME[a.trim.k].toLowerCase()+' non souhaitée');
+    (why.length ? rejected : kept).push(why.length ? {a, why} : a);
+  });
+  const pool = all.filter(a => a.price != null && !a.accident);
+  const enough = pool.length >= 3;
+  const mP = median(pool.map(a => a.price)), mK = median(pool.filter(a => a.km != null).map(a => a.km)) ?? 0, mY = median(pool.filter(a => a.year).map(a => a.year)) ?? 0;
+  kept.forEach(a => {
+    if(!enough || !mP){ a.deal = null; return; }
+    const expected = mP + (mK - (a.km ?? mK)) * 0.05 + ((a.year ?? mY) - mY) * 1200 + a.equip.length * 150;
+    a.expected = Math.round(expected); a.deal = (expected - a.price) / expected;
+  });
+  kept.sort((x,y) => enough ? (y.deal - x.deal) : (x.price - y.price));
+
+  let html = '';
+  if(!enough) html += `<div class="msg">Seulement ${pool.length} annonce(s) exploitable(s) : le classement se fait par prix. Ajoutes-en au moins 3 pour comparer le rapport prix, kilométrage et année.</div>`;
+  const lines = [];
+  kept.forEach((a, i) => {
+    const pct = a.deal == null ? null : Math.round(a.deal * 100);
+    const lab = pct == null ? '' : pct >= 12 ? 'Très bonne affaire' : pct >= 5 ? 'Bonne affaire' : pct >= -5 ? 'Prix correct' : 'Plutôt cher';
+    const cls = pct == null ? 'mid' : pct >= 5 ? '' : pct >= -5 ? 'mid' : 'low';
+    const parts = [];
+    if(pct != null) parts.push(pct >= 0 ? `${pct} % sous le prix attendu` : `${-pct} % au-dessus du prix attendu`);
+    if(pct != null) parts.push(`pour ${a.km != null ? a.km.toLocaleString('fr-FR')+' km' : 'un kilométrage inconnu'} et ${a.year ?? 'une année inconnue'}`);
+    if(a.equip.length) parts.push(a.equip.length+' équipement'+(a.equip.length>1?'s':'')+' notable'+(a.equip.length>1?'s':''));
+    if(a.pro) parts.push('vendeur pro');
+    if(a.good) parts.push('mention de bon état ou d\'entretien');
+    const why = (pct == null ? 'Moins cher de la sélection' : lab) + (parts.length ? ' : ' + parts.join(', ') + '.' : '.');
+    const motor = [a.fuel, a.power].filter(Boolean).join(' ') || 'motorisation non détectée';
+    const fin = a.trim ? a.trim.word + ' (' + TRIMNAME[a.trim.k].toLowerCase() + ')' : 'finition non détectée';
+    const seller = [a.seller || 'vendeur non détecté', a.city, a.rating ? `note ${a.rating}/5${a.rcount ? ' sur '+a.rcount+' avis' : ''}` : 'note non détectée'].filter(Boolean).join(' · ');
+    const link = /^https?:\/\//i.test(a.url) ? `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.url)}</a>` : '<em>non fourni</em>';
+    const warns = [];
+    if(a.pro == null && c.pro) warns.push('Vendeur non identifié comme professionnel : à vérifier.');
+    if(!a.trim && c.trims.length < 3) warns.push('Finition non détectée : à vérifier.');
+    if(a.year == null) warns.push('Année d\'immatriculation non détectée.');
+    if(a.country === 'Allemagne') warns.push('Annonce allemande : le prix n\'inclut ni carte grise, ni certificat de conformité, ni transport'+(a.vatNote ? ' ; TVA récupérable mentionnée, prix net possible.' : '.'));
+    html += `<div class="res"><h3>#${i+1} ${esc(a.title)}</h3>
+      <dl><dt>URL</dt><dd>${link}</dd>
+      <dt>Finition, motorisation, année</dt><dd>${esc(fin)} · ${esc(motor)} · ${a.year ?? 'année inconnue'}</dd>
+      <dt>Kilométrage et prix TTC</dt><dd>${a.km != null ? a.km.toLocaleString('fr-FR')+' km' : 'km inconnu'} · <strong>${a.price.toLocaleString('fr-FR')} €</strong>${a.expected ? ' (prix attendu environ '+a.expected.toLocaleString('fr-FR')+' €)' : ''}</dd>
+      <dt>Équipements notables</dt><dd>${a.equip.length ? esc(a.equip.join(', ')) : 'aucun détecté'}</dd>
+      <dt>Vendeur</dt><dd>${esc(seller)} · ${a.country}</dd></dl>
+      <div class="why ${cls}">${esc(why)}</div>${warns.map(w => `<div class="warn">${esc(w)}</div>`).join('')}</div>`;
+    lines.push(`${i+1}. ${a.url || a.title}\n   ${fin}, ${motor}, ${a.year ?? '?'}\n   ${a.km != null ? a.km+' km' : 'km ?'}, ${a.price} € TTC\n   Équipements : ${a.equip.join(', ') || 'aucun détecté'}\n   Vendeur : ${seller}\n   ${why}`);
+  });
+  if(!kept.length) html += '<div class="msg">Aucune annonce ne respecte tous tes critères.</div>';
+  if(rejected.length) html += '<h3 style="margin:18px 0 4px;font-size:15px">Écartées (' + rejected.length + ')</h3>' + rejected.map(r => `<div class="rej"><strong>${esc(r.a.title)}</strong> : ${esc(r.why.join(', '))}</div>`).join('');
+  html += '<p class="note">Le « prix attendu » est une estimation à partir des annonces que tu as collées (kilométrage, année, équipements), pas un prix de marché officiel. Plus ta sélection est large, plus elle est fiable.</p>';
+  out.innerHTML = html;
+  lastSummary = lines.join('\n\n');
+  $('copy').hidden = !lines.length;
+}
+
+const SAMPLE = `https://exemple.test/annonce-1
+BMW 320d Touring M Sport - 190 ch Diesel
+Première immatriculation 03/2021 · 52 000 km
+Prix : 27 900 €
+Équipements : toit ouvrant panoramique, sièges chauffants, caméra de recul, navigation, attelage, phares LED, CarPlay
+Vendeur : Garage Martin Automobiles, 31000 Toulouse, 4,6/5 (128 avis)
+Véhicule non accidenté, carnet d'entretien complet
+---
+https://exemple.test/annonce-2
+BMW 320d Touring Business - 190 ch Diesel
+Erstzulassung 05/2020 · 78.000 km
+26.400 €
+Ausstattung: Navi, Sitzheizung, Rückfahrkamera, LED
+Händler: Autohaus Becker GmbH, 80331 München, 4,8 Sterne (310 Bewertungen)
+Unfallfrei, Scheckheft
+---
+https://exemple.test/annonce-3
+BMW 320d Touring M Sport - 190 ch Diesel
+Mise en circulation 09/2021 · 49 000 km
+31 500 €
+Équipements : toit ouvrant, sièges chauffants, caméra, navigation, attelage, Head-up
+Vendeur : Concession Dupont, 69003 Lyon
+---
+https://exemple.test/annonce-4
+BMW 320d Touring - 150 ch Diesel
+Première immatriculation 2019 · 95 000 km
+Prix : 19 800 €
+Vendeur particulier. Véhicule accidenté, à réparer
+---
+https://exemple.test/annonce-5
+BMW 320d Touring M Sport 190 ch Diesel
+Erstzulassung 10/2021 · 61.000 km
+28.900 €
+Panoramadach, Sitzheizung, Rückfahrkamera, Navi, Anhängerkupplung, Leder, LED
+Händler: Auto Schmidt GmbH, 50667 Köln, 4,3 Sterne (75 Bewertungen), MwSt. ausweisbar
+Unfallfrei`;
+
+$('go').onclick = analyse;
+$('sample').onclick = () => { $('paste').value = SAMPLE; analyse(); };
+$('clear').onclick = () => { $('paste').value = ''; $('out').innerHTML = ''; $('copy').hidden = true; };
+$('copy').onclick = () => copy(lastSummary, $('copy'));
+load(); render();
+</script>
+</body>
+</html>
