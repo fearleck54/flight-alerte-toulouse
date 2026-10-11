@@ -56,6 +56,7 @@ button.primary,.btn.primary{background:var(--acc);color:var(--acc-ink);border-co
 <div><label for="year">Première immatriculation (à partir de)</label><input id="year" type="number" min="2000" max="2030" placeholder="ex. 2020"></div>
 <div><label for="price">Prix maximum TTC (€)</label><input id="price" type="number" min="0" step="500" placeholder="ex. 25000"></div>
 <div><label for="km">Kilométrage maximum</label><input id="km" type="number" min="0" step="5000" placeholder="ex. 80000"></div>
+<div><label for="imp">Frais d'import si annonce allemande (€)</label><input id="imp" type="number" min="0" step="100" placeholder="900"></div>
 </div>
 <div class="row">
 <div class="checks"><span style="font-size:13px;color:var(--mute)">Finition :</span>
@@ -74,7 +75,7 @@ button.primary,.btn.primary{background:var(--acc);color:var(--acc-ink);border-co
 <section>
 <h2>2. Recherches prêtes à ouvrir</h2>
 <div id="sites"></div>
-<p class="note" style="margin-top:12px">La finition ne peut pas être filtrée par lien (chaque marque nomme ses finitions différemment) : elle est vérifiée à l'étape 3.</p>
+<p class="note" style="margin-top:12px">La finition ne peut pas être filtrée par lien (chaque marque nomme ses finitions différemment) : elle est vérifiée à l'étape 3. Sur AutoScout24, repère aussi les pastilles de prix affichées sur les annonces. Pour dénicher une pépite : ouvre « Nouvelles annonces » tous les jours, puis compare avec « Km les plus bas ».</p>
 </section>
 
 <section>
@@ -90,7 +91,7 @@ button.primary,.btn.primary{background:var(--acc);color:var(--acc-ink);border-co
 <div id="out"></div>
 </section>
 
-<p class="note">Les liens AutoScout24 (France et Allemagne) ont été testés : prix, année, kilométrage et vendeur professionnel sont bien appliqués. Le filtre « non accidenté » n'a pas pu être confirmé, c'est donc l'étape 3 qui écarte les annonces mentionnant un accident. Pour mobile.de, LeBonCoin, La Centrale, ParuVendu et Autosphere, certains filtres sont à confirmer sur le site. Prix des annonces allemandes : prévoir en plus carte grise, certificat de conformité, éventuel malus CO2, transport, et vérifier si la TVA est récupérable.</p>
+<p class="note">Les liens AutoScout24 (France et Allemagne) ont été testés : prix, année, kilométrage, vendeur professionnel et les tris prix, km et année sont bien appliqués. Le tri « Nouvelles annonces » et le filtre « non accidenté » n'ont pas pu être confirmés ; c'est donc l'étape 3 qui écarte les annonces mentionnant un accident. Pour mobile.de, LeBonCoin, La Centrale, ParuVendu et Autosphere, certains filtres sont à confirmer sur le site. Prix des annonces allemandes : prévoir en plus carte grise, certificat de conformité, éventuel malus CO2, transport, et vérifier si la TVA est récupérable.</p>
 </main>
 
 <script>
@@ -127,30 +128,34 @@ function criteria(){
   const any = MODELS.find(x => x[0]===brand);
   return {
     brand, make: any ? any[1] : '', m,
-    year: +$('year').value || 0, price: +$('price').value || 0, km: +$('km').value || 0,
+    year: +$('year').value || 0, price: +$('price').value || 0, km: +$('km').value || 0, imp: $('imp').value === '' ? 900 : Math.max(0, +$('imp').value),
     trims: ['haute','milieu','entree'].filter(t => $('t-'+t).checked),
     pro: $('pro').checked, acc: $('acc').checked, cat: $('cat').value
   };
 }
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify({cat:$('cat').value,brand:$('brand').value,model:$('model').value,year:$('year').value,price:$('price').value,km:$('km').value,
+  try{ localStorage.setItem(KEY, JSON.stringify({cat:$('cat').value,brand:$('brand').value,model:$('model').value,year:$('year').value,price:$('price').value,km:$('km').value,imp:$('imp').value,
     th:$('t-haute').checked,tm:$('t-milieu').checked,te:$('t-entree').checked,pro:$('pro').checked,acc:$('acc').checked})); }catch(e){}
 }
 function load(){
   let s = null; try{ s = JSON.parse(localStorage.getItem(KEY)||'null'); }catch(e){}
   if(!s) return refreshModels();
   $('cat').value = s.cat||''; $('brand').value = s.brand||''; refreshModels(s.model||'');
-  $('year').value = s.year||''; $('price').value = s.price||''; $('km').value = s.km||'';
+  $('year').value = s.year||''; $('price').value = s.price||''; $('km').value = s.km||''; $('imp').value = s.imp||'';
   $('t-haute').checked = s.th!==false; $('t-milieu').checked = s.tm!==false; $('t-entree').checked = s.te!==false;
   $('pro').checked = s.pro!==false; $('acc').checked = s.acc!==false;
 }
-['year','price','km','t-haute','t-milieu','t-entree','pro','acc'].forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
+['year','price','km','imp','t-haute','t-milieu','t-entree','pro','acc'].forEach(id => $(id).addEventListener('input', () => { save(); render(); }));
 
 /* ---------- liens de recherche ---------- */
 const noAccent = s => s.normalize('NFD').replace(/[̀-ͯ]/g,'');
-function as24(dom, cy, c){
-  const slug = c.m ? (dom==='fr' ? c.m[4] : c.m[5]) : null;
-  const p = new URLSearchParams({atype:'C', cy, sort:'price', desc:'0', ustate:'N,U'});
+const SORTS = {
+  new:['Nouvelles annonces','age','1'], km:['Km les plus bas','mileage','0'],
+  year:['Année la plus récente','year','1'], price:['Prix croissant','price','0']
+};
+function as24(dom, cy, c, sk){
+  const slug = c.m ? (dom==='fr' ? c.m[4] : c.m[5]) : null, [,sort,desc] = SORTS[sk];
+  const p = new URLSearchParams({atype:'C', cy, sort, desc, ustate:'N,U'});
   if(c.pro) p.set('custtype','D');
   if(c.acc) p.set('damaged_listing','exclude');
   if(c.year) p.set('fregfrom', c.year);
@@ -158,21 +163,22 @@ function as24(dom, cy, c){
   if(c.km) p.set('kmto', c.km);
   return `https://www.autoscout24.${dom}/lst/${c.make}${slug ? '/'+slug : ''}?${p}`;
 }
+const as24set = (dom, cy, c) => Object.fromEntries(Object.keys(SORTS).map(k => [k, as24(dom, cy, c, k)]));
 function sitesFor(c){
   const label = (c.brand + ' ' + (c.m ? c.m[2] : '')).trim();
   const q = encodeURIComponent(label);
   const crit = [label, c.year && 'à partir de '+c.year, c.price && 'max '+c.price+' €', c.km && 'max '+c.km+' km', c.pro && 'vendeur pro', c.acc && 'non accidenté'].filter(Boolean).join(', ');
   const out = [];
-  out.push({n:'AutoScout24 France', d:'Annonces de professionnels en France.', s:'ok', u:as24('fr','F',c)});
-  out.push({n:'AutoScout24 Allemagne', d:'Annonces de professionnels en Allemagne (site allemand).', s:'ok', u:as24('de','D',c)});
-  out.push({n:'AutoScout24 FR, annonces d\'Allemagne', d:'Interface en français, annonces de vendeurs allemands.', s:'part', u:as24('fr','D',c)});
-  const mp = new URLSearchParams({isSearchRequest:'true', vc:'Car', dam:'0', damageUnrepaired:'NO_DAMAGE_UNREPAIRED', sb:'p', od:'up'});
+  out.push({n:'AutoScout24 France', d:'Professionnels en France. Commence par « Nouvelles annonces » : les pépites partent vite.', s:'ok', angles:as24set('fr','F',c)});
+  out.push({n:'AutoScout24 Allemagne', d:'Professionnels en Allemagne (site allemand). Souvent moins cher, frais d\'import à prévoir.', s:'ok', angles:as24set('de','D',c)});
+  out.push({n:'AutoScout24 FR, annonces d\'Allemagne', d:'Interface en français, vendeurs allemands (à confirmer sur la page).', s:'part', angles:as24set('fr','D',c)});
+  const mp = new URLSearchParams({isSearchRequest:'true', vc:'Car', dam:'0', damageUnrepaired:'NO_DAMAGE_UNREPAIRED', sb:'doc', od:'down'});
   if(c.year) mp.set('fr', c.year+':'); if(c.price) mp.set('p', ':'+c.price); if(c.km) mp.set('ml', ':'+c.km);
-  out.push({n:'mobile.de', d:'Prix, année, kilométrage et non accidenté sont préremplis. Choisis la marque, le modèle et « Händler » (vendeur pro) sur le site. Il bloque les robots, d\'où les critères à saisir.', s:'part', u:'https://suchen.mobile.de/fahrzeuge/search.html?'+mp});
-  const lb = new URLSearchParams({category:'2', text:label, sort:'price', order:'asc'});
+  out.push({n:'mobile.de', d:'Prix, année, kilométrage, non accidenté et tri « plus récentes » préremplis. Choisis la marque, le modèle et « Händler » (vendeur pro) sur le site.', s:'part', u:'https://suchen.mobile.de/fahrzeuge/search.html?'+mp});
+  const lb = new URLSearchParams({category:'2', text:label, sort:'time', order:'desc'});
   if(c.pro) lb.set('owner_type','pro'); if(c.price) lb.set('price','min-'+c.price); if(c.year) lb.set('regdate', c.year+'-max'); if(c.km) lb.set('mileage','min-'+c.km);
-  out.push({n:'LeBonCoin', d:'Recherche avec filtre « Professionnel ». À vérifier sur le site.', s:'part', u:'https://www.leboncoin.fr/recherche?'+lb});
-  const lc = new URLSearchParams({sortBy:'priceAsc'});
+  out.push({n:'LeBonCoin', d:'Recherche avec filtre « Professionnel », annonces les plus récentes d\'abord. À vérifier sur le site.', s:'part', u:'https://www.leboncoin.fr/recherche?'+lb});
+  const lc = new URLSearchParams();
   if(c.m) lc.set('makesModelsCommercialNames', noAccent(c.brand).toUpperCase()+':'+noAccent(c.m[2]).toUpperCase()); else if(c.brand) lc.set('makesModelsCommercialNames', noAccent(c.brand).toUpperCase());
   if(c.price) lc.set('priceMax', c.price); if(c.year) lc.set('yearMin', c.year); if(c.km) lc.set('mileageMax', c.km);
   out.push({n:'La Centrale', d:'Prix, année et kilométrage préremplis. Choisis « Professionnel » sur le site.', s:'part', u:'https://www.lacentrale.fr/listing?'+lc, crit});
@@ -186,7 +192,7 @@ function render(){
   if(!c.make){ box.innerHTML = '<div class="msg">Choisis une marque (et si possible un modèle) pour générer les liens.</div>'; return; }
   const {list, crit} = sitesFor(c);
   box.innerHTML = '<div class="sites">' + list.map(s => `<div class="site"><h3>${esc(s.n)} <span class="badge ${BADGE[s.s][0]}">${BADGE[s.s][1]}</span></h3><p>${esc(s.d)}</p>
-    <div><a class="btn primary" href="${esc(s.u)}" target="_blank" rel="noopener noreferrer">Ouvrir la recherche</a></div></div>`).join('') + '</div>'
+    <div class="row" style="margin-top:6px">${s.angles ? Object.entries(s.angles).map(([k,u]) => `<a class="btn${k==='new' ? ' primary' : ''}" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(SORTS[k][0])}</a>`).join('') : `<a class="btn primary" href="${esc(s.u)}" target="_blank" rel="noopener noreferrer">Ouvrir la recherche</a>`}</div></div>`).join('') + '</div>'
     + `<div class="row"><button id="cpcrit">Copier mes critères</button><span class="note">${esc(crit)}</span></div>`;
   $('cpcrit').onclick = () => copy(crit, $('cpcrit'));
 }
@@ -288,10 +294,11 @@ function analyse(){
   $('copy').hidden = true;
   if(!blocks.length){ out.innerHTML = '<div class="msg">Colle d\'abord le texte d\'au moins une annonce.</div>'; return; }
   const all = blocks.map(parseListing), rejected = [], kept = [];
+  all.forEach(a => { a.eff = a.price == null ? null : a.price + (a.country === 'Allemagne' ? c.imp : 0); });
   all.forEach(a => {
     const why = [];
     if(a.price == null) why.push('prix introuvable');
-    else if(c.price && a.price > c.price) why.push(`prix ${a.price} € au-dessus du maximum`);
+    else if(c.price && a.eff > c.price) why.push(`coût estimé ${a.eff} € au-dessus du maximum`);
     if(c.year && a.year && a.year < c.year) why.push(`immatriculée en ${a.year}, avant ${c.year}`);
     if(c.km && a.km != null && a.km > c.km) why.push(`${a.km} km au-dessus du maximum`);
     if(c.pro && a.pro === false) why.push('vendeur particulier');
@@ -299,51 +306,63 @@ function analyse(){
     if(a.trim && c.trims.length && !c.trims.includes(a.trim.k)) why.push(TRIMNAME[a.trim.k].toLowerCase()+' non souhaitée');
     (why.length ? rejected : kept).push(why.length ? {a, why} : a);
   });
-  const pool = all.filter(a => a.price != null && !a.accident);
+  const pool = all.filter(a => a.eff != null && !a.accident);
   const enough = pool.length >= 3;
-  const mP = median(pool.map(a => a.price)), mK = median(pool.filter(a => a.km != null).map(a => a.km)) ?? 0, mY = median(pool.filter(a => a.year).map(a => a.year)) ?? 0;
+  const mP = median(pool.map(a => a.eff)), mK = median(pool.filter(a => a.km != null).map(a => a.km)) ?? 0, mY = median(pool.filter(a => a.year).map(a => a.year)) ?? 0;
+  const NOW = new Date().getFullYear();
   kept.forEach(a => {
-    if(!enough || !mP){ a.deal = null; return; }
+    a.flags = [];
+    a.kmYear = (a.km != null && a.year) ? Math.round(a.km / Math.max(0.5, NOW - a.year + 0.5)) : null;
+    if(a.kmYear != null && NOW - a.year >= 2 && a.kmYear < 4000) a.flags.push('Kilométrage très bas pour l\'âge : vérifie l\'historique et le carnet d\'entretien.');
+    if(!enough || !mP){ a.deal = null; a.score = null; return; }
     const expected = mP + (mK - (a.km ?? mK)) * 0.05 + ((a.year ?? mY) - mY) * 1200 + a.equip.length * 150;
-    a.expected = Math.round(expected); a.deal = (expected - a.price) / expected;
+    a.expected = Math.round(expected); a.deal = (expected - a.eff) / expected;
+    let s = 50 + Math.max(-25, Math.min(35, a.deal * 100)) * 1.3 + Math.min(6, a.equip.length);
+    if(a.kmYear != null) s += a.kmYear <= 12000 ? 5 : a.kmYear <= 18000 ? 2 : a.kmYear <= 25000 ? 0 : -6;
+    if(a.rating){ const r = +a.rating, n = +a.rcount || 0; if(r >= 4.5 && n >= 30) s += 3; else if(r < 3.8) s -= 6; }
+    if(a.deal > 0.35){ s -= 12; a.flags.push('Prix très inférieur à l\'attendu : vérifie qu\'il n\'y a pas d\'erreur de prix, d\'export ou de dommage caché.'); }
+    a.score = Math.max(0, Math.min(100, Math.round(s)));
   });
-  kept.sort((x,y) => enough ? (y.deal - x.deal) : (x.price - y.price));
+  kept.sort((x,y) => enough ? (y.score - x.score) : (x.eff - y.eff));
 
   let html = '';
   if(!enough) html += `<div class="msg">Seulement ${pool.length} annonce(s) exploitable(s) : le classement se fait par prix. Ajoutes-en au moins 3 pour comparer le rapport prix, kilométrage et année.</div>`;
   const lines = [];
   kept.forEach((a, i) => {
-    const pct = a.deal == null ? null : Math.round(a.deal * 100);
-    const lab = pct == null ? '' : pct >= 12 ? 'Très bonne affaire' : pct >= 5 ? 'Bonne affaire' : pct >= -5 ? 'Prix correct' : 'Plutôt cher';
-    const cls = pct == null ? 'mid' : pct >= 5 ? '' : pct >= -5 ? 'mid' : 'low';
+    const pct = a.deal == null ? null : Math.round(a.deal * 100), sc = a.score;
+    const d = a.deal;
+    const lab = sc == null ? '' : (d >= 0.10 && sc >= 65) ? 'Pépite' : d >= 0.05 ? 'Très bonne affaire' : d >= 0.02 ? 'Bonne affaire' : d >= -0.03 ? 'Prix dans la moyenne' : 'Plutôt cher';
+    const cls = sc == null ? 'mid' : d >= 0.02 ? '' : d >= -0.03 ? 'mid' : 'low';
     const parts = [];
-    if(pct != null) parts.push(pct >= 0 ? `${pct} % sous le prix attendu` : `${-pct} % au-dessus du prix attendu`);
-    if(pct != null) parts.push(`pour ${a.km != null ? a.km.toLocaleString('fr-FR')+' km' : 'un kilométrage inconnu'} et ${a.year ?? 'une année inconnue'}`);
+    if(pct != null) parts.push(pct === 0 ? 'au prix attendu' : pct > 0 ? `${pct} % sous le prix attendu` : `${-pct} % au-dessus du prix attendu`);
+    if(a.kmYear != null) parts.push(`${a.kmYear.toLocaleString('fr-FR')} km par an`);
     if(a.equip.length) parts.push(a.equip.length+' équipement'+(a.equip.length>1?'s':'')+' notable'+(a.equip.length>1?'s':''));
-    if(a.pro) parts.push('vendeur pro');
+    if(a.pro) parts.push('vendeur pro' + (a.rating ? ' noté '+a.rating+'/5' : ''));
     if(a.good) parts.push('mention de bon état ou d\'entretien');
-    const why = (pct == null ? 'Moins cher de la sélection' : lab) + (parts.length ? ' : ' + parts.join(', ') + '.' : '.');
+    const why = (sc == null ? 'Moins cher de la sélection' : lab) + (parts.length ? ' : ' + parts.join(', ') + '.' : '.');
     const motor = [a.fuel, a.power].filter(Boolean).join(' ') || 'motorisation non détectée';
     const fin = a.trim ? a.trim.word + ' (' + TRIMNAME[a.trim.k].toLowerCase() + ')' : 'finition non détectée';
     const seller = [a.seller || 'vendeur non détecté', a.city, a.rating ? `note ${a.rating}/5${a.rcount ? ' sur '+a.rcount+' avis' : ''}` : 'note non détectée'].filter(Boolean).join(' · ');
     const link = /^https?:\/\//i.test(a.url) ? `<a href="${esc(a.url)}" target="_blank" rel="noopener noreferrer">${esc(a.url)}</a>` : '<em>non fourni</em>';
-    const warns = [];
+    const warns = [...a.flags];
     if(a.pro == null && c.pro) warns.push('Vendeur non identifié comme professionnel : à vérifier.');
     if(!a.trim && c.trims.length < 3) warns.push('Finition non détectée : à vérifier.');
     if(a.year == null) warns.push('Année d\'immatriculation non détectée.');
-    if(a.country === 'Allemagne') warns.push('Annonce allemande : le prix n\'inclut ni carte grise, ni certificat de conformité, ni transport'+(a.vatNote ? ' ; TVA récupérable mentionnée, prix net possible.' : '.'));
-    html += `<div class="res"><h3>#${i+1} ${esc(a.title)}</h3>
+    if(a.country === 'Allemagne') warns.push('Annonce allemande : '+c.imp.toLocaleString('fr-FR')+' € de frais d\'import ont été ajoutés pour la comparaison. Ni le malus CO2 éventuel ni la TVA ne sont inclus'+(a.vatNote ? ' (TVA récupérable mentionnée : prix net possible).' : '.'));
+    const total = a.country === 'Allemagne' ? ` → coût estimé en France <strong>${a.eff.toLocaleString('fr-FR')} €</strong>` : '';
+    html += `<div class="res"><h3>#${i+1} ${esc(a.title)}${sc != null ? ` <span class="badge ${d >= 0.02 ? 'b-ok' : d >= -0.03 ? 'b-part' : 'b-bad'}">Indice ${sc}/100</span>` : ''}</h3>
       <dl><dt>URL</dt><dd>${link}</dd>
       <dt>Finition, motorisation, année</dt><dd>${esc(fin)} · ${esc(motor)} · ${a.year ?? 'année inconnue'}</dd>
-      <dt>Kilométrage et prix TTC</dt><dd>${a.km != null ? a.km.toLocaleString('fr-FR')+' km' : 'km inconnu'} · <strong>${a.price.toLocaleString('fr-FR')} €</strong>${a.expected ? ' (prix attendu environ '+a.expected.toLocaleString('fr-FR')+' €)' : ''}</dd>
+      <dt>Kilométrage et prix TTC</dt><dd>${a.km != null ? a.km.toLocaleString('fr-FR')+' km' : 'km inconnu'} · <strong>${a.price.toLocaleString('fr-FR')} €</strong>${total}${a.expected ? ' (prix attendu environ '+a.expected.toLocaleString('fr-FR')+' €)' : ''}</dd>
       <dt>Équipements notables</dt><dd>${a.equip.length ? esc(a.equip.join(', ')) : 'aucun détecté'}</dd>
       <dt>Vendeur</dt><dd>${esc(seller)} · ${a.country}</dd></dl>
       <div class="why ${cls}">${esc(why)}</div>${warns.map(w => `<div class="warn">${esc(w)}</div>`).join('')}</div>`;
-    lines.push(`${i+1}. ${a.url || a.title}\n   ${fin}, ${motor}, ${a.year ?? '?'}\n   ${a.km != null ? a.km+' km' : 'km ?'}, ${a.price} € TTC\n   Équipements : ${a.equip.join(', ') || 'aucun détecté'}\n   Vendeur : ${seller}\n   ${why}`);
+    lines.push(`${i+1}. ${a.url || a.title}${sc != null ? ' (indice '+sc+'/100)' : ''}\n   ${fin}, ${motor}, ${a.year ?? '?'}\n   ${a.km != null ? a.km+' km' : 'km ?'}, ${a.price} € TTC${a.country === 'Allemagne' ? ' (≈ '+a.eff+' € avec import)' : ''}\n   Équipements : ${a.equip.join(', ') || 'aucun détecté'}\n   Vendeur : ${seller}\n   ${why}`);
   });
   if(!kept.length) html += '<div class="msg">Aucune annonce ne respecte tous tes critères.</div>';
   if(rejected.length) html += '<h3 style="margin:18px 0 4px;font-size:15px">Écartées (' + rejected.length + ')</h3>' + rejected.map(r => `<div class="rej"><strong>${esc(r.a.title)}</strong> : ${esc(r.why.join(', '))}</div>`).join('');
-  html += '<p class="note">Le « prix attendu » est une estimation à partir des annonces que tu as collées (kilométrage, année, équipements), pas un prix de marché officiel. Plus ta sélection est large, plus elle est fiable.</p>';
+  if(kept.length) html += '<div class="msg" style="background:var(--okbg);color:var(--ok)">Avant d\'appeler pour une pépite : demande le numéro de châssis (VIN), le carnet d\'entretien et le dernier contrôle technique (TÜV en Allemagne). Pour une voiture immatriculée en France, le vendeur peut te partager son rapport HistoVec (service gratuit de l\'État). Ne verse jamais d\'acompte avant d\'avoir vu ou fait voir la voiture.</div>';
+  html += '<p class="note">Le « prix attendu » est une estimation à partir des annonces que tu as collées (kilométrage, année, équipements), pas un prix de marché officiel. L\'indice combine l\'écart de prix, le kilométrage par an, les équipements et la note du vendeur. Plus ta sélection est large, plus il est fiable.</p>';
   out.innerHTML = html;
   lastSummary = lines.join('\n\n');
   $('copy').hidden = !lines.length;
